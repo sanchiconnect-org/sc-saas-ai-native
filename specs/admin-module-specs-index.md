@@ -1,13 +1,13 @@
 ---
 type: index
 repo: admin
-updated: 2026-07-20
+updated: 2026-10-08 # SAN-1467
 ---
 
 # Admin Module Specs Index
 
-Master index of all `sc-saas-admin` module specs — **68 of 68** `modules/*/` directories now have a
-`module.spec.md` (verified 2026-07-19; zero gaps). The admin panel is PHP/Medoo/sparkAdminTpl with
+Master index of all `sc-saas-admin` module specs — **69 of 69** `modules/*/` directories now have a
+`module.spec.md` (verified 2026-07-19; zero gaps; `email_logs` added 2026-09-30 by FA-009). The admin panel is PHP/Medoo/sparkAdminTpl with
 **two DB connections per request**: `$mainDatabase` (tenants DB — reads feature flags, api_url,
 per-tenant DB creds) and `$database` (per-tenant client DB — all business data). Plus cURL calls to
 `$api_server_url` (sc-saas-backend REST API) and, for a few modules, direct calls to the
@@ -50,9 +50,9 @@ supplementary background. Bundled entries are marked **(legacy/combined)** below
 
 | Module | Spec | Description |
 |---|---|---|
-| application_management | [module.spec.md](../sc-saas-admin/modules/application_management/module.spec.md) | Full CFA lifecycle — program creation wizard, round management, submission review, jury evaluation, approve/reject; also covers legacy startup-programs + mentor application flows |
+| application_management | [module.spec.md](../sc-saas-admin/modules/application_management/module.spec.md) | Full CFA lifecycle — program creation wizard, round management, submission review, jury evaluation, approve/reject; also covers legacy startup-programs + mentor application flows; FA-011 Limit Jury Access adds the Limit Access pop-up (Round Settings → Jury allotment), round badges, activity + CSV and the admin-only "Preview as juror" page (`jury_visibility_preview`) |
 | program-management | [module.spec.md](../sc-saas-admin/modules/program-management/module.spec.md) | PM/corporate-PM dashboards + program creation wizard; mentor round-advance/reject/tentative backend calls |
-| jury | [module.spec.md](../sc-saas-admin/modules/jury/module.spec.md) | Jury assignment, per-round scoring dashboards, review of startup/application/mentor/individual submissions |
+| jury | [module.spec.md](../sc-saas-admin/modules/jury/module.spec.md) | Jury assignment, per-round scoring dashboards, review of startup/application/mentor/individual submissions; FA-011 server-side hiding of questions on `round-applications.php` (fail closed, 15-minute file links, reviewers get the programme-wide union) |
 | challenges | [module.spec.md](../sc-saas-admin/modules/challenges/module.spec.md) | Corporate challenge creation, participant management — details.php JSON comparison bug locks non-super-admin PMs |
 | venture-studio | [module.spec.md](../sc-saas-admin/modules/venture-studio/module.spec.md) | VS-specific program management where individuals (not startups) apply and admins form teams from accepted applicants |
 | startup-application-management-flow | [flow.spec.md](../sc-saas-admin/modules/startup-application-management-flow.spec.md) | Kanban/table/reports view for a program's applications — 13 AJAX handlers; bulk email; round moves via backend `:adminMd5` API |
@@ -99,7 +99,9 @@ supplementary background. Bundled entries are marked **(legacy/combined)** below
 
 | Module | Spec | Description |
 |---|---|---|
-| broadcast_messages | [module.spec.md](../sc-saas-admin/modules/broadcast_messages/module.spec.md) | Compose + send audience-filtered broadcasts (email / in-app chat / community-wall post); every send logged for audit |
+| broadcast_messages | [module.spec.md](../sc-saas-admin/modules/broadcast_messages/module.spec.md) | Compose + send audience-filtered broadcasts (email / in-app chat / community-wall post); every send logged for audit. `approvals.php`: spoke broadcast approvals, pending-first with an Overdue flag (SAN-1445) |
+| command_centre | [command_centre.module.spec.md](../sc-saas-admin/modules/command_centre.module.spec.md) | SAN-1381 admin notification centre: `command_centre.php` queue cards and SLA strip, header bell and sidebar badges, `includes/notification_centre_functions.php` counters (per-permission, NFR-06) and `spa_settings` SLA / escalation keys. Gated by `notification_centre_enabled` |
+| email_logs | [module.spec.md](../sc-saas-admin/modules/email_logs/module.spec.md) | FA-009 (SAN-1157). Tenant-wide Email Logs page over `ses_email_queue`: filters (type, template, IST date range, recipient, status), server-side counters, per-row SES status + Request Stats (row loaded by id; POSTed email/messageId ignored), CSV without bodies. Gated by `can_broadcast_messages`, partners/jury redirected, CSV also needs `can_export_data` |
 | canned_responses | [module.spec.md](../sc-saas-admin/modules/canned_responses/module.spec.md) | Reusable email templates for the applicant broadcast-email composer; also written to directly from other modules' "save as canned response" checkbox |
 | outreach_requests | [module.spec.md](../sc-saas-admin/modules/outreach_requests/module.spec.md) | Cross-tenant/cross-partner program-promotion request system (`program_promotions` lives in the shared tenants DB, not per-tenant) — approve/reject with email notification, optional program clone into the receiving tenant |
 | contacts | [module.spec.md](../sc-saas-admin/modules/contacts/module.spec.md) | Generic category-tagged personal/organizational rolodex (vCard/QR export) — distinct from `connections` and from `outreach_requests`' `program_promotions` |
@@ -239,4 +241,21 @@ supplementary background. Bundled entries are marked **(legacy/combined)** below
 | 🟢 Low | system_logs | `list_aditya.php` is an unrouted near-duplicate of `list.php` — dead code, not a security issue but a maintenance trap |
 | 🟢 Low | reporting_backup | Confirmed dead code — stale duplicate of `reporting/`, not a real backup/DR mechanism; safe to delete but out of scope here |
 
-Updated: 2026-07-20
+Updated: 2026-10-06 (FA-011 Limit Jury Access: application_management + jury rows). Earlier: 2026-07-20
+
+---
+
+## Feature specs and Gap Register
+
+Cross-repo features are specified in `specs/features/` (the workspace layer), not in module specs. The notification-centre family:
+
+- [SAN-1381 Notifications and an Action-Driven Dashboard](features/SAN-1381-notifications-action-driven-dashboard.spec.md) (formerly NOTIF-001). Phase 1; includes the performance measurements and BRD sign-off.
+- Phase 2 specs:
+  - [SAN-1471 application status updates](features/SAN-1471-application-status-updates.spec.md)
+  - [SAN-1472 event reminders](features/SAN-1472-event-reminders.spec.md)
+  - [SAN-1475 escalation rules](features/SAN-1475-escalation-rules.spec.md)
+  - [SAN-1478 in-app preferences](features/SAN-1478-notification-preferences-in-app.spec.md)
+  - [SAN-1481 recommended for you](features/SAN-1481-recommended-for-you.spec.md)
+- [BRD §4 baseline queries](features/SAN-1381-baseline-queries.md)
+
+Known gaps (deferred, unverified or risky items) are tracked in the **[Gap Register](gap-register.md)**.

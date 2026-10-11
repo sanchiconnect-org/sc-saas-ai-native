@@ -1,7 +1,7 @@
 ---
 type: index
 repo: frontend
-updated: 2026-07-20
+updated: 2026-10-08 # SAN-1467
 ---
 
 # Frontend Module Specs — Index
@@ -110,7 +110,7 @@ All 82 directories under `sc-saas-frontend/src/app/modules/` have a `module.spec
 |---|---|---|
 | `chat` | [spec](../sc-saas-frontend/src/app/modules/chat/module.spec.md) | In-app messaging — two distinct chat implementations selected at runtime by the `chat_type` setting (CometChat SDK vs. in-house REST+socket chat). |
 | `community-feed` | [spec](../sc-saas-frontend/src/app/modules/community-feed/module.spec.md) | Member-facing social feed + notification inbox: posts, polls, reactions, comments, real-time push over Socket.IO. |
-| `notifications` | [spec](../sc-saas-frontend/src/app/modules/notifications/module.spec.md) | Notification feed + navbar badge count, kept accurate via REST poll + WebSocket event, lazy-loaded so it's never in the initial bundle. |
+| `notifications` | [spec](../sc-saas-frontend/src/app/modules/notifications/module.spec.md) | Notification feed + navbar badge count, kept accurate via REST poll + WebSocket event, lazy-loaded. With `notification_centre_enabled`, it adds the SAN-1381 notification centre: NgRx `counters`, header/sidebar bell (`notification-bell`), `count-badge` (red/orange/outlined, WCAG AA), `QualifyingVisitService` (3 s rule), and filtered badge landing. |
 | `connection-v4` | [spec](../sc-saas-frontend/src/app/modules/connection-v4/module.spec.md) | Umbrella spec: current active connections experience — wraps `connections-v3` (typed list sub-view) and `connection-approve-reject-page` (email-link flow). |
 | `connections-v3` | [spec](../sc-saas-frontend/src/app/modules/connections-v3/module.spec.md) | Full-featured connections list UI (master-detail, vCard export, QR sharing, instant-meeting) — reused as a sub-view inside `connection-v4`, not a standalone top-level route. |
 | `connections` | [spec](../sc-saas-frontend/src/app/modules/connections/module.spec.md) | Legacy shared-types-only directory — a single model file (`connections.model.ts`), no component, no route. |
@@ -272,3 +272,20 @@ These findings were captured in module `Watch out for` sections. They are **not 
 | 🟡 Medium | `search`/`global-search-page` | `/global-search` relies on the `elastic_search` flag but has no Angular `FeatureGuard` on the route. |
 | 🟡 Medium | `chat` | Two conversation-management backend calls (`update-admin`, whole-conversation `DELETE`) are referenced by comment/convention but have no corresponding frontend method at all — `createConversation()` itself is entirely commented-out dead code. |
 | 🟡 Medium | `pitch-deck-recorder` | Confirmed unreachable in the running app today: its host page (`complete-profile`) is itself unrouted, and the module's own `record` child route is never registered (`RouterModule.forChild(routes)` commented out) — correctly-wired but dead code, not orphaned. |
+
+---
+
+## Feature specs and Gap Register
+
+Cross-repo features are specified in `specs/features/` (the workspace layer), not in module specs. The notification-centre family:
+
+- [SAN-1381 Notifications and an Action-Driven Dashboard](features/SAN-1381-notifications-action-driven-dashboard.spec.md) (formerly NOTIF-001). Phase 1; includes the performance measurements and BRD sign-off.
+- Phase 2 specs:
+  - [SAN-1471 application status updates](features/SAN-1471-application-status-updates.spec.md)
+  - [SAN-1472 event reminders](features/SAN-1472-event-reminders.spec.md)
+  - [SAN-1475 escalation rules](features/SAN-1475-escalation-rules.spec.md)
+  - [SAN-1478 in-app preferences](features/SAN-1478-notification-preferences-in-app.spec.md)
+  - [SAN-1481 recommended for you](features/SAN-1481-recommended-for-you.spec.md)
+- [BRD §4 baseline queries](features/SAN-1381-baseline-queries.md)
+
+Known gaps (deferred, unverified or risky items) are tracked in the **[Gap Register](gap-register.md)**.

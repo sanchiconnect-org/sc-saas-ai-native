@@ -2,14 +2,14 @@
 id: SAN-557
 title: Tenant verification failing on resolve-domain — registration blocked (165 users)
 type: bug-fix
-status: in-progress
+status: done
 linear: https://linear.app/sanchiconnect/issue/SAN-557
 sentry:
   - SC-SAAS-FRONTEND-26
 repos: [frontend]
 commit: n/a — cross-repo infra/DB issue, no frontend code change
 created: 2026-09-03
-updated: 2026-09-03
+updated: 2026-10-07
 ---
 
 # SAN-557 — Tenant verification failing on resolve-domain
@@ -39,3 +39,6 @@ None — no code changed.
 
 ## Verification
 N/A — no code change made.
+
+## Update 2026-10-07
+Closed after the Oct 5-7 work (frontend retry `e233de1af` SAN-1672, tenants resolve-domain cache `f74d37d`, and the root-cause breakdown of FRONTEND-26 — unregistered origins get 418, 504s from tenants API load, client network drops). Full findings: `SAN-557-frontend-26-tenant-verification-cors-registry-and-504.md`.

@@ -4,7 +4,7 @@ id: SAN-756                     # Linear Project created (team: Sanchiconnect); 
                                  # SAN-757 (frontend), SAN-758 (admin).
 title: Operational Cost Reimbursement — Slices 1-4 + Sanction (Tripura)
 type: feature
-status: in-progress
+status: in-review
 linear: https://linear.app/sanchiconnect/project/operational-cost-reimbursement-slices-1-2-tripura-bd9afb3dfb3e
 owner: nirmal.s@sanchiconnect.com
 repos: [tenants, backend, frontend, admin]
@@ -182,3 +182,25 @@ Both remaining items are explicitly non-blocking per the BRD's own status line �
 - **2026-09-15** — Slice 4 (verify-and-submit) and the Rejected-transition email are now both in scope, per BRD §21. Genuine judgment call flagged for implementation (not fully specified by the BRD): whether verify-and-submit re-snapshots the amount at the CURRENT category rate at each later month's submission, or carries forward the ORIGINAL Month-1 snapshot unchanged — see Per-repo plan (backend), defaulted to re-snapshotting the current rate, consistent with FR-2.1 AC3's stated purpose.
 - **2026-09-15** — real T-RISE reference paperwork corrects FR-3.1/FR-3.2/FR-3.3, per BRD §22: shareholding pattern and self-declaration merge into one upload; bank details become the full Beneficiary Details field set. See Acceptance criteria and Per-repo plan above. Note: a live production incident occurred the same day on `OperationalCostClaimEntity`'s unique-index/FK structure (unrelated to this document/field correction) — see that entity's own doc-comment for the full incident history; this §22 work must not touch that structure at all.
 - **2026-09-15** — Sanction (FR-6.5, single AND bulk) is now in scope, per BRD §23, along with its FR-8.1 transition email (built proactively this time, unlike Rejected's email which had to be added as a follow-up fix in §21). Uses only existing `OperationalCostClaimEntity` columns — zero schema/index changes, deliberately, given the incident history on that table.
+
+## Post-implementation additions (2026-09-17/18)
+
+Real-usage follow-up work on the admin claims list and the startup-facing forms, done after the BRD §19-§23 scope above shipped. None of this changes the BRD; it's implementation polish plus one explicit product-directed scope reduction.
+
+**admin (SAN-758):**
+- Sanctioned/Rejected KPI cards added alongside the existing Total/Submitted/Under Process ones (same lightweight `limit=1` count pattern against `admin/claims`).
+- Per-page control moved into the Claims panel header (replacing the old static "N matching claims" text there, now shown at the bottom-left next to pagination instead); default page size 20 → 10.
+- "OCR Claims" added to the actual left sidebar (`spa_menu_management`) via a one-off idempotent CLI script (`cli/add_ocr_claims_sidebar_menu.php`) — this table has no auto-seed-on-load convention (unlike `spa_settings`), so a script was needed rather than a page-load seeder. Previously only reachable via the Developer Zone dropdown.
+- Date filter rebuilt twice: a bootstrap-datepicker-based Quick Range + custom Start/End attempt hit real bugs (jQuery load-order, unstyled calendar, preset-vs-custom reselection after reload) and was replaced entirely with the same single "chosen-select" quick-time-range dropdown already used by `system_logs`/`profile_audit_logs` (presets + a "Custom" option backed by the globally-loaded jquery-datetimepicker) — no new external library, named-preset date math computed server-side in PHP.
+- New "Submitted" column, sourced from the backend's newly-exposed `submittedAt`.
+- Row-actions alignment fix: the new Submitted column narrowed the Actions cell enough that multi-button rows wrapped onto a second line; fixed with `white-space:nowrap` + a min-width.
+
+**backend (SAN-756):**
+- `getAdminClaimsList()` exposes `submittedAt` per claim.
+- `AdminClaimsQueryDto` gained optional `startDate`/`endDate`, filtering `getPaginatedClaims()` by `claim.submittedAt` (end date inclusive through the full day) — backs the admin date filter above.
+
+**frontend (SAN-757) — scope reduction, product decision:**
+- Category selection (with its live amount preview) and the PH-led-only disability-certificate upload removed from the Month-1 claim form and the Month-2+ verify-and-submit form, along with the eligibility page's "Category (locked)" summary block. Every claim now always submits `OcrCategory.GENERAL` internally (the backend still requires a value). `IOcrEligibility`/`IOcrCategoryAmount`/`IOcrSubmitClaimPayload` (the data contract) are unchanged — this is UI-only.
+- **admin (SAN-758), same reduction**: Category/Amount columns removed from the claims table and View Details modal; the `disability_certificate` document-type label removed from the document list (a legacy claim with that doc type now shows its raw type string).
+
+Not part of this feature, but shipped the same week on the same OCR page: a "Schemes" tab (`application_programs` rows marked `isScheme:true`) — tracked separately under the **Startup Programs vs Schemes** project (SAN-840/841/842), since it's really a Program-Management-side classification, not an OCR concept.
