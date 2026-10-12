@@ -86,3 +86,19 @@ Gap Register: not opened — `/bug-fix` work is exempt from the Gap Register cer
 
 ## Part 6 — owner decision on the unregistered hosts (supersedes the "register sg.sanchiapp.com" action above)
 Owner confirmed on 2026-10-07 that there is **no current customer** on `sg.sanchiapp.com`, `acceleration.ihubgujarat.in`, `edge.isba.in` or the other hosts that get the CORS 418. They are therefore deliberately **not registered**, and the earlier recommendation to register them is cancelled. FRONTEND-26 was set to **ignored (until escalating)** instead of resolved, so it stops reopening but returns if volume spikes. The production-relevant mitigations stay in code (`f74d37d` tenants cache, `e233de1af` frontend retry). Optional follow-up if the noise matters: stop the frontend reporting "Tenant verification failed" to Sentry for an unregistered host (status 0 cannot distinguish a CORS 418 from a network drop, so that would need a server-side signal), or set an inbound filter — SAN-446.
+
+## Part 7 — 2026-10-12 follow-up (SAN-1866 .. SAN-1871)
+New groups seen after the earlier passes. All fixes are committed and pushed, **not deployed**; no automated tests (guardian skill blocked), `tsc` only, nothing run in a browser or against a DB.
+
+| Ticket | Sentry | Priority | Record | Module spec(s) updated | Commit |
+|---|---|---|---|---|---|
+| SAN-1866 | 3RDPARTY-WEBSERVICES-1 (bare-root `Cannot GET /api`, 929 ev) | Low | `SAN-1866-3rdparty-bare-root-404-not-reported-to-sentry.md` | 3rdparty `src/module.spec.md` (no spec exists for `src/core/exceptions`) | 3rdparty `0fbd5ca` |
+| SAN-1867 | BACKEND-52..56 (parent user undefined, 500 -> 404) | High | `SAN-1867-parent-user-undefined-404-instead-of-typeerror.md` | backend connections, dashboard, meetings, corporate (lists the unguarded sites) | backend `3473722f` |
+| SAN-1868 | BACKEND-3N, 3P, 5F, 5G, 5H, 5J, 5K, 5M, 5P ... (one fingerprint) | Low | `SAN-1868-duplicate-label-warning-single-sentry-fingerprint.md` | backend user (nothing covers `instrument.ts`) | backend `3473722f` |
+| SAN-1869 | FRONTEND-H0, H1 | Medium | `SAN-1869-public-profile-dynamic-form-sections-without-fields.md` | frontend `shared/module.spec.md` (no component-level spec) | frontend `c42bf95be` |
+| SAN-1870 | FRONTEND-H5, H9 | Low | `SAN-1870-feed-single-comment-null-profile-data.md` | frontend `shared/module.spec.md` | frontend `c42bf95be` |
+| SAN-1871 | BACKEND-4Q, 5N (bad stored Handlebars template) | Medium | `SAN-1871-pending-connection-reminder-template-invalid-handlebars-operator-fix.md` | backend cron (covers `SESEmailService` / reminder; no spec for `ses-email.service.ts`) | none (operator data fix; Linear still TODO) |
+
+**Groups that reappeared only because production runs an older build** (fix already in code, no new record): FRONTEND-H7 (hire loader, `49ee4426f`), H8 (Safari `viewerCompanyName.split`, `d18c43e4c`), 17 (lightGallery `licenseKey` 'GPLv3' on the remaining galleries, `e5280e7f2`), and the earlier fixes BACKEND-4X, ADMIN-5, BACKEND-3M, TENANTS-2, TENANTS-ADMIN-4, FRONTEND-GJ, BACKEND-9, FRONTEND-1, 2W, 4C, EX, EP, 7T. The remaining action for these is **deploying** the current builds; treat a recurrence on a build that contains the fix as the other side's problem, per the standing policy.
+
+**Open items:** SAN-1871 needs an operator to correct the `pending-connection-reminder` template in the tenant DB. SAN-1867's untriaged call sites (listed in its record) still dereference `.id` unguarded.
