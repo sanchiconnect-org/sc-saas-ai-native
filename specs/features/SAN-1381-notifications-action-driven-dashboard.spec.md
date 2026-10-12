@@ -64,6 +64,18 @@ The BRD asks for three counter types, kept strictly apart:
 
 > **Engagements amendment (2026-10-06, product decision by Mahima):** Engagements is no longer an orange "new since your last visit" counter. It is a red action queue: meetings waiting on admin moderation (`moderation_exists = 1`, `moderation_status = 'pending'`). A meeting stays in the count until an admin accepts or rejects it; visiting the meetings page no longer clears it, and the 3-second visit timer no longer runs there. Mentorship requests are left out, because the mentor approves them, not an admin. The bell follows the other red queues: clicking it writes a `bell_engagements` row, and from then on the bell counts only pending meetings created after the click. Implemented in `sc-saas-admin/includes/notification_centre_functions.php` and `themes/default/html/elements/footer.php`.
 
+> **Engagement badges amendment (2026-10-12, requested by Mahima):** every Engagement sub-menu that has something for an admin now carries a badge (all shown orange in the sidebar and bell, like meeting approvals; the Engagement parent sums them). Implemented in `sc-saas-admin/includes/notification_centre_functions.php` (helpers `notifCentreApprovalCounts`, `notifCentreNewSinceVisitCount`) and `themes/default/html/elements/footer.php` (visit timer).
+> - **Red, shared, stays until an admin acts** (overdue = `sla_engagement_decision_hours`, own `bell_*` section):
+>   - `connections` "Connection approvals": `connections` with `moderation_exists = 1`, `moderation_status = 'pending'`, `connection_status = 'pending_moderation'` (connection matrix `moderation_required = 1`); forwarded/rejected on connection detail.
+>   - `jobs` "Job approvals": `jobs` with `is_live = 0`, `job_status` in (`active`, `re-active`), plus `job_applications` with `application_status = 'in-moderation'`; both approved on job detail.
+>   - `challenges` "Business challenge approvals": `challenges` with `approval_status = 'pending'`; approved/rejected in challenges/edit.
+> - **Orange, per admin, new since the last 3-second visit to the list page (or a bell click):**
+>   - `engagement_events`: `events` not created by this admin (`created_by_admin_id` NULL or another admin), page `/events/list`.
+>   - `engagement_booster_kit`: new `startupkit_submissions`, page `/startup-booster-kit/list`.
+>   - `engagement_wall_posts`: new `comm_wall_posts` with `is_admin_post = 0`, page `/table/comm_wall_posts` (or `/community_wall/feeds`).
+> - **No badge — Introductions:** introductions are written by admins (`introductions.admin_user_id`); nothing arrives there for an admin to act on.
+> All rows soft-deleted (`deleted_at`) are excluded. Visibility follows the sidebar menu the admin can see.
+
 It also asks for a bell with a notification centre, a catch-up card, and an admin command centre.
 
 ## Current state (what already exists — reuse, don't reinvent)
@@ -258,6 +270,8 @@ Each counter is visible only when the admin has the permission shown (NFR-06).
 | `outreach` (FR-A1) | red | `partner_broadcast_requests status='pending' AND target_scope='hub'` + `program_promotions approval_status='pending'` for this tenant's domain. Oldest age shown; overdue when older than `sla_outreach_decision_hours`. Subject to OQ-2 | `can_broadcast_messages` / promotions |
 | `ecosystem.{persona}` (FR-A2) | red | `approval_status='pending'` per enabled persona table. Sum = menu total. Personas whose tenant flag is off are hidden | `can_accept_reject_profiles` + `profiles_access` |
 | `engagements` (FR-A3) | red, shared (amended 2026-10-06) | `meetings` rows with `moderation_exists = 1` and `moderation_status = 'pending'` (not soft-deleted), when `meeting` is in `notif_engagement_types` | engagement/meetings menu role |
+| `connections`, `jobs`, `challenges` (FR-A3, amended 2026-10-12) | red, shared | Pending connection moderation; jobs not live + job applications in moderation; challenges pending approval (not soft-deleted) | the matching Engagement menu |
+| `engagement_events`, `engagement_booster_kit`, `engagement_wall_posts` (FR-A3, amended 2026-10-12) | orange, per admin | New since the admin's last 3 s visit: events by others, booster kit submissions, user wall posts | the matching Engagement menu |
 | `tasks` (FR-A4) | red | `tasks` with `task_status IN ('open','assigned')`, `status=1`, and (`assigned_to_ids` contains me OR team-queue rule per OQ-5). Overdue = `due_date < today` | `task_management` flag + tasks menu role |
 | `support.{feedback,grievance}` (FR-A5) | red | `tickets` with `ticket_status='open'`, split per OQ-4. "Awaiting user" is a grey sub-count, excluded from red | `ticket_management` flag + tickets menu role |
 | `bell` | — | Sum of the above | — |
