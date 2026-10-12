@@ -85,3 +85,8 @@ Uncommitted, on `ai_native_setup_mahima`.
   - Frontend Karma 22/22, and the AOT build passes.
   - Not run: a browser check on a dev tenant.
 - **Gates:** additive optional fields only; user- or team-scoped queries on the tenant's own DB; no new flags.
+
+## Fix (2026-10-12) — duplicate deadlines, deep links
+
+- **Duplicates:** an internal business challenge is also a live CFA program (`challenges.cfa_id` → `application_programs`, `program_type = 'business_challenge'`), so `opportunities.closingSoon` listed it twice (e.g. "Tech Update" = challenge 2 + program 84 on adm.thub.sanchidev.in). `NotificationCountersService` now drops a program whose uuid is a live challenge's CFA; this also corrects `catchUp.closingSoon`. `getLiveChallenges` selects `cfa.uuid AS cfaUuid, cfa.program_code AS programCode` (WHERE unchanged; SQL snapshot updated).
+- **Deep links:** `ClosingSoonItem` gains optional `programCode` (challenges). "Apply" now opens the item itself: a challenge → `/programs/apply/<code>/<slug>?businesschallengessearch=true&challengeUuid=<uuid>` (same as the Business Challenges card); a program → `/call-for-applications?programId=<uuid>` (opens that program); an external challenge (no CFA code) → `/search/challenges`. Older backends without `programCode` fall back to the list.
