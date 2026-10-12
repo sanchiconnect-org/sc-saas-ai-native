@@ -30,7 +30,8 @@ A role permission was placed on the user form. On top of that, the save handlers
 ## Verification
 - `php -l` passes on both PHP files.
 - The repo has no test framework, so no regression test was added.
-- **Still to do after deploy to dev:** add the QA admin on `adm.thub.sanchidev.in`, confirm the account appears and can log in, then run `sc-saas-e2e` `npm test` so the admin and jury tests go green.
+- **Verified on dev (2026-10-12):** a throwaway admin added through the normal Add Admin form on `adm.thub.sanchidev.in` showed the success message and appeared in the list, then was deleted. The `sc-saas-e2e` admin and jury tests pass in CI (e2e #1, 24/24).
+- **Not yet on staging or production:** promote `3255e7d7` to `stagingdemo`, then `main`.
 
 ## Commit
 sc-saas-admin `3255e7d7` (ai_native_setup).
