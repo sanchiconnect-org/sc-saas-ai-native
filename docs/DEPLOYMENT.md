@@ -44,10 +44,21 @@ Every deploying branch has a gate; nothing deploys unverified.
 
 | Branch | Gate | Turned on at |
 |---|---|---|
-| `ai_native_setup` | Checks on every push; the dev 1 deploy is triggered only when the checks are green | L1 reports; L2 makes the deploy wait for green |
-| `development` | Checks + review on the PR | Review protection, 13 Nov 2026; checks required from L2 |
-| `stagingdemo` | Checks + review on the PR | Review protection, 13 Nov 2026; checks required from L2 |
-| `main` / `master` | Checks + review on the PR (hotfixes included) | Review protection, 13 Nov 2026; checks required from L2 |
+| `ai_native_setup` | Checks on every push; the dev 1 deploy is triggered only when the checks are green | Checks report since 13 Oct 2026 (L1); L2 makes the deploy wait for green |
+| `development` | Checks + review on the PR | Review required since 13 Oct 2026; checks required from L2 |
+| `stagingdemo` | Checks + review on the PR | Review required since 13 Oct 2026; checks required from L2 |
+| `main` / `master` | Checks + review on the PR (hotfixes included) | Review required since 13 Oct 2026; checks required from L2 |
+
+### Branch protection settings (SAN-1569)
+
+GitHub repository rulesets, identical in all seven repos (the `sanchiconnect` account is on GitHub Pro, which private-repo protection requires):
+
+| Ruleset | Branches | Rules |
+|---|---|---|
+| release branches | `main`, `master`, `stagingdemo`, `development` | Pull request required (no direct pushes); 1 approving review, never the author's own; stale approvals dismissed on new commits; the last push must be approved by someone else; no force-push; no deletion; no bypass actors |
+| dev branch | `ai_native_setup` | No force-push; no deletion; direct pushes allowed |
+
+Not yet enabled, at L2: required status checks (SAN-1583) and required CODEOWNERS review (SAN-1584). In an emergency the account owner can disable a ruleset in the repo's Settings → Rules; that change is logged and should be reversed the same day.
 
 ## Current state per repo
 
