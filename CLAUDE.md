@@ -94,7 +94,7 @@ Per **"The SanchiConnect Way · Book Two: The Developer Guide"** (by Prabs; `~/D
 2. **`/from-linear <id>`** — pull the issue into a governing spec.
 3. **`/spec-new feature <id>`** (or edit the existing governing spec if one already covers it). For a narrowly-scoped bug fix, this collapses to `/bug-fix` instead — see below.
 4. **Resolve open design questions** — any `[DESIGN DECISION PENDING]` is routed to the product owner (business questions) or dev lead (technical questions). Never invent an answer.
-5. **Run the matching contract check** — `/trace-flag` (flags), `/audit-contract` (API/DTO), `/check-isolation` (tenant-scoped queries).
+5. **Run the gates and the matching contract check** — in each repo you changed, run its gates entry point before pushing: `npm run gates` (backend, tenants, 3rdparty-webservices, frontend), `composer gates` (sc-saas-admin, tenants-admin), `make gates` (ai-startups-analyzer). It runs exactly what CI runs (`scripts/gates.sh`, SAN-1590) and prints every command with its exit code; paste the summary into the PR. Then the matching contract check: `/trace-flag` (flags), `/audit-contract` (API/DTO), `/check-isolation` (tenant-scoped queries); these are Claude skills, not yet part of the gates.
 6. **Write tests first.** Currently blocked workspace-wide: the guide's referenced "guardian" skill doesn't exist here yet. Until it does, substitute the strongest verification actually available (type-check, lint, existing test suite, manual repro) and say explicitly that automated test coverage wasn't added.
 7. **Work directly on `ai_native_setup`** — no dedicated feature branch per task (reversed 2026-07-30, see below).
 8. **`/spec-implement <id>`** — the actual development.
