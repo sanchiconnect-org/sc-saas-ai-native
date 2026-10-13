@@ -86,6 +86,7 @@ Call for Applications (CFA, a.k.a. application programs) is the most-used workfl
 8. **D8 Isolation primitive is test mode.** `changeTestMode` with `action=enable` sets `test_mode_enabled=1` **and** `status=1` (`sc-saas-admin/modules/application_management/program.php:1272-1308` ✔). Test-mode programs are hidden from public and authenticated program lists (`sc-saas-backend/.../repositories/application-programs.repository.ts:125,348` ✔ `testModeEnabled=false`) and are ignored by the notification counters (`notification-counters.repository.ts:91` ✔). The PWA ignores closed and deadline state for test-mode programs (`sc-saas-frontend/.../program-public-apply.component.ts:897` ✔). Tests reach the program by direct URL `/programs/apply/{code}/{slug}`.
 9. **D9 "Closed program blocks applying" is tested on a dedicated, long-lived closed program, never by turning test mode off.** Test mode deliberately ignores closed and deadline state (D8), so a per-run program can't show it. Each environment gets one `[QA] CFA Closed (do not delete)` program, live with test mode **off** and applications closed. It sits under "Past" on the PWA, which is harmless, and is never written to by tests. Decided 2026-10-12. The alternative, briefly turning test mode off on a per-run program, was rejected because it would list a `[QA]` program publicly.
 10. **D10 Backend apply ignores closed, deadline and unpublished state: filed as SAN-1886** (Enhancement → milestone `QA_Automation_Bugs-Found`, Sandeep). The suite covers it with an API-level test that is **known-failing** (`test.fail()`) until SAN-1886 ships, the same pattern as Tentative / SAN-1878 (also moved to that milestone). Decided 2026-10-12.
+11. **D11 Round names are not unique per program (spec correction, 2026-10-12).** The original P2 criterion assumed a unique-name error. The code has no such check (`submission-application-management.php:272`, no unique index), and the product owner confirmed duplicates are acceptable: rounds are identified by id. The test now asserts that a duplicate is accepted as a separate round.
 
 ## How CFA is driven (verified surface)
 
@@ -119,7 +120,7 @@ Call for Applications (CFA, a.k.a. application programs) is the most-used workfl
   - **Drafts page:** `/application_management/draft_applications/{programId}/{slug}`, with `moveToSubmitted`, `deleteApplication`, `download_csv` and bulk email.
   - **Fast seeding:** `import_applications_csv` (`submission-application-management.php:3033` ✔; also `-tableview.php:1073` ✔) followed by `moveToSubmitted`.
 - **Rounds and round actions**
-  - Round CRUD: `createProgramRound` (the round name must be unique), `editRound`, `deleteRound`.
+  - Round CRUD: `createProgramRound` (round names are **not** unique, D11), `editRound`, `deleteRound`.
   - Round editor iframe `#loadIframeBoxEditRound`: open `/application_management/edit_program_round/{roundId}?section=…` directly.
   - `silent_transfer` suppresses the move and reject emails.
   - `freeze_applications` (`edit_program_round.php:469` ✔) is enforced by the backend (`application-program.service.ts:771,1049` ✔).
@@ -222,7 +223,7 @@ All tests are Given/When/Then. Unless noted, each is tagged `@regression @cfa @w
 - [ ] **Given** the admin is logged in, **when** they create a program through the UI at `/table/application_programs` (Add), **then** they land on the wizard `editUrl` and the program appears in the table. The program is a throwaway and is cleaned up afterwards.
 - [ ] **Given** a throwaway program, **when** the admin edits basic details in the wizard and saves (`editProgram`), **then** a reload shows the saved values.
 - [ ] **Given** a throwaway program, **when** the admin saves evaluation settings (`editEvaluation`), **then** a reload shows them.
-- [ ] **Given** a throwaway program, **when** the admin creates a round, **then** it appears in the round list. **When** they create a second round with the same name, **then** they see an error (unique name).
+- [ ] **Given** a throwaway program, **when** the admin creates a round, **then** it appears in the round list. **When** they create a second round with the same name, **then** it is accepted as a separate round. Round names are not unique (D11).
 - [ ] **Given** a throwaway round, **when** the admin edits it through `/application_management/edit_program_round/{roundId}?section=…`, **then** the change persists. **When** they delete the round, **then** it disappears.
 - [ ] **Given** a throwaway program in test mode, **when** test mode is disabled (`changeTestMode action=disable`), **then** the wizard shows test mode off. **When** it is re-enabled, **then** the program is hidden from `/call-for-applications` again. The test-mode-off window lasts one assertion, and no deadline is set on the program.
 - [ ] **Given** a throwaway draft program, **when** the admin clicks Make Live, **then** the program and its form are live (the apply page renders for a direct-URL visitor).
