@@ -2,7 +2,7 @@
 id: SAN-1873
 title: "AxiosError 500 unhandled rejection still firing after SAN-988 (SC-SAAS-BACKEND-X)"
 type: bug-fix
-status: in-review
+status: done
 linear: https://linear.app/sanchiconnect/issue/SAN-1873
 sentry: [SC-SAAS-BACKEND-X]
 repos: [backend]
@@ -51,3 +51,6 @@ Add `.catch((error) => this.logger.error('<op>() failed for <entity> <uuid>', er
 * ESLint: same 19 non-CRLF findings before and after, all pre-existing. Every CRLF `␍` finding is checkout noise.
 * `src/modules/form-management` suite: 8/8 pass.
 * Pitch-deck and resources have no existing specs, and **no new automated test was added** (workspace step 6 is blocked). Promise `.catch` semantics guarantee the rejection is handled.
+
+## Closed 2026-10-13
+SAN-1873 was marked Done in Linear after `aaad005e` was pushed. Reopen it if SC-SAAS-BACKEND-X fires again once this is deployed. Its `axios_host` tag will then name the real call site.
