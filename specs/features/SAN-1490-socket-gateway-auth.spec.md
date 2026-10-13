@@ -2,7 +2,7 @@
 id: SAN-1490
 title: Authenticate the socket gateway and restrict room joins to the caller's own rooms
 type: feature
-status: in-progress
+status: done
 linear: https://linear.app/sanchiconnect/issue/SAN-1490
 owner: vishali.k@sanchiconnect.com
 repos: [backend, frontend]
@@ -100,6 +100,8 @@ Rollback: set `SOCKET_AUTH_ENFORCE=false`. No data or schema change is involved.
 - Admin, tenants and tenants-admin. None of them use the socket.
 
 ## Rollout status (2026-10-13)
+**SAN-1490 and SAN-1892 were closed as Done by owner decision on 2026-10-13. SAN-45 is marked a duplicate of SAN-1490.** The unticked items below are post-closure **ops steps**, still required. In particular, the finding is fully closed only once `SOCKET_AUTH_ENFORCE=true` is set. Under PRA-24, a second-person review is still outstanding.
+
 - [x] **Step 1 code: backend (soft mode)** pushed to `sc-saas-backend` `ai_native_setup_vishali`: `f6f1a152` (gateway auth, tests) and `4d743f33` (sockets module.spec). It is safe to deploy alone: the current frontend is unaffected (verified, real socket.io e2e 24/24).
 - [x] Step 1 **deploy**: the backend is deployed. On 2026-10-13 dev (`api.thub.sanchidev.in`) was verified live: the `/socket.io/` polling response carries `Access-Control-Allow-Credentials: true`, and a cookie-less handshake still joins any room, confirming soft mode. Deploy remaining tenant backends the same way, with `SOCKET_AUTH_ENFORCE` unset.
 - [x] Step 2 code: frontend (`withCredentials` + `reconnect()`) pushed to `sc-saas-frontend` `ai_native_setup_vishali` as `b9691380a`. It contains only `socket.service.ts` and `app.component.ts`.
