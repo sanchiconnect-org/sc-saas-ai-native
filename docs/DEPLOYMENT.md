@@ -24,7 +24,7 @@ ai_native_setup → development → stagingdemo → main / master
 
 `initial_development` and `pre_development` were retired on 2026-10-13. They held no code of their own, only merge commits, and added two PR hops to every release. Before deletion each tip was tagged `archive/<branch>` (backend, frontend and admin had both; tenants had `pre_development`; the analyzer had `initial_development`), and no Jenkins job built from either branch. To restore one: `git push origin archive/<branch>:refs/heads/<branch>`.
 
-Every repo deletes a PR's branch automatically when the PR merges ("Automatically delete head branches"); it can be restored from the PR page.
+"Automatically delete head branches" is **off** in every repo. It was briefly on (13 Oct) and deleted the long-lived `ai_native_setup_<name>` branches as soon as their PRs merged; those were restored at their exact commits. Turn it on only once the team works on short-lived per-issue branches.
 
 The per-developer `ai_native_setup_<name>` branches are replaced by short-lived topic branches (`<name>/san-123-slug`, the branch name Linear generates), deleted after merge.
 
@@ -80,7 +80,7 @@ Long-lived branches on each remote after the 2026-10-13 retirement. "Missing" me
 
 1. **SAN-1044: nothing to recover.** Backend `971836f3` (on `pre_development`) has an identical twin, `49d6e84c` (same patch ID), merged into `ai_native_setup` through PR #1975. No repo had production code missing from `ai_native_setup`. Done.
 2. **Jenkins.** Confirmed that no Jenkins job builds from `initial_development` or `pre_development`. Done.
-3. **Archive, then delete.** Done: 8 `archive/<branch>` tags pushed, 8 branches deleted, auto-delete of merged PR branches on in all seven repos.
+3. **Archive, then delete.** Done: 8 `archive/<branch>` tags pushed, 8 branches deleted. (Auto-delete of merged PR branches stays off; see Retired branches.)
 4. **Fill the gaps. Open:** decide, per repo, whether tenants, 3rdparty, tenants-admin and the analyzer get a `stagingdemo` branch (and a staging Jenkins job), and whether the analyzer gets a `development` branch.
 
 ## Jenkins jobs
