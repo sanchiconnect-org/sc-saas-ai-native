@@ -101,8 +101,9 @@ Rollback: set `SOCKET_AUTH_ENFORCE=false`. No data or schema change is involved.
 
 ## Rollout status (2026-10-13)
 - [x] **Step 1 code: backend (soft mode)** pushed to `sc-saas-backend` `ai_native_setup_vishali`: `f6f1a152` (gateway auth, tests) and `4d743f33` (sockets module.spec). It is safe to deploy alone: the current frontend is unaffected (verified, real socket.io e2e 24/24).
-- [ ] Step 1 **deploy**: merge `ai_native_setup_vishali` → `main` and deploy each backend. Leave `SOCKET_AUTH_ENFORCE` **unset**.
-- [ ] Step 2: frontend (`withCredentials` + `reconnect()`). The code is ready locally and uncommitted. Commit and deploy it **only after step 1 is live**.
+- [x] Step 1 **deploy**: the backend is deployed. On 2026-10-13 dev (`api.thub.sanchidev.in`) was verified live: the `/socket.io/` polling response carries `Access-Control-Allow-Credentials: true`, and a cookie-less handshake still joins any room, confirming soft mode. Deploy remaining tenant backends the same way, with `SOCKET_AUTH_ENFORCE` unset.
+- [x] Step 2 code: frontend (`withCredentials` + `reconnect()`) pushed to `sc-saas-frontend` `ai_native_setup_vishali` as `b9691380a`. It contains only `socket.service.ts` and `app.component.ts`.
+- [ ] Step 2 **deploy**: deploy the frontend **only to tenants whose backend is already on step 1**. Then check that the `/socket.io/` request carries the `accessToken` cookie, and that badges, toasts, chat, typing and presence still work.
 - [ ] Two-user smoke test on staging.
 - [ ] Step 3: set `SOCKET_AUTH_ENFORCE=true` per tenant deployment.
 
@@ -136,7 +137,7 @@ None.
 - `core/config/{configuration,validation-schema,app-config.service}.ts`: `SOCKET_AUTH_ENFORCE`, optional and **lenient**. Only `true` (case-insensitive, trimmed) enforces; blank, absent or any other value means soft mode, and **never fails boot**. This follows the schema's existing boot-safety pattern; a strict `.valid()` would have crashed startup on a typo such as `TRUE`.
 - `core/sockets/gateways/sockets.gateway.spec.ts`: 18 tests.
 
-**frontend** (sc-saas-frontend, `ai_native_setup_vishali`). **Not committed: on hold until the backend is deployed** (see Rollout ordering rule).
+**frontend** (sc-saas-frontend, `ai_native_setup_vishali`). **Pushed: `b9691380a`.**
 - `core/service/socket.service.ts`:
   - `setUrl()` opens the socket with `withCredentials: true`.
   - New `reconnect()` (disconnect + connect) re-handshakes with the current cookie.
