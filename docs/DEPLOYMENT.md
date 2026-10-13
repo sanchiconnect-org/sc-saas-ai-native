@@ -83,6 +83,20 @@ Long-lived branches on each remote after the 2026-10-13 retirement. "Missing" me
 3. **Archive, then delete.** Done: 8 `archive/<branch>` tags pushed, 8 branches deleted. (Auto-delete of merged PR branches stays off; see Retired branches.)
 4. **Fill the gaps. Open:** decide, per repo, whether tenants, 3rdparty, tenants-admin and the analyzer get a `stagingdemo` branch (and a staging Jenkins job), and whether the analyzer gets a `development` branch.
 
+## CI secrets
+
+| Secret | Repos | What it is | Used by |
+|---|---|---|---|
+| `FLAG_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin | Fine-grained personal access token of the `sanchiconnect` account. Repository access: those four repos only. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year; renew before it lapses. | `flags.yml` (SAN-1592), which checks out the other three flag repos to compare the feature-flag contract. GitHub's built-in token can only read the repo it runs in. |
+
+To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token, with the settings above. Then add it to each of the four repos without pasting it anywhere else:
+
+```bash
+for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin; do
+  gh secret set FLAG_CHECK_TOKEN -R sanchiconnect/$r   # paste the token when prompted
+done
+```
+
 ## Jenkins jobs
 
 To be filled in from the Jenkins dashboard. None of the seven repos has a Jenkinsfile, so the branch-to-server mapping lives only in Jenkins.
