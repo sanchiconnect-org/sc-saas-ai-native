@@ -73,6 +73,7 @@ All 60 `sc-saas-backend` modules under `src/modules/` have a `module.spec.md` (u
 | `challenges` | [spec](../sc-saas-backend/src/modules/challenges/module.spec.md) | Innovation challenge lifecycle. |
 | `news` | [spec](../sc-saas-backend/src/modules/news/module.spec.md) | External news proxy + per-user category prefs. **All 4 routes have `JwtAuthGuard` commented out.** Preference write has no ownership check. |
 | `notifications` | [spec](../sc-saas-backend/src/modules/notifications/module.spec.md) | Inbox + the SAN-1381 notification centre: `GET notifications/counters` (bell + badges, catch-up, `communityWallSince`, `opportunities.unseen`), section visits, item views, narrowed mark-all-read, live-feed items, 90-day purge, application-status and event-reminder writers. Gated by `notification_centre_enabled` (strict `true`). Badge = list on real MySQL: `badge-equals-list.integration.spec.ts` (opt-in). 6 cron-trigger POSTs are still open. The old `getNotifications` precedence bug was fixed in SAN-1409. |
+| `consent` | [spec](../sc-saas-backend/src/modules/consent/module.spec.md) | SAN-1479 DPDP consent: append-only `user_consents` ledger, `GET/PATCH consent` (JWT), public rate-limited signed-token `consent/unsubscribe/:token` (GET read-only). Mirrors state onto `notification_settings.consent` + `promotional_emails_enabled`, which the existing send checks already read. New users start undecided (`@BeforeInsert`). |
 
 ---
 

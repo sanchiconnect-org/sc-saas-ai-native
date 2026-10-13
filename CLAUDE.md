@@ -1,6 +1,6 @@
 # SanchiSaaS — Workspace Constitution
 
-SanchiSaaS is one product built from **seven independently-versioned, independently-deployed Git repos** living side by side (a poly-repo, **not** a monorepo). Each has its own `.git`, dependencies, and deploy pipeline. Together they form a multi-tenant SaaS for startup incubators/accelerators.
+SanchiSaaS is one product built from **seven independently-versioned, independently-deployed Git repos**, plus an eighth, test-only repo (`sc-saas-e2e`), living side by side (a poly-repo, **not** a monorepo). Each has its own `.git`, dependencies, and deploy pipeline. Together they form a multi-tenant SaaS for startup incubators/accelerators.
 
 | Repo | Role | Stack |
 |---|---|---|
@@ -11,6 +11,7 @@ SanchiSaaS is one product built from **seven independently-versioned, independen
 | `ai-startups-analyzer` | **AI scoring service.** LLM-based startup application evaluation; called by sc-saas-admin; supports OpenAI/Anthropic/Gemini via DEFAULT_PROVIDER. | Python 3.10+, FastAPI, SQLAlchemy (async), MySQL |
 | `sc-saas-3rdparty-webservices` | **Integration gateway.** Centralises all third-party API calls (SMS, email, video, chat, URL shortening, document conversion). Called only by sc-saas-backend. Stateless — no DB. | NestJS 9, TypeScript |
 | `sanchiconnect-saas-tenants-admin` | **Tenants control-plane admin UI.** PHP admin panel for platform operators to manage the tenants DB directly (tenant provisioning, settings, roles). Leaf node — no downstream calls. | PHP, Medoo, sparkAdminTpl (QUCod) |
+| `sc-saas-e2e` | **End-to-end test suite** (test-only, no product code). Playwright drives the PWA and the admin panel against a deployed QA tenant per environment (development = `ai_native_setup`, staging = `stagingdemo`, production = `main`, read-only). Default branch `main`. Ships nothing; breaks nothing at runtime. | Playwright, TypeScript |
 
 ## Blast-radius graph
 
@@ -72,6 +73,7 @@ Blast radius: **tenants → backend → {frontend, admin}**. A change in `tenant
 - **Tenants-admin email / API configuration** → `sanchiconnect-saas-tenants-admin/modules/developer/` (email_management, api_management)
 - **How the backend calls PowerPitch (create-session, video, transcript)** → `sc-saas-backend/src/core/services/power-pitch-external.service.ts`
 - **PowerPitch external module (the receiving end in SanchiPowerpitch)** → `power-pitch-sanchiconnect-api/src/modules/external/` (SanchiPowerpitch workspace)
+- **E2E tests, QA tenant setup, fixed-OTP test accounts** → `sc-saas-e2e/` (`CLAUDE.md` for rules, `knowledge.md` for the product behaviours the tests depend on, `README.md` for setup). It is a *consumer* of the frontend/admin UI and of a few backend public routes. A change to a selector, route, `submitAction` name or login flow there can turn a test red. That's the suite doing its job, so update the test in the same change set where possible. Bugs the suite finds go to Linear project **Enhancement**, milestone `QA_Automation_Bugs-Found`.
 - **Zoho CRM sync** → exists **independently** in two repos — `sc-saas-backend/src/core/zoho/` and `sc-saas-admin/includes/zoho_functions.php`. These are NOT the same integration and don't share a contract; don't assume a change in one affects the other.
 
 ## Specs (structured work orders)
