@@ -2,12 +2,13 @@
 id: SAN-619
 title: "ng-select 'reading keys' on /startups/dashboard (SC-SAAS-FRONTEND-C1) — cascade of SC-SAAS-FRONTEND-30, already fixed"
 type: bug-fix
-status: done
+status: duplicate
 linear: https://linear.app/sanchiconnect/issue/SAN-619
+duplicate_of: SAN-502
 sentry: [SC-SAAS-FRONTEND-C1, SC-SAAS-FRONTEND-30]
 repos: [frontend]
 duplicates: [SAN-698]
-commit: none. Fixed earlier by sc-saas-frontend@4d22a03c (2026-08-24), which is in main and prod release 90bde7be
+commit: none. Fixed earlier by sc-saas-frontend@c0638d20 (2026-08-19) and @4d22a03c (2026-08-24, SAN-502); both are in main and prod release 90bde7be
 created: 2026-10-13
 updated: 2026-10-13
 ---
@@ -22,7 +23,9 @@ updated: 2026-10-13
 
 ## Fix status
 * `4d22a03c` (2026-08-24) defaulted `userType = { type: 'all', label: 'All' }` and made the placeholder null-safe (`userType?.type`, `userType?.label`). That removes the change-detection abort, which removes C1 too.
-* `4d22a03c` is an ancestor of `origin/main`, `origin/ai_native_setup` and prod release `90bde7be`. The crash release `51eb6706` did not include it.
+* `c0638d20` (2026-08-19) had already added the `?.` guards; `4d22a03c` (SAN-502) added the default value.
+* Both commits are ancestors of `origin/main`, `origin/ai_native_setup` and prod release `90bde7be`. The crash release `51eb6706` included neither.
+* SAN-619 is closed in Linear as a duplicate of SAN-502, the SC-SAAS-FRONTEND-30 issue whose fix removed this crash. SAN-698 remains a duplicate of SAN-619.
 * Neither Sentry group has recorded an event since 2026-09-01. Both groups are now `resolved` in Sentry.
 
 ## Why no code change
