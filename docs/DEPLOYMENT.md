@@ -87,7 +87,7 @@ Long-lived branches on each remote after the 2026-10-13 retirement. "Missing" me
 
 | Secret | Repos | What it is | Used by |
 |---|---|---|---|
-| `CONTRACT_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin, ai-startups-analyzer | Fine-grained personal access token of the `sanchiconnect` account. Repository access: those five repos only. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year; renew before it lapses. | The L3 contract checks, which check out the other repos of a contract to compare them: `flags.yml` (SAN-1592) and `scoring-contract.yml` (SAN-1594). GitHub's built-in token can only read the repo it runs in. |
+| `CONTRACT_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin, ai-startups-analyzer | Fine-grained personal access token of the `sanchiconnect` account. Repository access: those five repos only. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year; renew before it lapses. | The L3 contract checks, which check out the other repos of a contract to compare them: `flags.yml` (SAN-1592), `scoring-contract.yml` (SAN-1594) and `tenant-contract.yml` (SAN-1591). GitHub's built-in token can only read the repo it runs in. |
 
 To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token, with the settings above. Then add it to each of the five repos without pasting it anywhere else:
 
