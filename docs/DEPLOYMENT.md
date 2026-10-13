@@ -87,13 +87,13 @@ Long-lived branches on each remote after the 2026-10-13 retirement. "Missing" me
 
 | Secret | Repos | What it is | Used by |
 |---|---|---|---|
-| `FLAG_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin | Fine-grained personal access token of the `sanchiconnect` account. Repository access: those four repos only. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year; renew before it lapses. | `flags.yml` (SAN-1592), which checks out the other three flag repos to compare the feature-flag contract. GitHub's built-in token can only read the repo it runs in. |
+| `CONTRACT_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin, ai-startups-analyzer | Fine-grained personal access token of the `sanchiconnect` account. Repository access: those five repos only. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year; renew before it lapses. | The L3 contract checks, which check out the other repos of a contract to compare them: `flags.yml` (SAN-1592) and `scoring-contract.yml` (SAN-1594). GitHub's built-in token can only read the repo it runs in. |
 
-To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token, with the settings above. Then add it to each of the four repos without pasting it anywhere else:
+To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token, with the settings above. Then add it to each of the five repos without pasting it anywhere else:
 
 ```bash
-for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin; do
-  gh secret set FLAG_CHECK_TOKEN -R sanchiconnect/$r   # paste the token when prompted
+for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer; do
+  gh secret set CONTRACT_CHECK_TOKEN -R sanchiconnect/$r   # paste the token when prompted
 done
 ```
 
