@@ -22,7 +22,9 @@ ai_native_setup → development → stagingdemo → main / master
 
 ## Retired branches
 
-`initial_development` and `pre_development` are retired. They held no code of their own, only merge commits, and added two PR hops to every release.
+`initial_development` and `pre_development` were retired on 2026-10-13. They held no code of their own, only merge commits, and added two PR hops to every release. Before deletion each tip was tagged `archive/<branch>` (backend, frontend and admin had both; tenants had `pre_development`; the analyzer had `initial_development`), and no Jenkins job built from either branch. To restore one: `git push origin archive/<branch>:refs/heads/<branch>`.
+
+Every repo deletes a PR's branch automatically when the PR merges ("Automatically delete head branches"); it can be restored from the PR page.
 
 The per-developer `ai_native_setup_<name>` branches are replaced by short-lived topic branches (`<name>/san-123-slug`, the branch name Linear generates), deleted after merge.
 
@@ -62,26 +64,24 @@ Not yet enabled, at L2: required status checks (SAN-1583) and required CODEOWNER
 
 ## Current state per repo
 
-Branches as found on each remote on 2026-10-13. "Missing" means the branch does not exist yet in that repo.
+Long-lived branches on each remote after the 2026-10-13 retirement. "Missing" means the branch does not exist yet in that repo.
 
-| Repo | Production | `stagingdemo` | `development` | `ai_native_setup` | To retire |
-|---|---|---|---|---|---|
-| sc-saas-backend | `main` | yes | yes | yes | `initial_development`, `pre_development` |
-| sc-saas-frontend | `main` | yes | yes | yes | `initial_development`, `pre_development` |
-| sc-saas-admin | `main` | yes | yes | yes | `initial_development`, `pre_development` |
-| sanchiconnect-saas-tenants | `master` | missing | yes | yes | `pre_development` |
-| sc-saas-3rdparty-webservices | `master` | missing | yes | yes | — |
-| sanchiconnect-saas-tenants-admin | `main` | missing | yes | yes | — |
-| ai-startups-analyzer | `main` | missing | missing | yes | `initial_development` |
+| Repo | Production | `stagingdemo` | `development` | `ai_native_setup` |
+|---|---|---|---|---|
+| sc-saas-backend | `main` | yes | yes | yes |
+| sc-saas-frontend | `main` | yes | yes | yes |
+| sc-saas-admin | `main` | yes | yes | yes |
+| sanchiconnect-saas-tenants | `master` | missing | yes | yes |
+| sc-saas-3rdparty-webservices | `master` | missing | yes | yes |
+| sanchiconnect-saas-tenants-admin | `main` | missing | yes | yes |
+| ai-startups-analyzer | `main` | missing | missing | yes |
 
-## Before retiring anything
+## Retirement checklist (2026-10-13)
 
-These are preconditions, in order. Nothing is deleted until each one is done.
-
-1. **Recover SAN-1044.** Backend commit `971836f3` (1:1 event emails CC fix) is on `pre_development` and in production, but not in `ai_native_setup`. Merge it back first.
-2. **Repoint Jenkins.** Any Jenkins job that builds from `initial_development` or `pre_development` (a dev server is believed to deploy from `pre_development`) is moved to `ai_native_setup` or `development` before the branch goes.
-3. **Fill the gaps.** Decide, per repo, whether tenants, 3rdparty, tenants-admin and the analyzer get a `stagingdemo` branch (and a staging Jenkins job), and whether the analyzer gets a `development` branch.
-4. **Archive, then delete.** Tag each retired branch as `archive/<branch>` so nothing is lost, then delete it. Turn on "Automatically delete head branches" in every repo.
+1. **SAN-1044: nothing to recover.** Backend `971836f3` (on `pre_development`) has an identical twin, `49d6e84c` (same patch ID), merged into `ai_native_setup` through PR #1975. No repo had production code missing from `ai_native_setup`. Done.
+2. **Jenkins.** Confirmed that no Jenkins job builds from `initial_development` or `pre_development`. Done.
+3. **Archive, then delete.** Done: 8 `archive/<branch>` tags pushed, 8 branches deleted, auto-delete of merged PR branches on in all seven repos.
+4. **Fill the gaps. Open:** decide, per repo, whether tenants, 3rdparty, tenants-admin and the analyzer get a `stagingdemo` branch (and a staging Jenkins job), and whether the analyzer gets a `development` branch.
 
 ## Jenkins jobs
 
