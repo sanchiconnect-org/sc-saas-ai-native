@@ -111,10 +111,10 @@ To create it: api.slack.com/apps → Create New App → From scratch (name it e.
 for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer sc-saas-3rdparty-webservices sanchiconnect-saas-tenants-admin; do
   gh secret set SLACK_CI_WEBHOOK_URL -R sanchiconnect/$r   # paste the URL when prompted
 done
-gh workflow run ci-alerts.yml --ref ai_native_setup -R sanchiconnect/sc-saas-backend   # sends a test message
+gh workflow run ci-alerts.yml -R sanchiconnect/sc-saas-backend   # test message; works once ci-alerts.yml is on main
 ```
 
-GitHub runs `workflow_run` triggers from the default branch's copy of the workflow, so real alerts start once `ci-alerts.yml` reaches each repo's `main`/`master` through the normal release path. The manual test works from any branch.
+GitHub only runs `workflow_run` triggers, and only allows manual runs, from the default branch's copy of a workflow, so `ci-alerts.yml` does nothing until it reaches each repo's `main`/`master` through the normal release path. To check the webhook before then, post to it directly from your own machine: `curl -X POST -H 'Content-Type: application/json' -d '{"text":"test"}' "$SLACK_CI_WEBHOOK_URL"` (read the URL into the variable with `read -s SLACK_CI_WEBHOOK_URL` so it stays out of your shell history).
 
 ## Jenkins jobs
 
