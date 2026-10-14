@@ -18,7 +18,7 @@ ai_native_setup → development → stagingdemo → main / master
 | `development` | Second dev server, integration check | Jenkins, dev server 2 | PR from `ai_native_setup` |
 | `stagingdemo` | The demo site, running on production (sc-saas-e2e also runs here) | Jenkins, production demo | PR from `development` |
 | `main` / `master` | Client production | Production Jenkins | PR from `stagingdemo`, or a hotfix PR |
-| `sanchiconnect` (sc-saas-frontend only) | SanchiConnect incubation, on production | Production Jenkins | Outside this path today; see Other branches below. Never delete. |
+| `sanchiconnect` (sc-saas-frontend only) | SanchiConnect incubation, on production | Production Jenkins | PR (protected like `main`); outside this path today, see Other branches below. Never delete. |
 
 `main` / `master`, `stagingdemo` and the frontend's `sanchiconnect` are fixed names: production Jenkins jobs depend on them (all three deploy to production: clients, the demo, and SanchiConnect incubation; corrected 2026-10-14). `sanchiconnect-saas-tenants` and `sc-saas-3rdparty-webservices` use `master` for production; every other repo uses `main`.
 
@@ -59,7 +59,7 @@ GitHub repository rulesets, identical in all seven repos (the `sanchiconnect` ac
 
 | Ruleset | Branches | Rules |
 |---|---|---|
-| release branches | `main`, `master`, `stagingdemo`, `development` | Pull request required (no direct pushes); 1 approving review, never the author's own; stale approvals dismissed on new commits; the last push must be approved by someone else; no force-push; no deletion; no bypass actors |
+| release branches | `main`, `master`, `stagingdemo`, `development`; in sc-saas-frontend also `sanchiconnect` (added 2026-10-14) | Pull request required (no direct pushes); 1 approving review, never the author's own; stale approvals dismissed on new commits; the last push must be approved by someone else; no force-push; no deletion; no bypass actors |
 | dev branch | `ai_native_setup` | No force-push; no deletion; direct pushes allowed |
 
 Not yet enabled, at L2: required status checks (SAN-1583) and required CODEOWNERS review (SAN-1584). The contract checks (`flags`, `scoring-contract`, `tenant-contract`, `api-contract`) can be made required: they run on every PR and push and decide in their first step whether the files they protect changed (SAN-1596), so an unrelated PR gets a passing check in seconds instead of a check that never reports. Never add an `on.paths` filter to a workflow that is, or will be, a required check. In an emergency the account owner can disable a ruleset in the repo's Settings → Rules; that change is logged and should be reversed the same day.
@@ -83,9 +83,10 @@ Long-lived branches on each remote, checked 2026-10-14: every repo has all four.
 **Other branches (checked 2026-10-14).** Besides the four above:
 
 - Per-developer `ai_native_setup_<name>` (aman, mahima, sandeep, vishali) in every repo: still used for PRs (e.g. admin PR #2619). Kept until the team moves to short-lived per-issue branches.
-- **Frontend `sanchiconnect` is a production branch: it deploys the SanchiConnect incubation production site. Never delete it.** It has no work that `ai_native_setup` lacks, but it is not covered by the release-branch ruleset or the release path above; its Jenkins job belongs in the table below.
+- **Frontend `sanchiconnect` is a production branch: it deploys the SanchiConnect incubation production site. Never delete it.** It has no work that `ai_native_setup` lacks. Since 2026-10-14 it is in the frontend's release-branch ruleset (PR with one non-author approval, no force-push, no deletion), but it is still outside the release path above; its Jenkins job belongs in the table below.
 - Archived and deleted 2026-10-14 (no work missing from `ai_native_setup`): backend `ai_native_updates_aman`, `api_integration_aman`, `backend_new_branch_aman`, `corporate_logo_fix`. Each tip is kept as tag `archive/<branch>`; restore with `git push origin archive/<branch>:refs/heads/<branch>`.
-- Unmerged work, owner to decide: backend `language_updates` (1 commit, Apr 2026) and `update-the-api` (2 commits, Aug 2026: a TypeORM 0.3.31 upgrade); frontend `language_updates` (61 translation commits, Apr 2026); analyzer `ai_analyizing_new_updates_aman` (SAN-1015 DB pool fix, 14 Oct, not yet merged).
+- Archived and deleted 2026-10-14 by decision, although never merged (the work now exists only in the tags): backend `update-the-api` (2 commits, a TypeORM 0.3.31 upgrade) and `language_updates` (1 commit); frontend `language_updates` (61 translation commits, Apr 2026). Tags `archive/<branch>`.
+- Analyzer `ai_analyizing_new_updates_aman`: SAN-1015 DB pool fix (14 Oct), not yet merged; needs a PR into `ai_native_setup`.
 
 ## Retirement checklist (2026-10-13)
 
@@ -129,8 +130,38 @@ GitHub only runs `workflow_run` triggers, and only allows manual runs, from the 
 
 ## Jenkins jobs
 
-To be filled in from the Jenkins dashboard. None of the seven repos has a Jenkinsfile, so the branch-to-server mapping lives only in Jenkins.
+None of the seven repos has a Jenkinsfile, so the branch-to-server mapping lives only in Jenkins. Recorded from the **production Jenkins** dashboard on 2026-10-14 (branches confirmed by Nirmal). Status: enabled jobs had a successful build about 2 days 17 hours earlier (a bulk deploy); ⊘ marks a disabled job.
 
-| Jenkins job | Repo | Branch | Server / URL | Trigger (webhook / poll / manual) |
-|---|---|---|---|---|
-| | | | | |
+**Demo and SanchiConnect stack (production servers)**
+
+| Jenkins job | Repo | Branch |
+|---|---|---|
+| Demo - SaaS API, Demo - SaaS API - 2, Demo - SaaS API - 3 | sc-saas-backend | `stagingdemo` |
+| SanchiConnect - Live - SaaS API | sc-saas-backend | `stagingdemo` |
+| Demo - API Builder | sc-saas-backend (build step) | `stagingdemo` |
+| Demo - Frontend | sc-saas-frontend | `stagingdemo` |
+| Demo - Frontend Sanchi Connect | sc-saas-frontend | `sanchiconnect` |
+| Demo - Backoffice | sc-saas-admin | `stagingdemo` |
+
+**Client production**
+
+| Jenkins job | Repo | Branch |
+|---|---|---|
+| SaaS - Frontend | sc-saas-frontend | `main` |
+| SaaS - Backoffice (Admin) | sc-saas-admin | `main` |
+| SaaS - 3rd Party Services | sc-saas-3rdparty-webservices | `master` |
+| SaaS API - Builder | sc-saas-backend (build step) | `main` |
+| SaaS API - Client NN - <client> (one backend per client) | sc-saas-backend | `main` |
+| (job not on this dashboard) | sanchiconnect-saas-tenants (cockpit API, shared by every client) | `master` |
+| (job not on this dashboard) | sanchiconnect-saas-tenants-admin | `main` |
+| (job not on this dashboard) | ai-startups-analyzer | `main` |
+
+Client backend jobs, enabled: 01 Sine Mumbai, 07 IIIT Dic, 11 CII, 14 VGU, 17 ISBA, 19 SIIC Program, 21 Ginserv, 22 CDIIC, 23 SINGAM, 24 First Wings, 26 AMSIM, 27 iHUB, 30 Tally Startup Collective, 31 Runway, 34 Ieema, 35 Bharat Innovates, 36 IIML EIC, 37 Tally MSME Honours, 38 Nagpur Entrepreneurship Mission, 39 PSG Step Incubation, 40 ISGBB Bharat Cares, 41 T-Rise Tripura, 42 Supernova Gdai, 43 Healthx Elevate, 44 AIC Techno, 45 AKTU.
+
+Disabled (⊘): 02 Preseed Accelerator, 03 Leap Unicorn, 04 T-Hub, 04 T-Hub Math, 05 Nass Com, 06 SIIC Kanpur, 08 Startup Themezha, 09 SPJIMR, 10 N.COE, 12 1Trepreneur, 13 Innovher, 15 8x Ventures, 16 IIT Tirupati, 18 Boss Ladies, 20 Jubiliant, 25 Pitch To VC, 28 SanchiAccel, 29 Startup Chattisgarh, 33 Truleum. (No Client 32.)
+
+The tenants API, tenants-admin and the AI analyzer deploy to production from `master`/`main` only (Nirmal, 2026-10-14); their job names are not on this dashboard.
+
+**Development (dev Jenkins, confirmed by Nirmal 2026-10-14):** `ai_native_setup` deploys dev server 1 (thub.sanchidev.in: frontend thub.sanchidev.in, backend api.thub.sanchidev.in, admin adm.thub.sanchidev.in, tenants API api.tenants.sanchidev.in); `development` deploys dev server 2.
+
+**Not recorded yet:** the dev Jenkins job names, each job's server/URL, and whether any job starts by itself on a push (webhook/poll) or only from "Build now".
