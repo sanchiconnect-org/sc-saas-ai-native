@@ -26,7 +26,7 @@ Don't skip the workspace-root repo — without it you get a normal poly-repo che
 ### 2.2 Clone the workspace-root repo *as* your working folder
 
 ```bash
-git clone https://github.com/sanchiconnect/sc-saas-ai-native.git ~/Desktop/Work/SanchiSaaS
+git clone https://github.com/sanchiconnect-org/sc-saas-ai-native.git ~/Desktop/Work/SanchiSaaS
 cd ~/Desktop/Work/SanchiSaaS
 git checkout ai_native_setup
 ```
@@ -36,13 +36,13 @@ Note the clone target: `sc-saas-ai-native`'s content lands directly in `SanchiSa
 ### 2.3 Clone the 7 product repos as subfolders inside it
 
 ```bash
-git clone https://github.com/sanchiconnect/sanchiconnect-saas-tenants.git
-git clone https://github.com/sanchiconnect/sc-saas-backend.git
-git clone https://github.com/sanchiconnect/sc-saas-frontend.git
-git clone https://github.com/sanchiconnect/sc-saas-admin.git
-git clone https://github.com/sanchiconnect/ai-startups-analyzer.git
-git clone https://github.com/sanchiconnect/sc-saas-3rdparty-webservices.git
-git clone https://github.com/sanchiconnect/sanchiconnect-saas-tenants-admin.git
+git clone https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants.git
+git clone https://github.com/sanchiconnect-org/sc-saas-backend.git
+git clone https://github.com/sanchiconnect-org/sc-saas-frontend.git
+git clone https://github.com/sanchiconnect-org/sc-saas-admin.git
+git clone https://github.com/sanchiconnect-org/ai-startups-analyzer.git
+git clone https://github.com/sanchiconnect-org/sc-saas-3rdparty-webservices.git
+git clone https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin.git
 
 for d in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer sc-saas-3rdparty-webservices sanchiconnect-saas-tenants-admin; do
   (cd "$d" && git checkout ai_native_setup)
