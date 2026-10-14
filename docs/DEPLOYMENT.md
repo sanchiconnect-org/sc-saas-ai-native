@@ -97,6 +97,25 @@ for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-adm
 done
 ```
 
+### Slack alerts for CI (SAN-1600)
+
+`ci-alerts.yml` in each of the seven repos posts to Slack when `ci`, `secret-scan` or a contract check fails on `main`/`master`, `stagingdemo` or `development` (a merge, or a release PR from one of them), and once more when that workflow is green again. `ai_native_setup` is left out on purpose. Without the secret the workflow only logs a warning.
+
+| Secret | Repos | What it is |
+|---|---|---|
+| `SLACK_CI_WEBHOOK_URL` | all seven product repos | A Slack incoming-webhook URL for the channel the team watches (one URL can serve every repo). Treat it as a secret: anyone holding it can post to that channel. |
+
+To create it: api.slack.com/apps → Create New App → From scratch (name it e.g. "SanchiSaaS CI", pick the workspace) → Incoming Webhooks → On → Add New Webhook to Workspace → choose the channel (e.g. `#ci-alerts`) → copy the URL. Then add it without pasting it anywhere else:
+
+```bash
+for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer sc-saas-3rdparty-webservices sanchiconnect-saas-tenants-admin; do
+  gh secret set SLACK_CI_WEBHOOK_URL -R sanchiconnect/$r   # paste the URL when prompted
+done
+gh workflow run ci-alerts.yml --ref ai_native_setup -R sanchiconnect/sc-saas-backend   # sends a test message
+```
+
+GitHub runs `workflow_run` triggers from the default branch's copy of the workflow, so real alerts start once `ci-alerts.yml` reaches each repo's `main`/`master` through the normal release path. The manual test works from any branch.
+
 ## Jenkins jobs
 
 To be filled in from the Jenkins dashboard. None of the seven repos has a Jenkinsfile, so the branch-to-server mapping lives only in Jenkins.
