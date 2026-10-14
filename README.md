@@ -1,5 +1,7 @@
 # SanchiSaaS
 
+**Module map:** every module across the seven repos, generated from the `module.spec.md` files: [docs/MODULE-MAP.md](docs/MODULE-MAP.md) (`python3 scripts/generate-module-map.py`, regenerated nightly by the `module-map` workflow).
+
 Multi-tenant SaaS platform for startup incubators and accelerators. Built as a **poly-repo** — seven independently-versioned, independently-deployed repositories that together form a single product.
 
 ---

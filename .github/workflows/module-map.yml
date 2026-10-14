@@ -1,0 +1,67 @@
+# Module map (SAN-1627): regenerate docs/MODULE-MAP.md from every module.spec.md in the seven repos,
+# and commit it to ai_native_setup when it changed. The page is never edited by hand.
+#
+# Checks out the seven product repos next to the workspace, at ai_native_setup, using the
+# CONTRACT_CHECK_TOKEN Actions secret (fine-grained, owner sanchiconnect-org, Contents read-only).
+# That token must include all seven repos, sc-saas-3rdparty-webservices too, and the secret must
+# exist in this repo. GitHub only runs the schedule from the default branch's copy of this file,
+# so the nightly run starts once it reaches main; until then, run it by hand (workflow_dispatch).
+
+name: module-map
+
+on:
+  push:
+    branches: [ai_native_setup]
+    paths:
+      - 'scripts/generate-module-map.py'
+      - '.github/workflows/module-map.yml'
+  schedule:
+    - cron: '30 1 * * *'   # 07:00 IST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: module-map
+  cancel-in-progress: false
+
+jobs:
+  module-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ai_native_setup
+
+      - name: Check out the seven repos (ai_native_setup)
+        env:
+          GH_TOKEN: ${{ secrets.CONTRACT_CHECK_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "::error::CONTRACT_CHECK_TOKEN is not set in this repo"; exit 1; fi
+          for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin \
+                   sanchiconnect-saas-tenants-admin ai-startups-analyzer sc-saas-3rdparty-webservices; do
+            git clone --quiet --depth 1 --branch ai_native_setup \
+              "https://x-access-token:${GH_TOKEN}@github.com/${OWNER}/${r}.git" "$r"
+          done
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate docs/MODULE-MAP.md
+        run: |
+          pip install --quiet pyyaml
+          python3 scripts/generate-module-map.py
+
+      - name: Commit if it changed
+        run: |
+          if git diff --quiet -- docs/MODULE-MAP.md; then echo "docs/MODULE-MAP.md unchanged"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/MODULE-MAP.md
+          git commit -m "docs: regenerate MODULE-MAP.md from the module specs (SAN-1627)"
+          git pull --rebase --quiet origin ai_native_setup
+          git push origin HEAD:ai_native_setup

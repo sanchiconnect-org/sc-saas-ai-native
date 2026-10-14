@@ -1,5 +1,7 @@
 # SanchiSaaS — Module Map (Cross-Repo Reference)
 
+> **The module inventory and the dependency diagram are now generated** from the module specs in [`docs/MODULE-MAP.md`](../docs/MODULE-MAP.md) (SAN-1627) and are kept current there. This hand-written page stays for what the generator can't derive: the per-module narrative and the roles-and-access tables. Where the two disagree, the generated page reflects the specs.
+
 **Document type:** Internal architecture reference.
 **Last updated:** 2026-07-21 (roles & access verified directly against code on this date).
 
