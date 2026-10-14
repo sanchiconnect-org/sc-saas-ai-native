@@ -95,17 +95,21 @@ Long-lived branches on each remote, checked 2026-10-14: every repo has all four.
 3. **Archive, then delete.** Done: 8 `archive/<branch>` tags pushed, 8 branches deleted. (Auto-delete of merged PR branches stays off; see Retired branches.)
 4. **Fill the gaps. Done:** by 2026-10-14 every repo has `development` and `stagingdemo` (tenants, 3rdparty and tenants-admin gained them 8-11 Oct). Whether each has a staging Jenkins job is part of the Jenkins table below.
 
+## GitHub organization
+
+On 2026-10-14 the repos moved from the `sanchiconnect` personal account to the **`sanchiconnect-org`** organization. `github.com/sanchiconnect/<repo>` still redirects, but only until someone creates a repo of the same name under the `sanchiconnect` account, which still exists. Use `sanchiconnect-org` everywhere: in git remotes (`git remote set-url origin https://github.com/sanchiconnect-org/<repo>.git`), Jenkins job and server clone URLs, and `gh -R`. The contract workflows check out sibling repos with `${{ github.repository_owner }}/<repo>`, so they follow the org automatically.
+
 ## CI secrets
 
 | Secret | Repos | What it is | Used by |
 |---|---|---|---|
-| `CONTRACT_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin, ai-startups-analyzer | Fine-grained personal access token of the `sanchiconnect` account. Repository access: those five repos **plus sanchiconnect-saas-tenants-admin** (tenants' `tenant-contract.yml` reads both PHP panels' copy of the ai_credit_* schema, SAN-1595), nothing else. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year; renew before it lapses. | The L3 contract checks, which check out the other repos of a contract to compare them: `flags.yml` (SAN-1592), `scoring-contract.yml` (SAN-1594) and `tenant-contract.yml` (SAN-1591). GitHub's built-in token can only read the repo it runs in. |
+| `CONTRACT_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin, ai-startups-analyzer | Fine-grained personal access token created from the `sanchiconnect` account with **Resource owner: `sanchiconnect-org`** (a token owned by the personal account cannot read the org's repos). Repository access: those five repos **plus sanchiconnect-saas-tenants-admin** (tenants' `tenant-contract.yml` reads both PHP panels' copy of the ai_credit_* schema, SAN-1595), nothing else. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year (current token expires 2027-10-15); renew before it lapses. | The L3 contract checks, which check out the other repos of a contract to compare them: `flags.yml` (SAN-1592), `scoring-contract.yml` (SAN-1594) and `tenant-contract.yml` (SAN-1591). GitHub's built-in token can only read the repo it runs in. |
 
-To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token, with the settings above. Then add it as a secret to the five repos that run the checks (tenants-admin only needs to be readable, it runs none) without pasting it anywhere else:
+To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token (fine-grained tokens are always created from a personal account's settings, never the org's), set Resource owner to `sanchiconnect-org`, then the settings above. Check the token's page afterwards: it must list the six repos and Contents: Read-only. A token saved with repositories but no permission keeps no repositories at all, and the checks then fail at checkout with `403 Write access to repository not granted`. Test it with `curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $T" https://api.github.com/repos/sanchiconnect-org/sc-saas-backend/contents/README.md` (200 = good, 404 = no access). Then add it as a secret to the five repos that run the checks (tenants-admin only needs to be readable, it runs none) without pasting it anywhere else:
 
 ```bash
 for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer; do
-  gh secret set CONTRACT_CHECK_TOKEN -R sanchiconnect/$r   # paste the token when prompted
+  gh secret set CONTRACT_CHECK_TOKEN -R sanchiconnect-org/$r   # paste the token when prompted
 done
 ```
 
@@ -121,9 +125,9 @@ To create it: api.slack.com/apps → Create New App → From scratch (name it e.
 
 ```bash
 for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer sc-saas-3rdparty-webservices sanchiconnect-saas-tenants-admin; do
-  gh secret set SLACK_CI_WEBHOOK_URL -R sanchiconnect/$r   # paste the URL when prompted
+  gh secret set SLACK_CI_WEBHOOK_URL -R sanchiconnect-org/$r   # paste the URL when prompted
 done
-gh workflow run ci-alerts.yml -R sanchiconnect/sc-saas-backend   # test message; works once ci-alerts.yml is on main
+gh workflow run ci-alerts.yml -R sanchiconnect-org/sc-saas-backend   # test message; works once ci-alerts.yml is on main
 ```
 
 GitHub only runs `workflow_run` triggers, and only allows manual runs, from the default branch's copy of a workflow, so `ci-alerts.yml` does nothing until it reaches each repo's `main`/`master` through the normal release path. To check the webhook before then, post to it directly from your own machine: `curl -X POST -H 'Content-Type: application/json' -d '{"text":"test"}' "$SLACK_CI_WEBHOOK_URL"` (read the URL into the variable with `read -s SLACK_CI_WEBHOOK_URL` so it stays out of your shell history).
