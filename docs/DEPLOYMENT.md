@@ -168,4 +168,10 @@ The tenants API, tenants-admin and the AI analyzer deploy to production from `ma
 
 **Development (dev Jenkins, confirmed by Nirmal 2026-10-14):** `ai_native_setup` deploys dev server 1 (thub.sanchidev.in: frontend thub.sanchidev.in, backend api.thub.sanchidev.in, admin adm.thub.sanchidev.in, tenants API api.tenants.sanchidev.in); `development` deploys dev server 2.
 
-**Not recorded yet:** the dev Jenkins job names, each job's server/URL, and whether any job starts by itself on a push (webhook/poll) or only from "Build now".
+**How a deploy starts (Nirmal, 2026-10-14):** every deploy, on dev and production Jenkins alike, is started **by hand with "Build now"** on the job. No job runs by itself on a push (no webhook or poll trigger), and this stays manual for now. Merging to a branch therefore does not deploy it: the change goes live only when someone builds that branch's job, which is how a branch and its server drift apart (SAN-589).
+
+**Not recorded yet:** the dev Jenkins job names, and each dev job's server/URL.
+
+## Rollback
+
+**Not recorded yet; to be filled in by Nirmal.** None of the repos has a Jenkinsfile or a rollback script, so the method lives in Jenkins or on the servers. [INFERRED] Since jobs build the tip of a branch, the one method that works without server access is to revert the bad commit on the deploy branch (through a PR, since those branches are protected) and press "Build now" again. Whether Jenkins can redeploy an earlier build, or the servers keep previous releases, is unconfirmed.
