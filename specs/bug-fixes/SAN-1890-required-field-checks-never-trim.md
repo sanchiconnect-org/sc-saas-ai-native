@@ -15,7 +15,7 @@ Misplaced parenthesis (comparison inside `trim()`), copy-pasted across the admin
 
 ## Fix (`sc-saas-admin` only)
 Scripted replace of every `trim(($_POST['x']) <cmp> "")` with `trim((string) $_POST['x']) <cmp'> ""` (`==` → `===`, `!=` → `!==`, `!==` stays), 981 replacements in 148 files, plus `modules/tax_management/module.spec.md` (it documented the bug).
-- `(string)` instead of `?? ''` as the ticket suggested: the `isset` / `&&` guard in front is kept, and a posted array no longer throws a `TypeError` in `trim()` (it still passes the check as before, with PHP's usual array-to-string warning).
+- `(string)` instead of `?? ''` as the ticket suggested: the `isset` / `&&` guard in front is kept, and a posted array no longer throws a `TypeError` in `trim()`. **This turned out to be wrong for array-posted fields**: the cast emits "Array to string conversion", and that warning is printed in front of JSON responses (see SAN-1912 below).
 - The 10 positive-sense variants (value "present") now treat a whitespace-only value as absent, the same direction as the required checks.
 
 ## Behaviour change
@@ -32,5 +32,8 @@ Only whitespace-only values change: they are now treated as empty. Throwaway har
 - `modules/table.php` carries both this change (6 lines) and the uncommitted SAN-1889 fix; commit them separately.
 - Remaining ticket step: remove the `test.fail()` in sc-saas-e2e FT-006 P2 after deploy (repo not in this workspace).
 
+## Follow-up: SAN-1912 (regression)
+The blanket `(string)` cast broke AJAX handlers whose field is posted as an array (single Move to Round, drafts Move to Submitted). Fixed in `sc-saas-admin` commit `6a46fa8a` with an array-safe `isBlankInput()` helper on the 11 array-capable fields. Record: `specs/bug-fixes/SAN-1912-array-to-string-warning-breaks-json.md`. Lesson: a repo-wide scripted replace needs a check of what each field can carry (array vs scalar), not only `php -l`.
+
 ## Commit
-Not committed yet. Push branch: `ai_native_setup_sandeep`.
+Committed in `sc-saas-admin` (branch `ai_native_setup_sandeep`, `b9890246`); deployed 2026-10-14. Push is the user's.
