@@ -55,7 +55,7 @@ Every deploying branch has a gate; nothing deploys unverified.
 
 ### Branch protection settings (SAN-1569)
 
-GitHub repository rulesets, identical in all seven repos. **Not in effect since the repos moved to `sanchiconnect-org` (checked 2026-10-14):** the rulesets belonged to the old personal account (GitHub Pro) and did not come with the move, and the organization is on the free plan, which cannot enforce rulesets or branch protection on private repos (the API answers "Upgrade to GitHub Pro or make this repository public"; every default branch reports `protected: false`). To restore them, upgrade the organization to GitHub Team (org owner, Settings → Billing) and recreate the two rulesets below (SAN-1569, SAN-1584):
+GitHub repository rulesets, identical in all seven repos. **In effect** (re-checked 2026-10-14): the rulesets moved with the repos to `sanchiconnect-org` under the same IDs, were unenforceable for a few hours while the organization was on the free plan (the API answered "Upgrade to GitHub Pro"), and are enforced again since the organization moved to **GitHub Team** the same day. Both rulesets are `active` with no bypass actors in all seven repos, and GitHub reports `deletion, non_fast_forward, pull_request` on every release branch and `deletion, non_fast_forward` on `ai_native_setup`. Keep the organization on a paid plan: on the free plan, private repositories get no rulesets, branch protection, secret scanning or CodeQL.
 
 | Ruleset | Branches | Rules |
 |---|---|---|
