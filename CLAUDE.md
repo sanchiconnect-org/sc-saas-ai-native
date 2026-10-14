@@ -100,7 +100,7 @@ Per **"The SanchiConnect Way · Book Two: The Developer Guide"** (by Prabs; `~/D
 6. **Write tests first.** Currently blocked workspace-wide: the guide's referenced "guardian" skill doesn't exist here yet. Until it does, substitute the strongest verification actually available (type-check, lint, existing test suite, manual repro) and say explicitly that automated test coverage wasn't added.
 7. **Work directly on `ai_native_setup`** — no dedicated feature branch per task (reversed 2026-07-30, see below).
 8. **`/spec-implement <id>`** — the actual development.
-9. **Verify** against tests/acceptance criteria, then update module specs + Gap Register + Linear issue states.
+9. **Verify** against tests/acceptance criteria, then update module specs + Gap Register + Linear issue states. Every move to In Review carries a handover note (Changed / Verified with pasted evidence / Open) in the shape of `specs/handover-note.md` (SAN-1629).
 10. **Commit and push straight to `ai_native_setup`** (no PR/merge step) once the user confirms — close the Linear issue.
 
 **For a narrowly-scoped bug fix or small enhancement that doesn't need a full feature spec, use `/bug-fix`** (flat Linear issue, no project) as the lightweight variant of this same loop — but steps 1, 5, 6, and 9 still apply: orient on the issue, run the relevant contract check, verify, and update Linear state + specs when done. "Lightweight" means skipping the feature-spec document and Gap Register ceremony for genuinely small changes, not skipping verification.
