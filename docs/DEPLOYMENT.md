@@ -86,7 +86,7 @@ Long-lived branches on each remote, checked 2026-10-14: every repo has all four.
 - **Frontend `sanchiconnect` is a production branch: it deploys the SanchiConnect incubation production site. Never delete it.** It has no work that `ai_native_setup` lacks. Since 2026-10-14 it is in the frontend's release-branch ruleset (PR with one non-author approval, no force-push, no deletion), but it is still outside the release path above; its Jenkins job belongs in the table below.
 - Archived and deleted 2026-10-14 (no work missing from `ai_native_setup`): backend `ai_native_updates_aman`, `api_integration_aman`, `backend_new_branch_aman`, `corporate_logo_fix`. Each tip is kept as tag `archive/<branch>`; restore with `git push origin archive/<branch>:refs/heads/<branch>`.
 - Archived and deleted 2026-10-14 by decision, although never merged (the work now exists only in the tags): backend `update-the-api` (2 commits, a TypeORM 0.3.31 upgrade) and `language_updates` (1 commit); frontend `language_updates` (61 translation commits, Apr 2026). Tags `archive/<branch>`.
-- Analyzer `ai_analyizing_new_updates_aman`: SAN-1015 DB pool fix (14 Oct), not yet merged; needs a PR into `ai_native_setup`.
+- Analyzer `ai_analyizing_new_updates_aman` renamed 2026-10-14 to `ai_native_setup_aman` (same tip `7746fee`, also kept as tag `archive/ai_analyizing_new_updates_aman`), matching the `<base>_aman` naming in the other repos. Its SAN-1015 DB pool fix (`pool_pre_ping` / `pool_recycle`) is already in `ai_native_setup` (`e26b527`) and `main`, so no PR is needed.
 
 ## Retirement checklist (2026-10-13)
 
