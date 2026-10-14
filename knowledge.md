@@ -323,12 +323,16 @@ Engine]`
 
 ---
 
-## 7. No Docker, CI/CD, or infra-as-code anywhere in the workspace
+## 7. No Docker, CD, or infra-as-code anywhere in the workspace; CI since October 2026
 
-Confirmed independently in every repo's own `design.md` during this documentation series — no `Dockerfile`,
-no CI pipeline config (`.github/workflows`, `.gitlab-ci.yml`, etc.), and no infra-as-code (Terraform,
-CloudFormation, Pulumi) was found in any of the seven repos. Deployment is manual/ops-run in every case.
-`[Source: each repo's own design.md, Constraints Implied by Code section]`
+No `Dockerfile` and no infra-as-code (Terraform, CloudFormation, Pulumi) in any of the seven repos;
+deployment is manual/ops-run (Jenkins) in every case. `[Source: each repo's own design.md]`
+
+**Updated 2026-10-14 (P-SAN-75):** GitHub Actions CI now exists in all seven repos: `ci.yml` (runs
+`scripts/gates.sh`: lint/test/build, test floors, phpstan/phpcs, auth-gate and ai-credit-write checks per
+stack), `secret-scan.yml` (gitleaks), and the cross-repo contract workflows `flags`, `tenant-contract`,
+`scoring-contract`, `api-contract`. `ci-alerts.yml` posts release-branch failures to Slack. Branch model,
+gates, rulesets and CI secrets: `docs/DEPLOYMENT.md`. `[Source: .github/workflows/ in each repo]`
 
 ---
 
