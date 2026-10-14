@@ -64,7 +64,7 @@ Every bug fix, requirement implementation, and enhancement should have a corresp
 **Team:** Sanchiconnect (id `9e9df5bf-10ce-452a-ae21-aea4ab9f8adf`) — the only team in this Linear workspace.
 
 **Structure:**
-- **Feature/initiative-scale work** (anything that would get its own `/spec-new` spec — a new capability, a multi-repo change, anything with real design surface) → create a **Linear Project** for it, with one issue per meaningful piece of work under that project.
+- **Feature/initiative-scale work** (anything that would get its own `/spec-new` spec — a new capability, a multi-repo change, anything with real design surface) → a **milestone inside an existing Linear project** (`Enhancement` by default, or the owning program's project), with one issue per repo in that milestone. **Project-creation rule (SAN-1579):** a new project needs a lead, a target date and about five issues. `/spec-new` refuses to create one without a lead and a date, and smaller work is always a milestone. (Until 2026-10 `/spec-new` made one project per spec, and the board sprawled: 11 new projects after 30 Aug, none with a target date, five without a lead.)
 - **Bug fixes and small, self-contained enhancements** → a flat issue in the Sanchiconnect team backlog, no project. Still gets created and moved through states — just without a project wrapper.
 
 **States (Sanchiconnect team's real workflow, confirmed via `list_issue_statuses`):** `Backlog` → `Todo` → `In Progress` → `In Review` → `Done` (plus `Canceled` / `Duplicate` as needed). Move the issue as work actually progresses — don't create it and leave it stale in `Todo` while work is really `In Progress`.
