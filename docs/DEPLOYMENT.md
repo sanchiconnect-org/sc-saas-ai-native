@@ -60,7 +60,7 @@ GitHub repository rulesets, identical in all seven repos (the `sanchiconnect` ac
 | release branches | `main`, `master`, `stagingdemo`, `development` | Pull request required (no direct pushes); 1 approving review, never the author's own; stale approvals dismissed on new commits; the last push must be approved by someone else; no force-push; no deletion; no bypass actors |
 | dev branch | `ai_native_setup` | No force-push; no deletion; direct pushes allowed |
 
-Not yet enabled, at L2: required status checks (SAN-1583) and required CODEOWNERS review (SAN-1584). In an emergency the account owner can disable a ruleset in the repo's Settings → Rules; that change is logged and should be reversed the same day.
+Not yet enabled, at L2: required status checks (SAN-1583) and required CODEOWNERS review (SAN-1584). The contract checks (`flags`, `scoring-contract`, `tenant-contract`, `api-contract`) can be made required: they run on every PR and push and decide in their first step whether the files they protect changed (SAN-1596), so an unrelated PR gets a passing check in seconds instead of a check that never reports. Never add an `on.paths` filter to a workflow that is, or will be, a required check. In an emergency the account owner can disable a ruleset in the repo's Settings → Rules; that change is logged and should be reversed the same day.
 
 ## Current state per repo
 
