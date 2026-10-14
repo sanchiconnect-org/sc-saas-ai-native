@@ -174,4 +174,14 @@ The tenants API, tenants-admin and the AI analyzer deploy to production from `ma
 
 ## Rollback
 
-**Not recorded yet; to be filled in by Nirmal.** None of the repos has a Jenkinsfile or a rollback script, so the method lives in Jenkins or on the servers. [INFERRED] Since jobs build the tip of a branch, the one method that works without server access is to revert the bad commit on the deploy branch (through a PR, since those branches are protected) and press "Build now" again. Whether Jenkins can redeploy an earlier build, or the servers keep previous releases, is unconfirmed.
+Chosen method (Nirmal, 2026-10-14): **revert in git, then rebuild.** None of the repos has a Jenkinsfile or a rollback script, and Jenkins jobs build the tip of their branch, so the branch itself is what gets rolled back.
+
+1. Find the bad commit on the deploy branch (`main`/`master`, `stagingdemo`, or frontend `sanchiconnect`) and revert it on a hotfix branch: `git revert <sha>` (for a merged PR, `git revert -m 1 <merge-sha>`). Never force-push or reset; the protected branches block it anyway.
+2. Open a hotfix PR into the deploy branch. It needs one approval from someone other than the author, so line up a second person as soon as a rollback is likely.
+3. After the merge, press **"Build now"** on every Jenkins job that received the bad deploy. For sc-saas-backend that is each affected client job (`SaaS API - Client NN - ...`, up to 26), not one job.
+4. Bring the revert back to `ai_native_setup` (cherry-pick, as with any hotfix) so the next release does not redeploy the bad code.
+
+**Two things a code rollback does not undo:**
+
+- **Database schema (sc-saas-backend and sanchiconnect-saas-tenants).** Both run TypeORM `synchronize: true` with no migrations, so the app alters its tables at startup. Reverting the code does not remove a column the bad deploy added, and if it dropped or renamed a column, that column's data is already gone. Before deploying any change to an entity, take an RDS snapshot; it is the only undo for the database. The PHP panels and the 3rd-party gateway have no schema step, so for them the revert is a full rollback.
+- **Cached frontend (sc-saas-frontend is a PWA).** Browsers keep the cached build, so after a rollback some users still run the bad version until they reload or the service worker updates.
