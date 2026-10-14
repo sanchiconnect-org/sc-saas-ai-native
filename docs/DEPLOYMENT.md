@@ -8,17 +8,19 @@ Every repo follows the same four long-lived branches:
 
 ```
 ai_native_setup → development → stagingdemo → main / master
-    (dev 1)        (dev 2)       (staging)      (production)
+    (dev 1)        (dev 2)     (production    (production,
+                                    demo)          clients)
 ```
 
 | Branch | Purpose | Deployed by | How code gets in |
 |---|---|---|---|
 | `ai_native_setup` | Daily developer work and fixes | Jenkins, dev server 1 | Direct push (for now) |
 | `development` | Second dev server, integration check | Jenkins, dev server 2 | PR from `ai_native_setup` |
-| `stagingdemo` | Staging and QA (sc-saas-e2e runs here) | Staging Jenkins | PR from `development` |
-| `main` / `master` | Production | Production Jenkins | PR from `stagingdemo`, or a hotfix PR |
+| `stagingdemo` | The demo site, running on production (sc-saas-e2e also runs here) | Jenkins, production demo | PR from `development` |
+| `main` / `master` | Client production | Production Jenkins | PR from `stagingdemo`, or a hotfix PR |
+| `sanchiconnect` (sc-saas-frontend only) | SanchiConnect incubation, on production | Production Jenkins | Outside this path today; see Other branches below. Never delete. |
 
-`main` / `master` and `stagingdemo` are fixed names: the production and staging Jenkins jobs depend on them. `sanchiconnect-saas-tenants` and `sc-saas-3rdparty-webservices` use `master` for production; every other repo uses `main`.
+`main` / `master`, `stagingdemo` and the frontend's `sanchiconnect` are fixed names: production Jenkins jobs depend on them (all three deploy to production: clients, the demo, and SanchiConnect incubation; corrected 2026-10-14). `sanchiconnect-saas-tenants` and `sc-saas-3rdparty-webservices` use `master` for production; every other repo uses `main`.
 
 ## Retired branches
 
@@ -64,24 +66,33 @@ Not yet enabled, at L2: required status checks (SAN-1583) and required CODEOWNER
 
 ## Current state per repo
 
-Long-lived branches on each remote after the 2026-10-13 retirement. "Missing" means the branch does not exist yet in that repo.
+Long-lived branches on each remote, checked 2026-10-14: every repo has all four.
 
 | Repo | Production | `stagingdemo` | `development` | `ai_native_setup` |
 |---|---|---|---|---|
 | sc-saas-backend | `main` | yes | yes | yes |
 | sc-saas-frontend | `main` | yes | yes | yes |
 | sc-saas-admin | `main` | yes | yes | yes |
-| sanchiconnect-saas-tenants | `master` | missing | yes | yes |
-| sc-saas-3rdparty-webservices | `master` | missing | yes | yes |
-| sanchiconnect-saas-tenants-admin | `main` | missing | yes | yes |
-| ai-startups-analyzer | `main` | missing | missing | yes |
+| sanchiconnect-saas-tenants | `master` | yes | yes | yes |
+| sc-saas-3rdparty-webservices | `master` | yes | yes | yes |
+| sanchiconnect-saas-tenants-admin | `main` | yes | yes | yes |
+| ai-startups-analyzer | `main` | yes | yes | yes |
+
+**Production vs `ai_native_setup` (checked 2026-10-14).** GitHub shows production ahead of `ai_native_setup` in every repo (for example backend 53, admin 61 commits), but those are merge commits from release PRs: compared by content (`git cherry`), production has no change that `ai_native_setup` lacks. No catch-up merge is needed; merging `main`/`master` back into `ai_native_setup` at the next release just clears the counter.
+
+**Other branches (checked 2026-10-14).** Besides the four above:
+
+- Per-developer `ai_native_setup_<name>` (aman, mahima, sandeep, vishali) in every repo: still used for PRs (e.g. admin PR #2619). Kept until the team moves to short-lived per-issue branches.
+- **Frontend `sanchiconnect` is a production branch: it deploys the SanchiConnect incubation production site. Never delete it.** It has no work that `ai_native_setup` lacks, but it is not covered by the release-branch ruleset or the release path above; its Jenkins job belongs in the table below.
+- Archived and deleted 2026-10-14 (no work missing from `ai_native_setup`): backend `ai_native_updates_aman`, `api_integration_aman`, `backend_new_branch_aman`, `corporate_logo_fix`. Each tip is kept as tag `archive/<branch>`; restore with `git push origin archive/<branch>:refs/heads/<branch>`.
+- Unmerged work, owner to decide: backend `language_updates` (1 commit, Apr 2026) and `update-the-api` (2 commits, Aug 2026: a TypeORM 0.3.31 upgrade); frontend `language_updates` (61 translation commits, Apr 2026); analyzer `ai_analyizing_new_updates_aman` (SAN-1015 DB pool fix, 14 Oct, not yet merged).
 
 ## Retirement checklist (2026-10-13)
 
 1. **SAN-1044: nothing to recover.** Backend `971836f3` (on `pre_development`) has an identical twin, `49d6e84c` (same patch ID), merged into `ai_native_setup` through PR #1975. No repo had production code missing from `ai_native_setup`. Done.
 2. **Jenkins.** Confirmed that no Jenkins job builds from `initial_development` or `pre_development`. Done.
 3. **Archive, then delete.** Done: 8 `archive/<branch>` tags pushed, 8 branches deleted. (Auto-delete of merged PR branches stays off; see Retired branches.)
-4. **Fill the gaps. Open:** decide, per repo, whether tenants, 3rdparty, tenants-admin and the analyzer get a `stagingdemo` branch (and a staging Jenkins job), and whether the analyzer gets a `development` branch.
+4. **Fill the gaps. Done:** by 2026-10-14 every repo has `development` and `stagingdemo` (tenants, 3rdparty and tenants-admin gained them 8-11 Oct). Whether each has a staging Jenkins job is part of the Jenkins table below.
 
 ## CI secrets
 
