@@ -172,6 +172,28 @@ The tenants API, tenants-admin and the AI analyzer deploy to production from `ma
 
 **Not recorded yet:** the dev Jenkins job names, and each dev job's server/URL.
 
+## Deploy workflow (SAN-1602, pilot: sc-saas-3rdparty-webservices)
+
+Decided by Aman on 2026-10-15: Jenkins and the servers stay; a GitHub Actions workflow (`.github/workflows/deploy.yml`) **tags every release and triggers the Jenkins job through its API**. Staging follows `stagingdemo`, production follows `main`/`master`, the same as the release path above. The workflow never touches a server.
+
+| Push to | Tag | GitHub Release | Then |
+|---|---|---|---|
+| `stagingdemo` | `staging-YYYY.MM.DD-<sha7>` | pre-release | triggers the staging Jenkins job |
+| `master` / `main` | `YYYY.MM.DD-<sha7>` (date in IST) | release | waits for the reviewer on the `production` Environment, then triggers the production Jenkins job |
+
+The tag is what the rollback redeploys (SAN-1604) and what Sentry's release should carry. A re-run never creates a tag twice.
+
+**It is safe to merge before any setup.** The `release` job needs nothing but the repo, so tags and Releases start at once. The `deploy` job ends green with a warning until its Environment has the secrets below.
+
+**Setup, for the org owner. Order matters:**
+1. Create the Environments `staging` and `production` (Settings → Environments). On `production`, add a **required reviewer who is not the person who merged**. A GitHub Environment is created on first use with *no* rules, so if the secrets exist before the reviewer does, a production deploy runs unreviewed.
+2. Only then add, to each Environment, the secrets `JENKINS_URL`, `JENKINS_USER`, `JENKINS_TOKEN` (a Jenkins API token of a user that may only build that job) and `JENKINS_JOB` (the job name, for example `SaaS - 3rd Party Services`; URL-encode spaces as `%20`).
+3. Optional variables: `SERVICE_URL` (after the build the workflow checks that `GET <SERVICE_URL>/` answers 200) and `JENKINS_TAG_PARAMETER` (the name of a job parameter, for example `RELEASE_TAG`, that receives the tag so the job can set `SENTRY_RELEASE` to it; the job must be parameterised).
+
+**Open questions for Nirmal** (they cannot be answered from the repos): is the production Jenkins reachable from GitHub's runners (if it sits behind an IP allow-list, a self-hosted runner is needed); which job is the **staging** job for this service (the dashboard above lists none for `sc-saas-3rdparty-webservices`); is the production job parameterised.
+
+**Not in the pilot yet:** the smoke suite (sc-saas-e2e covers the PWA and the admin panel, not this service; the `SERVICE_URL` check is the substitute), a Sentry release created by the workflow, and the other repos. The backend needs more than one trigger (up to 26 client jobs), see SAN-1603.
+
 ## Rollback
 
 Chosen method (Nirmal, 2026-10-14): **revert in git, then rebuild.** None of the repos has a Jenkinsfile or a rollback script, and Jenkins jobs build the tip of their branch, so the branch itself is what gets rolled back.
