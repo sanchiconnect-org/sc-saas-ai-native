@@ -59,8 +59,14 @@ Exceptions that are not leaks: the CloudFront key files in `sc-saas-backend` (`c
 1. Open the alert; read the affected package, the range that fixes it and whether the vulnerable code path is used (production dependency or dev-only, reachable or not).
 2. Create or update an issue in Production Defects with the priority from the table above. Put the repo label on it.
 3. Fix by upgrading the package. Production runs Node 16 (backend) and Node 18 (tenants), and PHP 8.1 for the panels: a fix that needs a newer runtime is a bigger change, so say so on the issue rather than forcing the upgrade (the SAN-76/78 outages came from dependency drift).
-4. Run the repo's `gates` entry point (`npm run gates`, `composer gates`, `make gates`) before pushing.
-5. If an alert cannot be fixed, dismiss it on GitHub with a reason and link the issue, so it does not come back as noise.
+   - **Do not stop at the first fixed version the alert names.** Check the version you pick with OSV-Scanner first (put it in a scratch `package.json`, run `npm install --package-lock-only`, then `osv-scanner scan source --lockfile package-lock.json`). The first run of this runbook, mysql2 (SAN-1916), showed that the "fixed" 3.9.7 and 3.9.9 still carried other advisories while 3.24.6 and its whole tree carried none, and it was still inside the declared `^3` range.
+   - Change only the package: `npm install <pkg>@<range> --ignore-scripts --no-audit --no-fund`, then look at the lockfile diff (packages added, removed, changed) and at the new packages' `engines.node` against production's Node.
+   - Measure it: OSV-Scanner on the lockfile before and after, and put both numbers on the issue and the PR.
+4. Run the repo's `gates` entry point (`npm run gates`, `composer gates`, `make gates`) before pushing. On a **Windows** checkout with `core.autocrlf=true`, the "generated file is up to date" contract tests (tenants, backend) fail only because committed LF files become CRLF locally; convert those files to LF for the run (and restore them with `git checkout --` afterwards), or run the gates in WSL or CI, and say so in the PR.
+5. A runtime driver or framework (database driver, HTTP stack, auth) needs a **real smoke test** that the unit tests cannot give: start the service against a dev database after the merge to `ai_native_setup` and exercise one request. Say in the PR that this is still to do if you could not do it.
+6. If an alert cannot be fixed, dismiss it on GitHub with a reason and link the issue, so it does not come back as noise.
+7. **The alert does not close until the fix reaches the default branch** (`main`/`master`): Dependabot evaluates that branch only, and fixes land on `ai_native_setup` first. Leave the issue open until the release PR has gone through `development` and `stagingdemo`, then confirm the alert closed.
+8. In Linear text, do not write "alert #5": Linear turns `#5` into a link to an unrelated pull request. Write "alert number 5" or paste the alert URL.
 
 ## Cadence
 
