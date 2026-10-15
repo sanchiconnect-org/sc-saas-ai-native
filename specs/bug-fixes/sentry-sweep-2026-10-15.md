@@ -19,6 +19,7 @@
 | [SAN-1930](SAN-1930-network-0-504-and-expected-faults.md) | frontend | 1, H3, HE, HF, 49, EX, 9A, 4A | Public-events and uploadLogo error handling. The rest are already handled or fixed. |
 | [SAN-1931](SAN-1931-saas-settings-502-on-cache-clear.md) | backend | BACKEND-1H | Cache-clear keeps the last good settings when the cockpit returns 502. |
 | [SAN-1932](SAN-1932-tenants-admin-too-many-connections-recurrence.md) | tenants-admin | TENANTS-ADMIN-4 | Infra connection exhaustion. Recommendations only. |
+| [SAN-1933](SAN-1933-search-filter-preview-unmatched-id.md) | frontend | FRONTEND-HH | Filter preview falls back to the raw id instead of crashing (`d7d588876`). Found on the re-check. |
 
 ## Not ticketed
 * **BACKEND-4Q / 5N:** already open as SAN-1871 (Todo, Aman).
