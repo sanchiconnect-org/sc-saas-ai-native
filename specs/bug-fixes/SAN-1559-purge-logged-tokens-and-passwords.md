@@ -21,7 +21,7 @@ Files: `sc-saas-backend/src/modules/conversations/conversations.service.ts`, plu
 - **Log retention / purge:** confirm the pm2 log location and retention on every backend server (and any log shipping). Purge or redact entries matching `attributesToMap`, `console.log('token'`, `receiverUserToken`, `chatPageUrl`, `request/authenticate?token=`. Delete or limit access to the Sentry events whose breadcrumbs contain them (2026-07-28 onwards).
 - **Affected accounts (passwords):** `spa_admin_users` has no created-at column. Per tenant, list them from the email audit instead: `service_usage` rows with `service_type='ses-email'` and `JSON_UNQUOTE(data->'$.subject')` matching that tenant's `admin-account-created` subject ("Your account has been created …"), `created_at` from 2025-09-18 to the deploy date of `404c483c`. Then force a password reset for those accounts that are not SSO.
 - **Tokens:** decision for the dev lead: rotate `EMAIL_TOKEN_SECRET` (every outstanding email action link stops working) and `JWT_SECRET` (every user is logged out) per deployment, or wait for expiry. For partner JWTs that's about 30 days. For chat-link email tokens it's up to 90 days, and new ones were logged until this fix deploys.
-- Code hardening to consider (not done): scrub `event.breadcrumbs` in `scrubEvent`, or drop the Console breadcrumbs integration.
+- ~~Code hardening to consider: scrub `event.breadcrumbs` in `scrubEvent`.~~ Done on 2026-10-15, see "Sentry hardening" below.
 
 ## Verification
 - Repo-wide scan of `console.*` / `this.logger.*` calls for token/password/secret/otp/jwt/authenticated-URL arguments: only static strings remain (CometChat "Missing Username or Password", Stripe "Missing Stripe secret key").
@@ -31,3 +31,23 @@ Files: `sc-saas-backend/src/modules/conversations/conversations.service.ts`, plu
 
 ## Commit
 `d65db719` on sc-saas-backend `ai_native_setup_vishali` (pushed 2026-10-14). The ops follow-up is still open on SAN-1559.
+
+## Sentry hardening (2026-10-15)
+Evidence point 4 closed in code: Sentry now redacts secrets in breadcrumbs and by value, not only by key name.
+- New `sc-saas-backend/src/core/logging/sentry-redact.ts`: `redactSecretsInText()` replaces JWTs (`eyJ….….…`),
+  `?token= / access_token / accessToken / refresh_token / password / secret / jwt=` query values and `Bearer …`
+  credentials; `redactSecretsDeep()` applies it to every string in a value. The patterns are shape-specific, so
+  ordinary text, ids and URLs pass unchanged.
+- `src/instrument.ts`: new `beforeBreadcrumb: scrubBreadcrumb` (message redacted; `data` redacted by value, then by
+  key through the existing `scrubObject`), and `scrubEvent` now also redacts `event.message`, exception values and
+  `event.breadcrumbs`. It runs after the fingerprint functions, so issue grouping is unchanged.
+- This protects new events only. Events already stored in Sentry are untouched; deleting them is still the ops item
+  above. Sentry search covers the message, not breadcrumbs, so a search for these values finding nothing does not
+  prove they are absent.
+
+Verification: `sentry-redact.spec.ts` (6 cases, including ordinary lines left unchanged) and the existing
+`no-credential-console-logs.spec.ts` pass. An end-to-end script loaded the compiled `dist/instrument.js` (with a
+placeholder DSN, so nothing was sent) and called the registered `beforeBreadcrumb` / `beforeSend` with a JWT, a
+`?token=` login link, a password object, a Bearer header and an `http` breadcrumb carrying `?password=`: no secret
+survived, and an ordinary message was kept. `tsc` clean; eslint 0 errors (LF, as CI sees it); `npm run build` OK; gates
+`test` (1325 passing), `test-floors`, `openapi-floors` passed.
