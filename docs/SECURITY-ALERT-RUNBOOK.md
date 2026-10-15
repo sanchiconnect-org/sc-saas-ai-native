@@ -9,10 +9,11 @@ What to do when a security tool raises something. Covers the seven product repos
 | Source | State | Where you see it |
 |---|---|---|
 | Secret scan (gitleaks) | **Live** on every push and PR (`secret-scan.yml`, rules in `.gitleaks.toml`). Scans only new commits. Reports only; it blocks a merge once SAN-1583 makes it a required check. | A red `secret-scan` run; Slack alert (`ci-alerts.yml`) when it fails on `main`/`master`, `stagingdemo` or `development`. |
-| GitHub secret scanning and push protection | **Not available.** The `sanchiconnect-org` organization is on the free plan and has no GitHub Secret Protection (the API returns 404). The gitleaks workflow is the substitute, and it cannot stop a push: a secret is detected after it is already on GitHub. | n/a |
-| Dependabot alerts | **Live** in all seven repos. | Repo → Security → Dependabot, or `gh api repos/sanchiconnect-org/<repo>/dependabot/alerts?state=open`. Nothing notifies the team yet. |
-| Dependabot version updates, dependency review on PRs | **Not live** (SAN-1599). | n/a |
-| Code scanning | **CodeQL is not available:** it needs GitHub Code Security, a paid add-on that the `sanchiconnect-org` free plan does not include. **Semgrep** (open-source rules) runs instead, as `code-scan.yml` (SAN-1598). Advisory: it reports and never fails a build. | The `code-scan` run: a findings summary on the run page and a `semgrep-findings` artifact. |
+| GitHub secret scanning and push protection | **Not available.** The `sanchiconnect-org` organization is on the Team plan (since 2026-10-14), which does not include GitHub Secret Protection (a separate paid add-on; the API returns 404). The gitleaks workflow is the substitute, and it cannot stop a push: a secret is detected after it is already on GitHub. | n/a |
+| Dependabot alerts | **Live in five repos, but reporting nothing in `sc-saas-3rdparty-webservices` and `ai-startups-analyzer`**, where an OSV scan of the lockfile finds 213 and 50 advisories (see the baseline). Alerts are most likely not enabled there. | Repo → Security → Dependabot, or `gh api repos/sanchiconnect-org/<repo>/dependabot/alerts?state=open`. Nothing notifies the team yet. |
+| Dependabot version updates | **Merged in all seven repos** (`.github/dependabot.yml`, SAN-1599): one grouped weekly PR per ecosystem, minor and patch only. Dependabot reads the file only from the default branch, so the first PRs appear once it reaches `main`/`master`. | The weekly Dependabot PR in each repo. |
+| Dependency review on PRs | GitHub's own check is **not available** (the dependency-graph compare API answers 403; it needs the paid Code Security add-on). `dependency-check.yml` (OSV-Scanner, SAN-1599) runs instead: it flags the vulnerabilities a PR adds to a lockfile. Advisory. | The `dependency-check` run: warnings on the PR and a summary on the run page. |
+| Code scanning | **CodeQL is not available:** it needs GitHub Code Security, a separate paid add-on that the `sanchiconnect-org` Team plan does not include (the code-scanning API answers 403). **Semgrep** (open-source rules) runs instead, as `code-scan.yml` (SAN-1598). Advisory: it reports and never fails a build. | The `code-scan` run: a findings summary on the run page and a `semgrep-findings` artifact. |
 | Secrets already in git history | Not re-reported on every push. Tracked in SAN-1562 (rotation). | SAN-1562 |
 
 ## Severity and response
@@ -78,14 +79,16 @@ Open Dependabot alerts when this page was written:
 | sc-saas-frontend | 12 | 137 | 95 | 22 |
 | sc-saas-admin | 37 | 130 | 125 | 23 |
 | sanchiconnect-saas-tenants-admin | 37 | 133 | 121 | 20 |
-| ai-startups-analyzer, sc-saas-3rdparty-webservices | none reported | | | |
+| ai-startups-analyzer, sc-saas-3rdparty-webservices | none reported (see below) | | | |
 
-That is about 107 critical alerts today, so the same-day rule for criticals cannot be met for the existing backlog. `[DECISION PENDING]` Agree a burn-down plan (for example: triage every critical for reachability first, then upgrade the reachable ones repo by repo, starting with the backend and tenants) and treat only **new** criticals as same-day until the backlog is cleared.
+**Those last two are not clean.** Dependabot reports nothing for them, but an OSV-Scanner scan of their lockfiles on 2026-10-15 finds 213 advisories in 56 packages in `sc-saas-3rdparty-webservices/package-lock.json` and 50 advisories in 6 packages in `ai-startups-analyzer/api/requirements.txt`. The numbers above are therefore a floor. `[DECISION PENDING]` An org owner (Settings → Code security) should confirm that the dependency graph and Dependabot alerts are on for both repos; until then the weekly review for them has to use `osv-scanner scan source --lockfile <file>`.
+
+That is about 107 critical alerts in the five repos that report them, so the same-day rule for criticals cannot be met for the existing backlog. `[DECISION PENDING]` Agree a burn-down plan (for example: triage every critical for reachability first, then upgrade the reachable ones repo by repo, starting with the backend and tenants) and treat only **new** criticals as same-day until the backlog is cleared.
 
 ## Open items before this page is final
 
 - The three `[DECISION PENDING]` answers above.
 - SAN-1598: triage the first week of Semgrep findings into Production Defects with the Security prefix, then decide when `code-scan` becomes a required check.
-- SAN-1599: when Dependabot version updates and dependency review go live, update the table at the top.
+- SAN-1599: the first weekly Dependabot PRs appear once the files reach `main`/`master`; then confirm one is merged or declined within the week.
 - Mirror this page to Linear (a document in the CI Pipeline and Gates project).
 - Done-when: handle one real alert by following this page, and fix the gaps it shows.
