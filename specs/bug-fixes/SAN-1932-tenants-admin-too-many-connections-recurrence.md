@@ -2,14 +2,14 @@
 id: SAN-1932
 title: "PDO 1040 \"Too many connections\" recurred after the SAN-1757 retry fix (SC-SAAS-TENANTS-ADMIN-4)"
 type: bug-fix
-status: in-progress
+status: done
 linear: https://linear.app/sanchiconnect/issue/SAN-1932
 sentry: [SC-SAAS-TENANTS-ADMIN-4]
 repos: [tenants-admin]
 related: [SAN-1757, SAN-413, SAN-414, SAN-1922]
-commit: none — read-only investigation; infra follow-up open
+commit: sanchiconnect-saas-tenants-admin@55fa313 (branch ai_native_setup_vishali, pushed) — .htaccess
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-16
 ---
 
 # SAN-1932: tenants-admin connection exhaustion
@@ -33,10 +33,50 @@ updated: 2026-10-15
      * one connection per request in `sql_script_execute.php:126` and `_data_export_generate.php:2275`.
   4. **Per-tenant sc-saas-backend TypeORM pools**, if tenant DBs share the same instance.
 
-## Fix
-No code change.
+## Root cause (confirmed 2026-10-16 from the Sentry events)
+* All 7 events in the 14-day window landed within **3 seconds** (2026-10-10 20:43:27-29 UTC).
+* They all came from container `aeba05ccafd9` on **`adm.tenants.sanchidev.in`**, tagged `environment: local`.
+* **The requests were a vulnerability-scanner burst, not operator traffic:**
+  * user agents rotate between spoofed DuckAssistBot, Bravebot, Bytespider, PerplexityBot and Baiduspider;
+  * URLs are `/@fs/.env`, `/@fs/app/.env`, `/@fs/var/task/.env`, `/@fs/src/.env`, `/@fs/proc/self/cmdline` and `/@fs/..%252f…/proc/self/environ`. That is Vite `@fs` path traversal plus `.env` hunting.
+* **The SAN-1757 retry *is* deployed.** The stack shows `config.php(80) connectWithRetryOnTooManyConnections` → `config.php(67)` → `db.php(289)`, so all 3 attempts hit 1040.
+* **Mechanism:**
+  * `.htaccess` rewrites every non-existent path to `index.php`.
+  * `index.php` loads `config/config.php`, which opens the tenants-DB connection before routing can reach `modules/404.php`.
+  * So every junk request costs one MySQL connection, and a parallel scanner burst saturates the shared dev MySQL.
+  * Live check: `/@fs/.env` on the dev host returns 302 (PHP ran and redirected to login), not 404.
+* **Side finding (security):** `GET /phpinfo.php` returns **200** on `adm.tenants.sanchidev.in`.
+  * `phpinfo.php` (`<?php phpinfo();`, initial commit) is tracked in the docroot, and nothing links to it.
+  * `phpinfo()` prints the loaded environment, which includes the `.env` DB credentials and keys.
+  * The body was deliberately not fetched.
 
-**Infra first:**
+## Fix (tenants-admin `.htaccess`, `55fa313`)
+New rules go after the adminer rule and before the `index.php` catch-all, so they are answered by Apache with no PHP and no DB connection:
+* `^@fs/` → 404.
+* Any dot-segment `(^|/)\.` except `/.well-known/` → 404. This covers `/.env`, `/.git/…` and library dotfiles.
+* `(^|/)proc/(self|<pid>)/` → 404.
+* `^phpinfo\.php$` → 403.
+
+No module route starts with `@`, contains a dot-segment or has a `proc/<pid>/` segment (checked against `modules/`), and nothing references `phpinfo.php`. Real routes are untouched.
+
+### Verification
+* Ran an isolated XAMPP Apache 2.4 + PHP 8 instance on `127.0.0.1:8099`. It used this exact `.htaccess` with a stub `index.php` (no `.env`, no DB), and was torn down afterwards.
+  * All 6 Sentry scanner URLs, plus `/.env`, `/.git/config`, `/proc/self/environ` and `/foo/proc/1/environ` → **404**, without reaching `index.php`.
+  * `/phpinfo.php` and `/PHPINFO.PHP` → **403**.
+  * These are **unchanged** (200 via `index.php` with the right `action`): `/`, `/auth/login` (with a query string), `/client_stats/list`, `/ai_credits/packages`, `/tenants/edit/12`, `/process/list`, `/procurement`, `/some/file.csv`.
+  * Static assets: `/themes/…/a.css` → 200; `/adminer/adminer.css` → 200.
+  * `/adminer/adminer.php` → 403 (existing SAN-1913 rule still applies).
+  * `/.well-known/acme-challenge/*` → 200.
+* `httpd -t`: Syntax OK.
+* `scripts/gates.sh`:
+  * passed: platform 0, php-lint 0, ai-credit-writes 0;
+  * not installed on this machine: composer 127, phpstan 127, phpcs 127;
+  * auth-gates 1 is a **Windows-local false failure**. Git Bash rejects the `':!:vendor'` pathspec (`fatal: Invalid path`), so the file list is empty and existing files show as "no longer exists". The gate only reads PHP, and no PHP file changed. CI (Linux) is the authority.
+* No automated test added: there is no `.htaccess` test harness in the repo. The Apache run above is the verification.
+* Contract checks: no flag, API/DTO or tenant-scoped query touched.
+
+## Remaining infra and code follow-ups (not needed to close this issue)
+**Infra:**
 * Check `max_connections`, `Max_used_connections`, `Threads_connected` and the RDS `DatabaseConnections` metric around 2026-10-11.
 * Group `PROCESSLIST` by user and host to see who holds the connections.
 * Lower `wait_timeout`.
@@ -49,5 +89,7 @@ No code change.
 * Disable `synchronize` in prod.
 
 ## Open
-* Confirm the tenants-admin deploy date relative to 2026-10-11.
-* Confirm whether the Sentry events show the retry frame.
+* ~~Confirm the tenants-admin deploy date relative to 2026-10-11.~~ Answered: the retry frame is in the stack, so `0ccd8af` is deployed.
+* ~~Confirm whether the Sentry events show the retry frame.~~ Answered: yes, and all 3 attempts hit 1040.
+* The dev host reports `environment: local` to Sentry. `SENTRY_ENVIRONMENT` in the dev server's `.env` should be `development`, so dev noise can be filtered from production triage.
+* phpinfo exposure: after the `.htaccess` deploy, consider deleting `phpinfo.php` and rotating the dev `.env` secrets. Anyone could read them while the page was public.
