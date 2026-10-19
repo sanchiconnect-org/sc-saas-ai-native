@@ -59,6 +59,16 @@ Every deploying branch has a gate; nothing deploys unverified.
 | `stagingdemo` | Checks + review on the PR | Review required since 13 Oct 2026; checks required from L2 |
 | `main` / `master` | Checks + review on the PR (hotfixes included) | Review required since 13 Oct 2026; checks required from L2 |
 
+**Unguarded routes (SAN-1937, 2026-10-19).** `npm run gates` in sc-saas-backend, sanchiconnect-saas-tenants and sc-saas-3rdparty-webservices includes a required `unguarded-routes` gate (`scripts/unguarded-routes.js`, same file in all three).
+- It fails on any controller route without an auth guard that is neither allow-listed (kind, reason, owner) nor among the recorded known gaps (`unreviewed`, which may only shrink).
+- Baseline:
+
+| Repo | Routes | Guarded | Allow-listed | Known gaps |
+|---|---|---|---|---|
+| backend | 853 | 447 | 2 | 404 |
+| tenants | 72 | 13 | 4 | 55 |
+| 3rd-party | 36 | 0 | 1 | 35 |
+
 ### Branch protection settings (SAN-1569)
 
 GitHub repository rulesets, identical in all seven repos. **In effect** (re-checked 2026-10-14): the rulesets moved with the repos to `sanchiconnect-org` under the same IDs, were unenforceable for a few hours while the organization was on the free plan (the API answered "Upgrade to GitHub Pro"), and are enforced again since the organization moved to **GitHub Team** the same day. Both rulesets are `active` with no bypass actors in all seven repos, and GitHub reports `deletion, non_fast_forward, pull_request` on every release branch and `deletion, non_fast_forward` on `ai_native_setup`. Keep the organization on a paid plan: on the free plan, private repositories get no rulesets, branch protection, secret scanning or CodeQL.
