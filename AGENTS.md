@@ -17,9 +17,12 @@ be coordinated and staged in dependency order — the blast-radius order (`tenan
 {frontend, admin}`, with `ai-startups-analyzer` and `sc-saas-3rdparty-webservices` as leaf nodes in the
 outbound direction) is the right default staging order, but see §3 below before trusting it as complete.
 
-No repo in this workspace has Docker, CI/CD, or infra-as-code — deployment is manual/ops-run everywhere,
-confirmed independently in every repo's own `design.md`. This raises the cost of an uncoordinated change:
-there is no CI gate that would catch a cross-repo break before it reaches production.
+No repo in this workspace has Docker, CD, or infra-as-code: deployment is manual/ops-run (Jenkins)
+everywhere. CI exists since October 2026 (P-SAN-75): every repo runs `ci.yml` (`scripts/gates.sh`) and a
+secret scan, and the cross-repo contract workflows (`flags`, `tenant-contract`, `scoring-contract`,
+`api-contract`) catch the mechanical cross-repo breaks (flag names, the tenant-verification shape, the scoring
+scale, breaking API changes). They do not catch behavioural breaks, so an uncoordinated change is still risky.
+See `docs/DEPLOYMENT.md`.
 
 ---
 

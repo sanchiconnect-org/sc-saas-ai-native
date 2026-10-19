@@ -1,5 +1,7 @@
 # SanchiSaaS
 
+**Module map:** every module across the seven repos, generated from the `module.spec.md` files: [docs/MODULE-MAP.md](docs/MODULE-MAP.md) (`python3 scripts/generate-module-map.py`, regenerated nightly by the `module-map` workflow).
+
 Multi-tenant SaaS platform for startup incubators and accelerators. Built as a **poly-repo** — seven independently-versioned, independently-deployed repositories that together form a single product.
 
 ---
@@ -219,13 +221,13 @@ All seven repositories are private and hosted under the [sanchiconnect](https://
 
    | Repo | GitHub URL |
    |---|---|
-   | `sanchiconnect-saas-tenants` | github.com/sanchiconnect/sanchiconnect-saas-tenants |
-   | `sc-saas-backend` | github.com/sanchiconnect/sc-saas-backend |
-   | `sc-saas-frontend` | github.com/sanchiconnect/sc-saas-frontend |
-   | `sc-saas-admin` | github.com/sanchiconnect/sc-saas-admin |
-   | `ai-startups-analyzer` | github.com/sanchiconnect/ai-startups-analyzer |
-   | `sc-saas-3rdparty-webservices` | github.com/sanchiconnect/sc-saas-3rdparty-webservices |
-   | `sanchiconnect-saas-tenants-admin` | github.com/sanchiconnect/sanchiconnect-saas-tenants-admin |
+   | `sanchiconnect-saas-tenants` | github.com/sanchiconnect-org/sanchiconnect-saas-tenants |
+   | `sc-saas-backend` | github.com/sanchiconnect-org/sc-saas-backend |
+   | `sc-saas-frontend` | github.com/sanchiconnect-org/sc-saas-frontend |
+   | `sc-saas-admin` | github.com/sanchiconnect-org/sc-saas-admin |
+   | `ai-startups-analyzer` | github.com/sanchiconnect-org/ai-startups-analyzer |
+   | `sc-saas-3rdparty-webservices` | github.com/sanchiconnect-org/sc-saas-3rdparty-webservices |
+   | `sanchiconnect-saas-tenants-admin` | github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin |
 
 3. Share your GitHub username with an existing organization owner and ask them to send you a collaborator invite from **Settings → Collaborators and teams** on each repo you need.
 4. Accept the invite from your GitHub notifications or the email GitHub sends you.
@@ -236,13 +238,13 @@ Once invited, clone all repos into the same parent directory so workspace-level 
 
 ```bash
 mkdir SanchiSaaS && cd SanchiSaaS
-git clone https://github.com/sanchiconnect/sanchiconnect-saas-tenants
-git clone https://github.com/sanchiconnect/sc-saas-backend
-git clone https://github.com/sanchiconnect/sc-saas-frontend
-git clone https://github.com/sanchiconnect/sc-saas-admin
-git clone https://github.com/sanchiconnect/ai-startups-analyzer
-git clone https://github.com/sanchiconnect/sc-saas-3rdparty-webservices
-git clone https://github.com/sanchiconnect/sanchiconnect-saas-tenants-admin
+git clone https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants
+git clone https://github.com/sanchiconnect-org/sc-saas-backend
+git clone https://github.com/sanchiconnect-org/sc-saas-frontend
+git clone https://github.com/sanchiconnect-org/sc-saas-admin
+git clone https://github.com/sanchiconnect-org/ai-startups-analyzer
+git clone https://github.com/sanchiconnect-org/sc-saas-3rdparty-webservices
+git clone https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin
 ```
 
 > You do not need access to all seven repos to contribute. Request only the repos relevant to your work. The blast-radius order (tenants → backend → frontend / admin) is a good guide — start with the repos furthest downstream from your change. `sanchiconnect-saas-tenants-admin` also depends on the cockpit's DB schema, so treat it as living alongside `sanchiconnect-saas-tenants` when requesting access.

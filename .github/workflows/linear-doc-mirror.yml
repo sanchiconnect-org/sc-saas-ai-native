@@ -1,0 +1,43 @@
+# SAN-1580: after a merge to main, mirror the workspace docs listed in
+# docs/linear-mirror.json to Linear documents, one way (the repository wins).
+# Needs the LINEAR_API_KEY secret, and a project id in the config or the
+# LINEAR_DOCS_PROJECT_ID repository variable. Fails loudly if a write
+# doesn't read back correctly.
+name: linear-doc-mirror
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'AGENTS.md'
+      - 'README.md'
+      - 'api.md'
+      - 'database.md'
+      - 'design.md'
+      - 'knowledge.md'
+      - 'docs/**'
+      - 'scripts/linear-doc-mirror.mjs'
+      - '.github/workflows/linear-doc-mirror.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linear-doc-mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Mirror docs to Linear
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_DOCS_PROJECT_ID: ${{ vars.LINEAR_DOCS_PROJECT_ID }}
+        run: node scripts/linear-doc-mirror.mjs

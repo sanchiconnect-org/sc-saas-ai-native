@@ -1,0 +1,13 @@
+{
+  "_comment": "SAN-1580: workspace docs mirrored one way to Linear documents by .github/workflows/linear-doc-mirror.yml. The repository wins any conflict. Add the two SOPs here once they are committed. projectId can be overridden with the LINEAR_DOCS_PROJECT_ID repo variable.",
+  "projectId": "",
+  "docs": [
+    { "path": "AGENTS.md", "title": "Workspace guide: AGENTS.md" },
+    { "path": "README.md", "title": "Workspace guide: README.md" },
+    { "path": "api.md", "title": "Workspace guide: api.md" },
+    { "path": "database.md", "title": "Workspace guide: database.md" },
+    { "path": "design.md", "title": "Workspace guide: design.md" },
+    { "path": "knowledge.md", "title": "Workspace guide: knowledge.md" },
+    { "path": "docs/DEPLOYMENT.md", "title": "Workspace guide: DEPLOYMENT.md" }
+  ]
+}

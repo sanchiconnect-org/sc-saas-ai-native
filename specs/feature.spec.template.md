@@ -3,7 +3,8 @@ id: SAN-000                     # Linear id — also the branch prefix (<id>-<sl
 title: <one-line title>
 type: feature
 status: draft                   # draft → approved → in-progress → in-review → done
-linear: <https://linear.app/...>
+linear: <https://linear.app/...>   # the EXISTING project the spec lives in (default: Enhancement)
+linear_milestone: <SAN-000 — title>  # the spec's milestone in that project (SAN-1579); its issues sit here
 owner: <name@sanchiconnect.com>
 repos: []                       # subset of [tenants, backend, frontend, admin, ai-startups-analyzer, sc-saas-3rdparty-webservices, sanchiconnect-saas-tenants-admin] — DEPENDENCY ORDER
 contracts:

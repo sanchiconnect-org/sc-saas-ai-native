@@ -55,6 +55,11 @@ The tenant verification contract is the most critical shared interface in the Sa
 - `sc-saas-frontend` owns `brand.model.ts`. The `IFeatures` interface lists every flag name as a typed boolean property. A field added to `TenantUsersEntity` must also be added here; a field removed silently becomes `undefined` (TypeScript does not protect against missing server-side fields at runtime).
 - `sc-saas-backend` owns `core/constants/enum.ts` (`Feature` enum) and `sanchiconnect.service.ts`. The enum entries must match the exact snake_case column names returned by `tenant-settings`. A mismatch means the flag is never found in `saasFeatures` and every `FeatureGuard` using it returns 403.
 - `sc-saas-admin` owns `config/config.php` and all `$mainDatabase->get()` calls. These use string literals for column names. No type safety, no compile-time validation.
+- **Enforced in CI since 2026-10-13/14 (P-SAN-75, SAN-1591/1592/1595):**
+  - **Frozen shape:** the shape is frozen in `sanchiconnect-saas-tenants/contracts/tenant-verification.schema.json`, and the producer test `tenant-verification.contract.spec.ts` fails when the code returns anything else.
+  - **Compile-time checks in the consumers:** the generated `contracts/generated/tenant-verification.ts` is copied into backend (`src/core/contracts/`) and frontend (`src/app/core/contracts/`). `enum.ts` and `brand.model.ts` then fail to compile when they declare a key the cockpit doesn't send.
+  - **CI workflows:** `tenant-contract.yml` fails when a consumer reads a key the contract doesn't provide, or when a vendored copy drifts. `flags.yml` does the same for flag names, including admin's `config.php`.
+  - **Admin's `$mainDatabase->get()` column strings are still unchecked.**
 
 ## Feature flags
 

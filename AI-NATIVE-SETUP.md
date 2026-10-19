@@ -26,7 +26,7 @@ This workspace is configured for AI-native development with Claude Code. SanchiS
 | `/audit-contract [scope]` | Backend-vs-consumers API drift (→ `api-contract-auditor`). |
 | `/check-isolation [scope]` | Tenant-scoping safety net (→ `tenant-isolation-reviewer`). |
 | `/flag-impact <flag> rename\|remove` | Deploy-safe rename/remove plan across 4 repos (→ `flag-impact-planner`). |
-| `/spec-new feature <id> \| module <repo>/<module>` | Scaffold a spec from template (→ `spec-author` for features). |
+| `/spec-new feature <id> \| module <repo>/<module>` | Scaffold a spec from template (→ `spec-author` for features). Features: asks which existing Linear project and who to assign, then creates a **milestone** in that project with one issue per repo, never a new project unless it has a lead, a target date and ~5 issues (SAN-1579). |
 | `/spec-implement <id>` | Implement an **approved** feature spec across repos (→ `spec-implementer`). |
 | `/from-linear <id>` | Read a Linear issue and kick off `/spec-new feature <id>`. Requires the Linear connector. |
 

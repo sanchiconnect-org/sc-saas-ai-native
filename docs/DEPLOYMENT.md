@@ -8,23 +8,25 @@ Every repo follows the same four long-lived branches:
 
 ```
 ai_native_setup → development → stagingdemo → main / master
-    (dev 1)        (dev 2)       (staging)      (production)
+    (dev 1)        (dev 2)     (production    (production,
+                                    demo)          clients)
 ```
 
 | Branch | Purpose | Deployed by | How code gets in |
 |---|---|---|---|
 | `ai_native_setup` | Daily developer work and fixes | Jenkins, dev server 1 | Direct push (for now) |
 | `development` | Second dev server, integration check | Jenkins, dev server 2 | PR from `ai_native_setup` |
-| `stagingdemo` | Staging and QA (sc-saas-e2e runs here) | Staging Jenkins | PR from `development` |
-| `main` / `master` | Production | Production Jenkins | PR from `stagingdemo`, or a hotfix PR |
+| `stagingdemo` | The demo site, running on production (sc-saas-e2e also runs here) | Jenkins, production demo | PR from `development` |
+| `main` / `master` | Client production | Production Jenkins | PR from `stagingdemo`, or a hotfix PR |
+| `sanchiconnect` (sc-saas-frontend only) | SanchiConnect incubation, on production | Production Jenkins | PR (protected like `main`); outside this path today, see Other branches below. Never delete. |
 
-`main` / `master` and `stagingdemo` are fixed names: the production and staging Jenkins jobs depend on them. `sanchiconnect-saas-tenants` and `sc-saas-3rdparty-webservices` use `master` for production; every other repo uses `main`.
+`main` / `master`, `stagingdemo` and the frontend's `sanchiconnect` are fixed names: production Jenkins jobs depend on them (all three deploy to production: clients, the demo, and SanchiConnect incubation; corrected 2026-10-14). `sanchiconnect-saas-tenants` and `sc-saas-3rdparty-webservices` use `master` for production; every other repo uses `main`.
 
 ## Retired branches
 
 `initial_development` and `pre_development` were retired on 2026-10-13. They held no code of their own, only merge commits, and added two PR hops to every release. Before deletion each tip was tagged `archive/<branch>` (backend, frontend and admin had both; tenants had `pre_development`; the analyzer had `initial_development`), and no Jenkins job built from either branch. To restore one: `git push origin archive/<branch>:refs/heads/<branch>`.
 
-Every repo deletes a PR's branch automatically when the PR merges ("Automatically delete head branches"); it can be restored from the PR page.
+"Automatically delete head branches" is **off** in every repo. It was briefly on (13 Oct) and deleted the long-lived `ai_native_setup_<name>` branches as soon as their PRs merged; those were restored at their exact commits. Turn it on only once the team works on short-lived per-issue branches.
 
 The per-developer `ai_native_setup_<name>` branches are replaced by short-lived topic branches (`<name>/san-123-slug`, the branch name Linear generates), deleted after merge.
 
@@ -53,40 +55,155 @@ Every deploying branch has a gate; nothing deploys unverified.
 
 ### Branch protection settings (SAN-1569)
 
-GitHub repository rulesets, identical in all seven repos (the `sanchiconnect` account is on GitHub Pro, which private-repo protection requires):
+GitHub repository rulesets, identical in all seven repos. **In effect** (re-checked 2026-10-14): the rulesets moved with the repos to `sanchiconnect-org` under the same IDs, were unenforceable for a few hours while the organization was on the free plan (the API answered "Upgrade to GitHub Pro"), and are enforced again since the organization moved to **GitHub Team** the same day. Both rulesets are `active` with no bypass actors in all seven repos, and GitHub reports `deletion, non_fast_forward, pull_request` on every release branch and `deletion, non_fast_forward` on `ai_native_setup`. Keep the organization on a paid plan: on the free plan, private repositories get no rulesets, branch protection, secret scanning or CodeQL.
 
 | Ruleset | Branches | Rules |
 |---|---|---|
-| release branches | `main`, `master`, `stagingdemo`, `development` | Pull request required (no direct pushes); 1 approving review, never the author's own; stale approvals dismissed on new commits; the last push must be approved by someone else; no force-push; no deletion; no bypass actors |
+| release branches | `main`, `master`, `stagingdemo`, `development`; in sc-saas-frontend also `sanchiconnect` (added 2026-10-14) | Pull request required (no direct pushes); 1 approving review, never the author's own; stale approvals dismissed on new commits; the last push must be approved by someone else; no force-push; no deletion; no bypass actors |
 | dev branch | `ai_native_setup` | No force-push; no deletion; direct pushes allowed |
 
-Not yet enabled, at L2: required status checks (SAN-1583) and required CODEOWNERS review (SAN-1584). In an emergency the account owner can disable a ruleset in the repo's Settings → Rules; that change is logged and should be reversed the same day.
+Not yet enabled, at L2: required status checks (SAN-1583) and required CODEOWNERS review (SAN-1584). The contract checks (`flags`, `scoring-contract`, `tenant-contract`, `api-contract`) can be made required: they run on every PR and push and decide in their first step whether the files they protect changed (SAN-1596), so an unrelated PR gets a passing check in seconds instead of a check that never reports. Never add an `on.paths` filter to a workflow that is, or will be, a required check. The Playwright smoke check `smoke / e2e` (`smoke.yml` in sc-saas-frontend and sc-saas-admin, calling `sc-saas-e2e`'s `e2e.yml` against staging on every PR to `main`) reports only until SAN-1585 adds it to the `main` ruleset of both repos, after two green weeks with no quarantined test older than a week; it needs a `staging` Environment holding the QA secrets in each of the two repos. In an emergency the account owner can disable a ruleset in the repo's Settings → Rules; that change is logged and should be reversed the same day.
 
 ## Current state per repo
 
-Long-lived branches on each remote after the 2026-10-13 retirement. "Missing" means the branch does not exist yet in that repo.
+Long-lived branches on each remote, checked 2026-10-14: every repo has all four.
 
 | Repo | Production | `stagingdemo` | `development` | `ai_native_setup` |
 |---|---|---|---|---|
 | sc-saas-backend | `main` | yes | yes | yes |
 | sc-saas-frontend | `main` | yes | yes | yes |
 | sc-saas-admin | `main` | yes | yes | yes |
-| sanchiconnect-saas-tenants | `master` | missing | yes | yes |
-| sc-saas-3rdparty-webservices | `master` | missing | yes | yes |
-| sanchiconnect-saas-tenants-admin | `main` | missing | yes | yes |
-| ai-startups-analyzer | `main` | missing | missing | yes |
+| sanchiconnect-saas-tenants | `master` | yes | yes | yes |
+| sc-saas-3rdparty-webservices | `master` | yes | yes | yes |
+| sanchiconnect-saas-tenants-admin | `main` | yes | yes | yes |
+| ai-startups-analyzer | `main` | yes | yes | yes |
+
+**Production vs `ai_native_setup` (checked 2026-10-14).** GitHub shows production ahead of `ai_native_setup` in every repo (for example backend 53, admin 61 commits), but those are merge commits from release PRs: compared by content (`git cherry`), production has no change that `ai_native_setup` lacks. No catch-up merge is needed; merging `main`/`master` back into `ai_native_setup` at the next release just clears the counter.
+
+**Other branches (checked 2026-10-14).** Besides the four above:
+
+- Per-developer `ai_native_setup_<name>` (aman, mahima, sandeep, vishali) in every repo: still used for PRs (e.g. admin PR #2619). Kept until the team moves to short-lived per-issue branches.
+- **Frontend `sanchiconnect` is a production branch: it deploys the SanchiConnect incubation production site. Never delete it.** It has no work that `ai_native_setup` lacks. Since 2026-10-14 it is in the frontend's release-branch ruleset (PR with one non-author approval, no force-push, no deletion), but it is still outside the release path above; its Jenkins job belongs in the table below.
+- Archived and deleted 2026-10-14 (no work missing from `ai_native_setup`): backend `ai_native_updates_aman`, `api_integration_aman`, `backend_new_branch_aman`, `corporate_logo_fix`. Each tip is kept as tag `archive/<branch>`; restore with `git push origin archive/<branch>:refs/heads/<branch>`.
+- Archived and deleted 2026-10-14 by decision, although never merged (the work now exists only in the tags): backend `update-the-api` (2 commits, a TypeORM 0.3.31 upgrade) and `language_updates` (1 commit); frontend `language_updates` (61 translation commits, Apr 2026). Tags `archive/<branch>`.
+- Analyzer `ai_analyizing_new_updates_aman` renamed 2026-10-14 to `ai_native_setup_aman` (same tip `7746fee`, also kept as tag `archive/ai_analyizing_new_updates_aman`), matching the `<base>_aman` naming in the other repos. Its SAN-1015 DB pool fix (`pool_pre_ping` / `pool_recycle`) is already in `ai_native_setup` (`e26b527`) and `main`, so no PR is needed.
 
 ## Retirement checklist (2026-10-13)
 
 1. **SAN-1044: nothing to recover.** Backend `971836f3` (on `pre_development`) has an identical twin, `49d6e84c` (same patch ID), merged into `ai_native_setup` through PR #1975. No repo had production code missing from `ai_native_setup`. Done.
 2. **Jenkins.** Confirmed that no Jenkins job builds from `initial_development` or `pre_development`. Done.
-3. **Archive, then delete.** Done: 8 `archive/<branch>` tags pushed, 8 branches deleted, auto-delete of merged PR branches on in all seven repos.
-4. **Fill the gaps. Open:** decide, per repo, whether tenants, 3rdparty, tenants-admin and the analyzer get a `stagingdemo` branch (and a staging Jenkins job), and whether the analyzer gets a `development` branch.
+3. **Archive, then delete.** Done: 8 `archive/<branch>` tags pushed, 8 branches deleted. (Auto-delete of merged PR branches stays off; see Retired branches.)
+4. **Fill the gaps. Done:** by 2026-10-14 every repo has `development` and `stagingdemo` (tenants, 3rdparty and tenants-admin gained them 8-11 Oct). Whether each has a staging Jenkins job is part of the Jenkins table below.
+
+## GitHub organization
+
+On 2026-10-14 the repos moved from the `sanchiconnect` personal account to the **`sanchiconnect-org`** organization. `github.com/sanchiconnect/<repo>` still redirects, but only until someone creates a repo of the same name under the `sanchiconnect` account, which still exists. Use `sanchiconnect-org` everywhere: in git remotes (`git remote set-url origin https://github.com/sanchiconnect-org/<repo>.git`), Jenkins job and server clone URLs, and `gh -R`. The contract workflows check out sibling repos with `${{ github.repository_owner }}/<repo>`, so they follow the org automatically.
+
+## CI secrets
+
+| Secret | Repos | What it is | Used by |
+|---|---|---|---|
+| `CONTRACT_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin, ai-startups-analyzer | Fine-grained personal access token created from the `sanchiconnect` account with **Resource owner: `sanchiconnect-org`** (a token owned by the personal account cannot read the org's repos). Repository access: those five repos **plus sanchiconnect-saas-tenants-admin** (tenants' `tenant-contract.yml` reads both PHP panels' copy of the ai_credit_* schema, SAN-1595), nothing else. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year (current token expires 2027-10-15); renew before it lapses. | The L3 contract checks, which check out the other repos of a contract to compare them: `flags.yml` (SAN-1592), `scoring-contract.yml` (SAN-1594) and `tenant-contract.yml` (SAN-1591). GitHub's built-in token can only read the repo it runs in. |
+
+To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token (fine-grained tokens are always created from a personal account's settings, never the org's), set Resource owner to `sanchiconnect-org`, then the settings above. Check the token's page afterwards: it must list the six repos and Contents: Read-only. A token saved with repositories but no permission keeps no repositories at all, and the checks then fail at checkout with `403 Write access to repository not granted`. Test it with `curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $T" https://api.github.com/repos/sanchiconnect-org/sc-saas-backend/contents/README.md` (200 = good, 404 = no access). Then add it as a secret to the five repos that run the checks (tenants-admin only needs to be readable, it runs none) without pasting it anywhere else:
+
+```bash
+for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer; do
+  gh secret set CONTRACT_CHECK_TOKEN -R sanchiconnect-org/$r   # paste the token when prompted
+done
+```
+
+### Slack alerts for CI (SAN-1600)
+
+`ci-alerts.yml` in each of the seven repos posts to Slack when `ci`, `secret-scan` or a contract check fails on `main`/`master`, `stagingdemo` or `development` (a merge, or a release PR from one of them), and once more when that workflow is green again. `ai_native_setup` is left out on purpose. Without the secret the workflow only logs a warning.
+
+| Secret | Repos | What it is |
+|---|---|---|
+| `SLACK_CI_WEBHOOK_URL` | all seven product repos | A Slack incoming-webhook URL for the channel the team watches (one URL can serve every repo). Treat it as a secret: anyone holding it can post to that channel. |
+
+To create it: api.slack.com/apps → Create New App → From scratch (name it e.g. "SanchiSaaS CI", pick the workspace) → Incoming Webhooks → On → Add New Webhook to Workspace → choose the channel (e.g. `#ci-alerts`) → copy the URL. Then add it without pasting it anywhere else:
+
+```bash
+for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer sc-saas-3rdparty-webservices sanchiconnect-saas-tenants-admin; do
+  gh secret set SLACK_CI_WEBHOOK_URL -R sanchiconnect-org/$r   # paste the URL when prompted
+done
+gh workflow run ci-alerts.yml -R sanchiconnect-org/sc-saas-backend   # test message; works once ci-alerts.yml is on main
+```
+
+GitHub only runs `workflow_run` triggers, and only allows manual runs, from the default branch's copy of a workflow, so `ci-alerts.yml` does nothing until it reaches each repo's `main`/`master` through the normal release path. To check the webhook before then, post to it directly from your own machine: `curl -X POST -H 'Content-Type: application/json' -d '{"text":"test"}' "$SLACK_CI_WEBHOOK_URL"` (read the URL into the variable with `read -s SLACK_CI_WEBHOOK_URL` so it stays out of your shell history).
 
 ## Jenkins jobs
 
-To be filled in from the Jenkins dashboard. None of the seven repos has a Jenkinsfile, so the branch-to-server mapping lives only in Jenkins.
+None of the seven repos has a Jenkinsfile, so the branch-to-server mapping lives only in Jenkins. Recorded from the **production Jenkins** dashboard on 2026-10-14 (branches confirmed by Nirmal). Status: enabled jobs had a successful build about 2 days 17 hours earlier (a bulk deploy); ⊘ marks a disabled job.
 
-| Jenkins job | Repo | Branch | Server / URL | Trigger (webhook / poll / manual) |
-|---|---|---|---|---|
-| | | | | |
+**Demo and SanchiConnect stack (production servers)**
+
+| Jenkins job | Repo | Branch |
+|---|---|---|
+| Demo - SaaS API, Demo - SaaS API - 2, Demo - SaaS API - 3 | sc-saas-backend | `stagingdemo` |
+| SanchiConnect - Live - SaaS API | sc-saas-backend | `stagingdemo` |
+| Demo - API Builder | sc-saas-backend (build step) | `stagingdemo` |
+| Demo - Frontend | sc-saas-frontend | `stagingdemo` |
+| Demo - Frontend Sanchi Connect | sc-saas-frontend | `sanchiconnect` |
+| Demo - Backoffice | sc-saas-admin | `stagingdemo` |
+
+**Client production**
+
+| Jenkins job | Repo | Branch |
+|---|---|---|
+| SaaS - Frontend | sc-saas-frontend | `main` |
+| SaaS - Backoffice (Admin) | sc-saas-admin | `main` |
+| SaaS - 3rd Party Services | sc-saas-3rdparty-webservices | `master` |
+| SaaS API - Builder | sc-saas-backend (build step) | `main` |
+| SaaS API - Client NN - <client> (one backend per client) | sc-saas-backend | `main` |
+| (job not on this dashboard) | sanchiconnect-saas-tenants (cockpit API, shared by every client) | `master` |
+| (job not on this dashboard) | sanchiconnect-saas-tenants-admin | `main` |
+| (job not on this dashboard) | ai-startups-analyzer | `main` |
+
+Client backend jobs, enabled: 01 Sine Mumbai, 07 IIIT Dic, 11 CII, 14 VGU, 17 ISBA, 19 SIIC Program, 21 Ginserv, 22 CDIIC, 23 SINGAM, 24 First Wings, 26 AMSIM, 27 iHUB, 30 Tally Startup Collective, 31 Runway, 34 Ieema, 35 Bharat Innovates, 36 IIML EIC, 37 Tally MSME Honours, 38 Nagpur Entrepreneurship Mission, 39 PSG Step Incubation, 40 ISGBB Bharat Cares, 41 T-Rise Tripura, 42 Supernova Gdai, 43 Healthx Elevate, 44 AIC Techno, 45 AKTU.
+
+Disabled (⊘): 02 Preseed Accelerator, 03 Leap Unicorn, 04 T-Hub, 04 T-Hub Math, 05 Nass Com, 06 SIIC Kanpur, 08 Startup Themezha, 09 SPJIMR, 10 N.COE, 12 1Trepreneur, 13 Innovher, 15 8x Ventures, 16 IIT Tirupati, 18 Boss Ladies, 20 Jubiliant, 25 Pitch To VC, 28 SanchiAccel, 29 Startup Chattisgarh, 33 Truleum. (No Client 32.)
+
+The tenants API, tenants-admin and the AI analyzer deploy to production from `master`/`main` only (Nirmal, 2026-10-14); their job names are not on this dashboard.
+
+**Development (dev Jenkins, confirmed by Nirmal 2026-10-14):** `ai_native_setup` deploys dev server 1 (thub.sanchidev.in: frontend thub.sanchidev.in, backend api.thub.sanchidev.in, admin adm.thub.sanchidev.in, tenants API api.tenants.sanchidev.in); `development` deploys dev server 2.
+
+**How a deploy starts (Nirmal, 2026-10-14):** every deploy, on dev and production Jenkins alike, is started **by hand with "Build now"** on the job. No job runs by itself on a push (no webhook or poll trigger), and this stays manual for now. Merging to a branch therefore does not deploy it: the change goes live only when someone builds that branch's job, which is how a branch and its server drift apart (SAN-589).
+
+**Not recorded yet:** the dev Jenkins job names, and each dev job's server/URL.
+
+## Deploy workflow (SAN-1602, pilot: sc-saas-3rdparty-webservices)
+
+Decided by Aman on 2026-10-15: Jenkins and the servers stay; a GitHub Actions workflow (`.github/workflows/deploy.yml`) **tags every release and triggers the Jenkins job through its API**. Staging follows `stagingdemo`, production follows `main`/`master`, the same as the release path above. The workflow never touches a server.
+
+| Push to | Tag | GitHub Release | Then |
+|---|---|---|---|
+| `stagingdemo` | `staging-YYYY.MM.DD-<sha7>` | pre-release | triggers the staging Jenkins job |
+| `master` / `main` | `YYYY.MM.DD-<sha7>` (date in IST) | release | waits for the reviewer on the `production` Environment, then triggers the production Jenkins job |
+
+The tag is what the rollback redeploys (SAN-1604) and what Sentry's release should carry. A re-run never creates a tag twice.
+
+**It is safe to merge before any setup.** The `release` job needs nothing but the repo, so tags and Releases start at once. The `deploy` job ends green with a warning until its Environment has the secrets below.
+
+**Setup, for the org owner. Order matters:**
+1. Create the Environments `staging` and `production` (Settings → Environments). On `production`, add a **required reviewer who is not the person who merged**. A GitHub Environment is created on first use with *no* rules, so if the secrets exist before the reviewer does, a production deploy runs unreviewed.
+2. Only then add, to each Environment, the secrets `JENKINS_URL`, `JENKINS_USER`, `JENKINS_TOKEN` (a Jenkins API token of a user that may only build that job) and `JENKINS_JOB` (the job name, for example `SaaS - 3rd Party Services`; URL-encode spaces as `%20`).
+3. Optional variables: `SERVICE_URL` (after the build the workflow checks that `GET <SERVICE_URL>/` answers 200) and `JENKINS_TAG_PARAMETER` (the name of a job parameter, for example `RELEASE_TAG`, that receives the tag so the job can set `SENTRY_RELEASE` to it; the job must be parameterised).
+
+**Open questions for Nirmal** (they cannot be answered from the repos): is the production Jenkins reachable from GitHub's runners (if it sits behind an IP allow-list, a self-hosted runner is needed); which job is the **staging** job for this service (the dashboard above lists none for `sc-saas-3rdparty-webservices`); is the production job parameterised.
+
+**Not in the pilot yet:** the smoke suite (sc-saas-e2e covers the PWA and the admin panel, not this service; the `SERVICE_URL` check is the substitute), a Sentry release created by the workflow, and the other repos. The backend needs more than one trigger (up to 26 client jobs), see SAN-1603.
+
+## Rollback
+
+Chosen method (Nirmal, 2026-10-14): **revert in git, then rebuild.** None of the repos has a Jenkinsfile or a rollback script, and Jenkins jobs build the tip of their branch, so the branch itself is what gets rolled back.
+
+1. Find the bad commit on the deploy branch (`main`/`master`, `stagingdemo`, or frontend `sanchiconnect`) and revert it on a hotfix branch: `git revert <sha>` (for a merged PR, `git revert -m 1 <merge-sha>`). Never force-push or reset; the protected branches block it anyway.
+2. Open a hotfix PR into the deploy branch. It needs one approval from someone other than the author, so line up a second person as soon as a rollback is likely.
+3. After the merge, press **"Build now"** on every Jenkins job that received the bad deploy. For sc-saas-backend that is each affected client job (`SaaS API - Client NN - ...`, up to 26), not one job.
+4. Bring the revert back to `ai_native_setup` (cherry-pick, as with any hotfix) so the next release does not redeploy the bad code.
+
+**Two things a code rollback does not undo:**
+
+- **Database schema (sc-saas-backend and sanchiconnect-saas-tenants).** Both run TypeORM `synchronize: true` with no migrations, so the app alters its tables at startup. Reverting the code does not remove a column the bad deploy added, and if it dropped or renamed a column, that column's data is already gone. Before deploying any change to an entity, take an RDS snapshot; it is the only undo for the database. The PHP panels and the 3rd-party gateway have no schema step, so for them the revert is a full rollback.
+- **Cached frontend (sc-saas-frontend is a PWA).** Browsers keep the cached build, so after a rollback some users still run the bad version until they reload or the service worker updates.
