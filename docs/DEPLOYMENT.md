@@ -183,7 +183,28 @@ The tenants API, tenants-admin and the AI analyzer deploy to production from `ma
 
 **Not recorded yet:** the dev Jenkins job names, and each dev job's server/URL.
 
-## Deploy workflow (SAN-1602, pilot: sc-saas-3rdparty-webservices)
+## Deploy workflow (SAN-1602; all seven repos since 2026-10-19)
+
+**All seven repos now carry the same three files** (2026-10-19):
+- `.github/workflows/deploy.yml`;
+- `.github/scripts/deploy-rollout.sh`;
+- `.github/scripts/jenkins-build.sh`.
+
+Change them in every repo together. They grew out of the sc-saas-3rdparty-webservices pilot described below, and keep its settings, so a pilot setup keeps working.
+
+**Jobs per Environment:** either the secret `JENKINS_JOB` (one job) or the variable `JENKINS_JOB_PATTERN` (a regex over Jenkins' enabled jobs; the backend's per-tenant case is below).
+
+**Branches and Environments:**
+
+| Push to | Tag | Environment |
+|---|---|---|
+| `stagingdemo` | `staging-YYYY.MM.DD-<sha7>` | `staging` |
+| `main`/`master` | `YYYY.MM.DD-<sha7>` | `production` |
+| `sanchiconnect` (frontend only) | `sanchiconnect-YYYY.MM.DD-<sha7>` | `sanchiconnect` |
+
+The `sanchiconnect` Environment holds the `Demo - Frontend Sanchi Connect` job and needs its own reviewer. Every repo's deploy stays inert until its Environments and secrets exist (SAN-1597).
+
+The rest of this section describes the original pilot:
 
 Decided by Aman on 2026-10-15: Jenkins and the servers stay; a GitHub Actions workflow (`.github/workflows/deploy.yml`) **tags every release and triggers the Jenkins job through its API**. Staging follows `stagingdemo`, production follows `main`/`master`, the same as the release path above. The workflow never touches a server.
 
@@ -290,6 +311,13 @@ MySQL can't roll back DDL (`CREATE`, `ALTER`, `DROP`), so a migration that fails
 - Which notification does a failed production build send today?
 
 ## Rollback
+
+**Redeploy a previous tag (SAN-1604, built 2026-10-19).** Actions → deploy → Run workflow, and set `rollback_tag` to an earlier release tag, e.g. `2026.10.18-abc1234`.
+- **No new tag is made.** The tag's prefix picks the Environment, and that Environment's reviewer approves as usual.
+- **Every job is rebuilt with that tag**, in order, stopping at the first failure.
+- **The tag is checked first:** a name that is not a tag this workflow makes, or a tag that does not exist, is refused before anything runs.
+- **It needs `JENKINS_TAG_PARAMETER` and Jenkins jobs that check out the tag they are given.** A job that builds its branch tip would "roll back" to the current code. So without the parameter the rollback refuses to run, and the git revert below is the way back.
+- **Not drilled yet:** a drill needs a parameterised job. Until then, the method below is the one that has been used.
 
 Chosen method (Nirmal, 2026-10-14): **revert in git, then rebuild.** None of the repos has a Jenkinsfile or a rollback script, and Jenkins jobs build the tip of their branch, so the branch itself is what gets rolled back.
 
