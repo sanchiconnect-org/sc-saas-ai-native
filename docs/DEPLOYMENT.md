@@ -28,7 +28,13 @@ ai_native_setup → development → stagingdemo → main / master
 
 "Automatically delete head branches" is **off** in every repo. It was briefly on (13 Oct) and deleted the long-lived `ai_native_setup_<name>` branches as soon as their PRs merged; those were restored at their exact commits. Turn it on only once the team works on short-lived per-issue branches.
 
-The per-developer `ai_native_setup_<name>` branches are replaced by short-lived topic branches (`<name>/san-123-slug`, the branch name Linear generates), deleted after merge.
+Each developer keeps one long-lived personal branch, `ai_native_setup_<name>` (confirmed 2026-10-19, replacing the 2026-10-13 plan to move to short-lived topic branches). Work starts on it, and it reaches the release path through `ai_native_setup`:
+
+```
+ai_native_setup_<name> → ai_native_setup → development → stagingdemo → main / master
+```
+
+The personal branches are not deployed and are never deleted ("Automatically delete head branches" stays off). Only `ai_native_setup` and the branches after it deploy.
 
 ## Production hotfixes
 
