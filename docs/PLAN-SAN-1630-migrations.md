@@ -64,7 +64,7 @@ Status: **draft for approval** (2026-10-19). Covers sc-saas-backend and sanchico
 - **Boot check:** in non-local environments, the app runs the schema-builder log at start.
   - `SCHEMA_CHECK_MODE=log` (first): non-empty is logged as an error.
   - `enforce` (later): non-empty stops the app with the pending SQL in the log.
-- **Each Jenkins job:** `npm run migration:run` before the pm2 restart. For the backend, that's every client job, each against its own database.
+- **Each Jenkins job:** `npm run migration:deploy` before the pm2 restart (SAN-1605, built 2026-10-19; see `docs/DEPLOYMENT.md` → Database migrations step). For the backend, that's every client job, each against its own database. The step adopts each database on its first run, so Phase 2's `--fake` happens through it rather than by hand; jobs can run it before this phase, while `synchronize` is still on.
 - **Order:** dev 1 → dev 2 → demo → one production client → all production clients → cockpit. Same release path as `docs/RELEASE-PLAN-SAN-1939.md`.
 - **Tenant provisioning:** onboarding a new tenant must run `migration:run` on its new database. Update the onboarding steps.
 

@@ -218,6 +218,43 @@ fi
 
 An untagged build falls back to the short commit, which still identifies what's live.
 
+## Database migrations step (SAN-1605)
+
+`sc-saas-backend` and `sanchiconnect-saas-tenants` change their schema through TypeORM migrations (SAN-1630). Each Jenkins job for either service runs the migrations against its own database **after the build and before the app restarts**, and stops if they fail. For the backend that means every client job, each against the database in its own `.env`.
+
+Add this to the job's shell step, between `npm run build` and the pm2 restart:
+
+```bash
+set -e
+npm run migration:deploy   # exit 1: a migration failed, so the app is not restarted
+```
+
+`set -e` is what stops the job: Jenkins marks the build failed and the old version keeps running. Make sure the job's failure notification reaches a person (email or Slack), since that is the only page.
+
+What the step does (`src/core/database/deploy-migrate.ts` in each repo):
+
+| Database | Result |
+|---|---|
+| Nothing pending | "is up to date", exit 0 |
+| Has recorded migrations, some pending | runs them, one transaction each, exit 0. On failure: exit 1, the failed one isn't recorded. |
+| Never recorded a migration, empty | runs every migration (builds the schema), exit 0 |
+| Never recorded a migration, matches the entities | **adopts** it: records every migration as applied without running it (`--fake`), exit 0 |
+| Never recorded a migration, differs from the entities | prints the differences. While `synchronize` is still on (until SAN-1630 phase 4) it exits 0 and leaves them to `synchronize`. With `MIGRATIONS_STRICT=true` it exits 1. |
+| Can't connect | exit 2 |
+
+It holds a MySQL lock (`GET_LOCK('sc_deploy_migrate')`) while it works, so two jobs on one database (the three Demo API jobs) take turns.
+
+MySQL can't roll back DDL (`CREATE`, `ALTER`, `DROP`), so a migration that fails halfway can leave part of its change behind. Write one schema change per migration. If one fails, read the log, fix the database or the migration, and rebuild.
+
+**Rollout**
+1. Add the step to the dev server 1 jobs (backend and tenants) and build. The log should say "adopted". If it says "left to synchronize", that database has drift: build once more after the app has started (synchronize applies the drift at boot), and the next run adopts it.
+2. Then dev server 2, the Demo jobs, SanchiConnect, one client job, every other client job, and the cockpit job, in that order. Record each one in `docs/DEPLOY-LOG.md`.
+3. Once every job has adopted, SAN-1630 phase 4 turns `synchronize` off and makes `MIGRATIONS_STRICT` the default.
+
+**Open questions:**
+- Does each `SaaS API - Client NN` job run its own `npm ci && npm run build`, or does it copy `dist/` from `SaaS API - Builder`? The step needs `dist/`, `node_modules` and the client's `.env` in the job's folder.
+- Which notification does a failed production build send today?
+
 ## Rollback
 
 Chosen method (Nirmal, 2026-10-14): **revert in git, then rebuild.** None of the repos has a Jenkinsfile or a rollback script, and Jenkins jobs build the tip of their branch, so the branch itself is what gets rolled back.
