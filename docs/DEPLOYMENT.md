@@ -194,6 +194,24 @@ The tag is what the rollback redeploys (SAN-1604) and what Sentry's release shou
 
 **Not in the pilot yet:** the smoke suite (sc-saas-e2e covers the PWA and the admin panel, not this service; the `SERVICE_URL` check is the substitute), a Sentry release created by the workflow, and the other repos. The backend needs more than one trigger (up to 26 client jobs), see SAN-1603.
 
+## Deploy log, release tags and the Sentry release (SAN-1626)
+
+Every production deploy gets a row in `docs/DEPLOY-LOG.md` (what, where, who deployed, who verified, smoke result). Before pressing "Build now", tag the production branch with `scripts/tag-release.sh <repo> ...` (creates and pushes `release-YYYY-MM-DD`, `-2` for a second release the same day).
+
+So that Sentry shows which release is live, each production Jenkins job sets `SENTRY_RELEASE` to that tag before restarting the app. Add this to the job's shell step after the checkout (the analyzer's `.env` is in `api/`; the frontend needs nothing, it reports its build commit):
+
+```bash
+git fetch --quiet --tags origin
+TAG="$(git describe --tags --exact-match --match 'release-*' HEAD 2>/dev/null || git rev-parse --short HEAD)"
+if grep -q '^SENTRY_RELEASE=' .env; then
+  sed -i "s/^SENTRY_RELEASE=.*/SENTRY_RELEASE=${TAG}/" .env
+else
+  echo "SENTRY_RELEASE=${TAG}" >> .env
+fi
+```
+
+An untagged build falls back to the short commit, which still identifies what's live.
+
 ## Rollback
 
 Chosen method (Nirmal, 2026-10-14): **revert in git, then rebuild.** None of the repos has a Jenkinsfile or a rollback script, and Jenkins jobs build the tip of their branch, so the branch itself is what gets rolled back.
