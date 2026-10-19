@@ -33,7 +33,24 @@ Status: **draft for approval** (2026-10-19). Covers sc-saas-backend and sanchico
 `synchronize` should leave every database matching its entities. Where it failed silently (e.g. an index it couldn't create) or someone changed a table by hand, the database has drifted. A baseline can only be faked onto a database with **no drift**.
 
 - New script in each repo, `scripts/schema-drift.ts`. It builds a DataSource with `synchronize: false` and prints `driver.createSchemaBuilder().log()`: the SQL `synchronize` *would* run now, without running it. Read-only.
-- Run it against dev 1, dev 2, demo, SanchiConnect, **every production tenant database**, and the cockpit database. The backend can loop over `tenant_users` for the per-tenant credentials.
+- Run it against dev 1, dev 2, demo, SanchiConnect, **every production tenant database**, and the cockpit database.
+- **Every tenant database in one run (built 2026-10-19):** `npm run schema:drift-all` in sc-saas-backend (`src/core/database/schema-drift-all.ts`).
+  - It reads the tenant list and each tenant's DB settings from the cockpit's `tenant_users`, and checks each distinct database once.
+  - It prints one line per database: no drift, drift (n statements), or not checked (and why).
+  - With `REPORT_FILE` it writes a Markdown report with the SQL per drifted database.
+  - It is read-only, and credentials are never printed.
+
+  ```bash
+  npm run build
+  COCKPIT_DB_HOST=… COCKPIT_DB_PORT=3306 COCKPIT_DB_USER=… COCKPIT_DB_PASS=… COCKPIT_DB_NAME=… \
+    REPORT_FILE=drift-report.md npm run schema:drift-all
+  # optional: TENANT_DOMAINS=a.example,b.example   INCLUDE_INACTIVE=true
+  ```
+
+  - **Exit codes:** 0 no drift anywhere, 1 drift somewhere, 2 something not checked.
+  - **The cockpit database itself:** `npm run schema:drift` in sanchiconnect-saas-tenants.
+  - **Where to run it:** on a host that can reach the RDS instances, such as the production Jenkins server. Keep the report out of git; it names every tenant's database.
+  - **Tested** against throwaway databases: two tenants sharing a clean database (checked once), a database with an extra column (reported as `DROP COLUMN`), an unreachable host (timed out, reported), a row with no database settings, an inactive tenant (skipped), and the domain filter.
 - Record the result per database. Empty means ready. Anything else is resolved first: apply it deliberately, or fix the entity.
 
 ### Phase 1: tooling, no change in behaviour
