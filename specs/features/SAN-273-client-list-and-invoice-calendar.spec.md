@@ -2,7 +2,7 @@
 id: SAN-273
 title: Client list and invoice-due calendar
 type: feature
-status: in-review
+status: canceled  # 2026-10-19: AI-Native CRM project shut down, never implemented (Linear issue Canceled)
 linear: https://linear.app/sanchiconnect/issue/SAN-273/finance-can-scan-every-client-as-a-sortable-list-and-see-upcoming
 owner: sandeep.k@sanchiconnect.com
 repos: [sanchiconnect-saas-tenants-admin]

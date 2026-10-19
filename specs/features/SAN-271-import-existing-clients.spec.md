@@ -2,7 +2,7 @@
 id: SAN-271
 title: Import SanchiConnect's existing clients into the CRM
 type: feature
-status: in-progress
+status: canceled  # 2026-10-19: AI-Native CRM project shut down, never implemented (Linear issue Canceled)
 linear: https://linear.app/sanchiconnect/issue/SAN-271/all-28-existing-clients-are-in-the-crm-with-their-real-contract-terms
 owner: sandeep.k@sanchiconnect.com
 repos: [sanchiconnect-saas-tenants-admin]

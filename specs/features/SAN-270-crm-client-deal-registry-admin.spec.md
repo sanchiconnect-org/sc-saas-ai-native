@@ -2,7 +2,7 @@
 id: SAN-270
 title: Client & deal registry screens in the tenants-admin panel
 type: feature
-status: in-progress
+status: canceled  # 2026-10-19: AI-Native CRM project shut down, never implemented (Linear issue Canceled)
 linear: https://linear.app/sanchiconnect/issue/SAN-270/an-account-manager-can-add-and-edit-a-client-and-its-deal-terms-from-a
 owner: sandeep.k@sanchiconnect.com
 repos: [sanchiconnect-saas-tenants-admin]
