@@ -198,7 +198,28 @@ The tag is what the rollback redeploys (SAN-1604) and what Sentry's release shou
 
 **Open questions for Nirmal** (they cannot be answered from the repos): is the production Jenkins reachable from GitHub's runners (if it sits behind an IP allow-list, a self-hosted runner is needed); which job is the **staging** job for this service (the dashboard above lists none for `sc-saas-3rdparty-webservices`); is the production job parameterised.
 
-**Not in the pilot yet:** the smoke suite (sc-saas-e2e covers the PWA and the admin panel, not this service; the `SERVICE_URL` check is the substitute), a Sentry release created by the workflow, and the other repos. The backend needs more than one trigger (up to 26 client jobs), see SAN-1603.
+**Not in the pilot yet:** the smoke suite (sc-saas-e2e covers the PWA and the admin panel, not this service; the `SERVICE_URL` check is the substitute), a Sentry release created by the workflow, and the other repos except the backend (below).
+
+### Backend: one rollout over every tenant job (SAN-1603)
+
+`sc-saas-backend/.github/workflows/deploy.yml` follows the pilot, but deploys one Jenkins job per tenant. Pushes to `stagingdemo` go to the staging Environment, pushes to `main` to production.
+- **The tenant list comes from Jenkins at run time:** every enabled job whose name matches the Environment variable `JENKINS_JOB_PATTERN`, in name order. The tenants DB has no tenant-to-job mapping, so a client job added, disabled or removed in Jenkins changes the rollout with no workflow edit.
+- **One job, one approval.** GitHub asks a reviewer for every job that uses the `production` Environment, so the rollout is one job that deploys the tenants one after another, not 26 jobs.
+- **The first failure stops the rollout.** The tenants after it keep the previous version and the run fails. GitHub's failed-run notification is the page.
+- **The step summary** has a row per tenant: its result (SUCCESS, FAILURE, TIMEOUT or not started) and its Jenkins build link.
+
+Each Environment needs:
+- the secrets `JENKINS_URL`, `JENKINS_USER` and `JENKINS_TOKEN`;
+- the variable `JENKINS_JOB_PATTERN`, for example production `^SaaS API - Client [0-9]+ - ` and staging `^(Demo - SaaS API|SanchiConnect - Live - SaaS API)`.
+
+Optional variables:
+- `JENKINS_BUILDER_JOB`: `SaaS API - Builder` or `Demo - API Builder`, built once before the tenants, if the client jobs depend on it;
+- `JENKINS_TAG_PARAMETER`;
+- `JENKINS_WAIT_MINUTES` (default 30 per job).
+
+Same setup order as above: the Environment and its reviewer first, then the secrets.
+
+Open questions, the same as the pilot's, plus one: do the client jobs build their own `dist/` or copy it from the Builder job?
 
 ## Deploy log, release tags and the Sentry release (SAN-1626)
 
