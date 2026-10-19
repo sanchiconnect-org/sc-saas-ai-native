@@ -11,7 +11,7 @@ For each module's detail, follow its spec link or the repo's `specs/<repo>-modul
 | sanchiconnect-saas-tenants | 11 | 0 | 0 |
 | sc-saas-backend | 70 | 0 | 0 |
 | sc-saas-frontend | 87 | 0 | 0 |
-| sc-saas-admin | 74 | 4 | 0 |
+| sc-saas-admin | 78 | 0 | 0 |
 | sanchiconnect-saas-tenants-admin | 13 | 0 | 0 |
 | ai-startups-analyzer | 1 | 0 | 0 |
 | sc-saas-3rdparty-webservices | 8 | 0 | 0 |
@@ -33,7 +33,7 @@ graph LR
     admin -->|1| analyzer
     admin -->|7| tenants
     admin -->|1| tenants_admin
-    admin -->|44| backend
+    admin -->|58| backend
     backend -->|5| tenants
     backend -->|8| webservices
     backend -->|1| frontend
@@ -54,6 +54,15 @@ graph LR
 | admin / application-management | backend / zenxai | admin_consumers |
 | admin / auth | backend / auth | admin_consumers |
 | admin / auth | backend / global | backend_modules |
+| admin / bulk_actions | backend / corporate | backend_modules |
+| admin / bulk_actions | backend / global | backend_modules |
+| admin / bulk_actions | backend / individual | backend_modules |
+| admin / bulk_actions | backend / investor | backend_modules |
+| admin / bulk_actions | backend / mentors | backend_modules |
+| admin / bulk_actions | backend / partner | backend_modules |
+| admin / bulk_actions | backend / program-office-members | backend_modules |
+| admin / bulk_actions | backend / service-providers | backend_modules |
+| admin / bulk_actions | backend / startup | backend_modules |
 | admin / challenges | backend / challenges | admin_consumers, backend_modules |
 | admin / command_centre | tenants / subscriptions | consumers |
 | admin / community-connections | backend / community-wall | admin_consumers, backend_modules |
@@ -84,11 +93,16 @@ graph LR
 | admin / jury | backend / program-management | backend_modules |
 | admin / learning-management | backend / learning-management | admin_consumers, backend_modules |
 | admin / milestones | backend / milestones | backend_counterpart |
+| admin / notifications | backend / cron | api_calls, backend_modules |
+| admin / notifications | backend / notifications | backend_modules |
 | admin / outreach-communications | backend / application-management | backend_modules |
+| admin / partner-requests | backend / global | backend_modules |
+| admin / partner-requests | backend / partner | backend_modules |
 | admin / partners-recruitment | backend / partner | admin_consumers, backend_modules |
 | admin / profile_audit_logs | backend / audit-log | backend_counterpart |
 | admin / program-management | backend / mentors | backend_modules |
 | admin / program-management | backend / program-management | backend_modules |
+| admin / quicklinks | backend / public-portal | backend_modules |
 | admin / stakeholder-crud | backend / auth | admin_consumers |
 | admin / stakeholder-crud | backend / corporate | admin_consumers |
 | admin / stakeholder-crud | backend / investor | admin_consumers |
@@ -299,9 +313,10 @@ Tenant flags (boolean columns of `TenantUsersEntity`) and the modules whose spec
 | `mobile_otp_verification` |  | auth |  |  |  |  |  |
 | `multiple_profiles` |  | user | individual |  |  |  |  |
 | `new_dashboard_layout` | tenants |  | individual-profile |  |  |  |  |
-| `notification_centre_enabled` |  | connections, cron, job, notifications, startup | account, calender, call-for-applications, challenge-search, community-feed, connections-v3, dashboard, job-details, jobs, notifications | broadcast_messages, command_centre, outreach_requests, task_management, tickets |  |  |  |
+| `notification_centre_enabled` |  | connections, cron, job, notifications, startup | account, calender, call-for-applications, challenge-search, community-feed, connections-v3, dashboard, job-details, jobs, notifications | broadcast_messages, command_centre, notifications, outreach_requests, task_management, tickets |  |  |  |
 | `online_meetings` |  | meetings | account, meetings, shared |  |  |  |  |
 | `operational_cost_reimbursement_enabled` |  | operational-cost-reimbursement | operational-cost-reimbursement | operation_cost |  |  |  |
+| `partner_visibility_requests_enabled` |  |  |  | partner-requests |  |  |  |
 | `partners` |  | partner, search | partner, search |  |  |  |  |
 | `partners_contacts` |  |  |  | partners-recruitment |  |  |  |
 | `partners_enable_dashboard` |  |  |  | partners, partners-recruitment |  |  |  |
@@ -318,7 +333,7 @@ Tenant flags (boolean columns of `TenantUsersEntity`) and the modules whose spec
 | `program_offices_registration` |  |  | program-office |  |  |  |  |
 | `programs_payment_enabled` |  |  | call-for-applications |  |  |  |  |
 | `programs_public_view` |  |  | call-for-applications, programs | core-bootstrap |  |  |  |
-| `promotions_enabled` |  |  |  | outreach-communications, partners-recruitment |  |  |  |
+| `promotions_enabled` |  |  |  | notifications, outreach-communications, partners-recruitment |  |  |  |
 | `promotions_partners_enabled` |  |  |  | outreach-communications |  |  |  |
 | `public_portal_quicklinks_file_proxy_enabled` |  | public-portal |  |  |  |  |  |
 | `reports_downloads` |  | global | resource-reports | industry_reports |  |  |  |
@@ -348,7 +363,7 @@ Tenant flags (boolean columns of `TenantUsersEntity`) and the modules whose spec
 | `webinar_videos` |  | global | event-agenda, programs, webinars |  |  |  |  |
 | `zoho_service_enabled` |  |  |  | core-bootstrap, integrations, zoho |  |  |  |
 
-Flags no spec mentions (116): `active`, `admin_restriction`, `app_not_interested_types`, `application_management_check_status_section`, `application_management_invite_transfer_section`, `application_management_round_status_updates`, `application_programs_recommendation_field`, `ask_startup_to_mentor_connection_question`, `associated_partners_visibility_enabled`, `call_for_applications_analysis_enabled`, `call_for_applications_bypass_verification`, `call_for_applications_download_attachments_enabled`, `call_for_applications_download_pdfs_enabled`, `call_for_applications_download_reports_enabled`, `call_for_applications_import_applications`, `call_for_applications_mark_payment_done_enabled`, `call_for_applications_mask_info_jury`, `call_for_applications_menu_settings`, `call_for_applications_pitch_deck_enabled`, `call_for_applications_promotion_by_partner_enabled`, `call_for_applications_promotion_enabled`, `call_for_applications_promotion_with_partners_enabled`, `call_for_applications_promotion_with_tenants_enabled`, `call_for_applications_score_rating_enabled`, `call_for_applications_submission_details_in_email`, `call_for_applications_video_enabled`, `challenges_collections_filters_enabled`, `company_identification_cin`, `company_identification_dpiit`, `company_identification_gst`, `connection_request_limit_enabled`, `corporate_backdoor_login_enabled`, `corporate_profile_registration_confirmation_enabled`, `corporates_enagement_form`, `corporates_registration`, `custom_forms`, `custom_forms_filters`, `custom_onboarding_design_golive_enabled`, `custom_reporting`, `dashboard_plan_info`, `domain_based_restriction`, `email_otp_verification`, `enable_file_viewer`, `events_agenda_menu_enabled`, `events_notifications`, `events_one_to_one_feature`, `events_payment_enabled`, `events_questions`, `facility_enable_admin_booking_creation`, `facility_enable_admin_facility_creation`, `facility_enable_checkin_checkout`, `facility_enable_pricing`, `facility_enable_ratings`, `facility_hourly_basis_booking_enabled`, `filing_email_address_enabled`, `form_video_transcript_enabled`, `frontend_restriction`, `government`, `growth_metrics_duration_set`, `has_pp_partner_account`, `incubator_module_enabled`, `individual_investor`, `investor_pitch_deck_access_enabled`, `investors_registration`, `is_facility_hub`, `jury_questions`, `limit_jury_access_enabled`, `meeting_feedback_enabled`, `membership_certificate_generation_enabled`, `mentor_domain_expertise_tab`, `mentorship_areas_new_layout`, `new_search_layout`, `partner_visibility_requests_enabled`, `partners_can_add_booking`, `partners_can_invite_stakeholders`, `partners_enable_ecosystem`, `partners_enable_jury_in_app_management`, `partners_enable_qna_in_app_management`, `partners_facility_enable_checkin_checkout`, `partners_registration`, `post_revenue_fields`, `powerpitch_transcript_enabled`, `primary_industry`, `program_management_with_profile_form`, `program_timeline_enabled`, `programs_document_enabled`, `programs_mark_payment_done_enabled`, `programs_menu_enabled`, `programs_score_rating_enabled`, `programs_video_enabled`, `public_portal_api_enabled`, `registration_enterprise_sales_popup`, `registration_invite_only`, `registration_turnoff_programs`, `request_call_jury`, `service_providers_registration`, `short_links`, `show_dashboard`, `show_documents_to_jury`, `show_ecosystem`, `spoke_stakeholders_meeting_moderation_enabled`, `startup_approval_email_to_investors`, `startup_city_enabled`, `startup_district_subdistrict_enabled`, `startup_founders_advisory`, `startup_grant_release_format_download_enable`, `startup_kit_parallel_email`, `startup_onboarding_modal`, `startup_programs_recommendation_field`, `startup_show_programs`, `startups_registration`, `syndicate`, `tripura_certificate_theme_enabled`, `venture_studio_can_close_program`, `venture_studio_team_formation`, `whatsapp_otp_verification`
+Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested_types`, `application_management_check_status_section`, `application_management_invite_transfer_section`, `application_management_round_status_updates`, `application_programs_recommendation_field`, `ask_startup_to_mentor_connection_question`, `associated_partners_visibility_enabled`, `call_for_applications_analysis_enabled`, `call_for_applications_bypass_verification`, `call_for_applications_download_attachments_enabled`, `call_for_applications_download_pdfs_enabled`, `call_for_applications_download_reports_enabled`, `call_for_applications_import_applications`, `call_for_applications_mark_payment_done_enabled`, `call_for_applications_mask_info_jury`, `call_for_applications_menu_settings`, `call_for_applications_pitch_deck_enabled`, `call_for_applications_promotion_by_partner_enabled`, `call_for_applications_promotion_enabled`, `call_for_applications_promotion_with_partners_enabled`, `call_for_applications_promotion_with_tenants_enabled`, `call_for_applications_score_rating_enabled`, `call_for_applications_submission_details_in_email`, `call_for_applications_video_enabled`, `challenges_collections_filters_enabled`, `company_identification_cin`, `company_identification_dpiit`, `company_identification_gst`, `connection_request_limit_enabled`, `corporate_backdoor_login_enabled`, `corporate_profile_registration_confirmation_enabled`, `corporates_enagement_form`, `corporates_registration`, `custom_forms`, `custom_forms_filters`, `custom_onboarding_design_golive_enabled`, `custom_reporting`, `dashboard_plan_info`, `domain_based_restriction`, `email_otp_verification`, `enable_file_viewer`, `events_agenda_menu_enabled`, `events_notifications`, `events_one_to_one_feature`, `events_payment_enabled`, `events_questions`, `facility_enable_admin_booking_creation`, `facility_enable_admin_facility_creation`, `facility_enable_checkin_checkout`, `facility_enable_pricing`, `facility_enable_ratings`, `facility_hourly_basis_booking_enabled`, `filing_email_address_enabled`, `form_video_transcript_enabled`, `frontend_restriction`, `government`, `growth_metrics_duration_set`, `has_pp_partner_account`, `incubator_module_enabled`, `individual_investor`, `investor_pitch_deck_access_enabled`, `investors_registration`, `is_facility_hub`, `jury_questions`, `limit_jury_access_enabled`, `meeting_feedback_enabled`, `membership_certificate_generation_enabled`, `mentor_domain_expertise_tab`, `mentorship_areas_new_layout`, `new_search_layout`, `partners_can_add_booking`, `partners_can_invite_stakeholders`, `partners_enable_ecosystem`, `partners_enable_jury_in_app_management`, `partners_enable_qna_in_app_management`, `partners_facility_enable_checkin_checkout`, `partners_registration`, `post_revenue_fields`, `powerpitch_transcript_enabled`, `primary_industry`, `program_management_with_profile_form`, `program_timeline_enabled`, `programs_document_enabled`, `programs_mark_payment_done_enabled`, `programs_menu_enabled`, `programs_score_rating_enabled`, `programs_video_enabled`, `public_portal_api_enabled`, `registration_enterprise_sales_popup`, `registration_invite_only`, `registration_turnoff_programs`, `request_call_jury`, `service_providers_registration`, `short_links`, `show_dashboard`, `show_documents_to_jury`, `show_ecosystem`, `spoke_stakeholders_meeting_moderation_enabled`, `startup_approval_email_to_investors`, `startup_city_enabled`, `startup_district_subdistrict_enabled`, `startup_founders_advisory`, `startup_grant_release_format_download_enable`, `startup_kit_parallel_email`, `startup_onboarding_modal`, `startup_programs_recommendation_field`, `startup_show_programs`, `startups_registration`, `syndicate`, `tripura_certificate_theme_enabled`, `venture_studio_can_close_program`, `venture_studio_team_formation`, `whatsapp_otp_verification`
 
 ## Module inventory
 
@@ -548,6 +563,7 @@ Flags no spec mentions (116): `active`, `admin_restriction`, `app_not_interested
 | auth | draft | 2026-07-16 | backend/auth, backend/global | [modules/auth/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/auth/module.spec.md) |
 | aws | draft | 2026-07-17 |  | [modules/aws/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/aws/module.spec.md) |
 | broadcast_messages | draft | 2026-10-08 |  | [modules/broadcast_messages/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/broadcast_messages/module.spec.md) |
+| bulk_actions | draft | 2026-10-19 | backend/corporate, backend/global, backend/individual, backend/investor, backend/mentors, backend/partner, backend/program-office-members, backend/service-providers, backend/startup | [modules/bulk_actions/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/bulk_actions/module.spec.md) |
 | canned_responses | draft | 2026-07-17 |  | [modules/canned_responses/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/canned_responses/module.spec.md) |
 | certificate_builders | draft | 2026-07-17 |  | [modules/certificate_builders/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/certificate_builders/module.spec.md) |
 | certificates | draft | 2026-09-23 |  | [modules/certificates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/certificates/module.spec.md) |
@@ -584,10 +600,12 @@ Flags no spec mentions (116): `active`, `admin_restriction`, `app_not_interested
 | metric_types | draft | 2026-07-17 |  | [modules/metric_types/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/metric_types/module.spec.md) |
 | milestones | draft | 2026-06-18 | backend/milestones | [modules/milestones/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/milestones/module.spec.md) |
 | news | draft | 2026-07-17 |  | [modules/news/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/news/module.spec.md) |
+| notifications | draft | 2026-10-19 | backend/cron, backend/notifications | [modules/notifications/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/notifications/module.spec.md) |
 | onboarding_design | in-review | 2026-08-06 |  | [modules/onboarding_design/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/onboarding_design/module.spec.md) |
 | operation_cost | in-review | 2026-09-15 |  | [modules/operation_cost/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/operation_cost/module.spec.md) |
 | outreach-communications | draft | 2026-07-17 | backend/application-management | [modules/outreach-communications/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/outreach-communications/module.spec.md) |
 | outreach_requests | draft | 2026-10-12 |  | [modules/outreach_requests/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/outreach_requests/module.spec.md) |
+| partner-requests | draft | 2026-10-19 | backend/global, backend/partner | [modules/partner-requests/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/partner-requests/module.spec.md) |
 | partners | draft | 2026-08-24 |  | [modules/partners/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/partners/module.spec.md) |
 | partners-recruitment | draft | 2026-06-18 | backend/partner | [modules/partners-recruitment/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/partners-recruitment/module.spec.md) |
 | payment-gateways | draft | 2026-07-16 |  | [modules/payment_gateways/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/payment_gateways/module.spec.md) |
@@ -595,6 +613,7 @@ Flags no spec mentions (116): `active`, `admin_restriction`, `app_not_interested
 | product_updates | draft | 2026-07-17 |  | [modules/product_updates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/product_updates/module.spec.md) |
 | profile_audit_logs | draft | 2026-07-16 | backend/audit-log | [modules/profile_audit_logs/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/profile_audit_logs/module.spec.md) |
 | program-management | draft | 2026-08-14 (documented Allow Re-application's Immediate duration option) | backend/mentors, backend/program-management | [modules/program-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/program-management/module.spec.md) |
+| quicklinks | draft | 2026-10-19 | backend/public-portal | [modules/quicklinks/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/quicklinks/module.spec.md) |
 | recruitment-partners | draft | 2026-07-17 |  | [modules/recruitment-partners/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/recruitment-partners/module.spec.md) |
 | reporting | draft | 2026-07-16 |  | [modules/reporting/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/reporting/module.spec.md) |
 | reporting-certificates | draft | 2026-06-18 |  | [modules/reporting-certificates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/reporting-certificates/module.spec.md) |
@@ -654,10 +673,3 @@ Flags no spec mentions (116): `active`, `admin_restriction`, `app_not_interested
 ## Gaps
 
 Write the missing spec, fix the front matter, or correct the path, the next time the module is touched.
-
-### sc-saas-admin
-
-- no spec: `modules/bulk_actions/`
-- no spec: `modules/notifications/`
-- no spec: `modules/partner-requests/`
-- no spec: `modules/quicklinks/`
