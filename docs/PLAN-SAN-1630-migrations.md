@@ -60,10 +60,20 @@ Status: **draft for approval** (2026-10-19). Covers sc-saas-backend and sanchico
 
 ### Phase 4: switch it off, per environment
 
-- `synchronize: process.env.NODE_ENV === 'LOCAL'`. An escape hatch, `DB_SYNCHRONIZE=true`, exists for a one-off emergency only.
-- **Boot check:** in non-local environments, the app runs the schema-builder log at start.
-  - `SCHEMA_CHECK_MODE=log` (first): non-empty is logged as an error.
-  - `enforce` (later): non-empty stops the app with the pending SQL in the log.
+**Built 2026-10-19** (`src/core/database/schema-sync.ts` in both repos). This turned out as a per-environment switch rather than the original "off unless an escape hatch". Each Jenkins job's `.env` turns synchronize off when that job is ready, and nothing changes for the jobs that aren't ready.
+- `synchronize` is on unless `DB_SYNCHRONIZE=false`. LOCAL always synchronizes.
+  - Set `DB_SYNCHRONIZE=false` per environment, only after that job runs `npm run migration:deploy` and its log has said "adopted" or "up to date".
+  - Setting it back to `true` (or removing it) is the emergency way back.
+- **Boot check:** with synchronize off, `main.ts` asks TypeORM what synchronize would change, without running it.
+  - `SCHEMA_CHECK_MODE=log` (default): non-empty is logged as an error and the app keeps starting.
+  - `enforce` (later): non-empty stops the app with the pending SQL in the error.
+  - `off`: skip the check.
+- **Verified** by booting both compiled apps against throwaway utf8mb4 databases built by `migration:deploy`, with an extra column added by hand:
+  - off + log: reported `DROP COLUMN`, the column was kept, the app started;
+  - off + enforce: refused to start;
+  - default: synchronize on, as today, and it dropped the column;
+  - off again: "Schema matches the entities".
+- **Expect `log` to report columns that the PHP admin panels add outside TypeORM** (tenants-admin on the `spa_*` tables, sc-saas-admin on tenant databases). Each one needs a migration in the owning NestJS repo before `enforce`.
 - **Each Jenkins job:** `npm run migration:deploy` before the pm2 restart (SAN-1605, built 2026-10-19; see `docs/DEPLOYMENT.md` → Database migrations step). For the backend, that's every client job, each against its own database. The step adopts each database on its first run, so Phase 2's `--fake` happens through it rather than by hand; jobs can run it before this phase, while `synchronize` is still on.
 - **Order:** dev 1 → dev 2 → demo → one production client → all production clients → cockpit. Same release path as `docs/RELEASE-PLAN-SAN-1939.md`.
 - **Tenant provisioning:** onboarding a new tenant must run `migration:run` on its new database. Update the onboarding steps.

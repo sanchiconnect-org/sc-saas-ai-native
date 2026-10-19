@@ -270,7 +270,15 @@ MySQL can't roll back DDL (`CREATE`, `ALTER`, `DROP`), so a migration that fails
 **Rollout**
 1. Add the step to the dev server 1 jobs (backend and tenants) and build. The log should say "adopted". If it says "left to synchronize", that database has drift: build once more after the app has started (synchronize applies the drift at boot), and the next run adopts it.
 2. Then dev server 2, the Demo jobs, SanchiConnect, one client job, every other client job, and the cockpit job, in that order. Record each one in `docs/DEPLOY-LOG.md`.
-3. Once every job has adopted, SAN-1630 phase 4 turns `synchronize` off and makes `MIGRATIONS_STRICT` the default.
+3. Turning `synchronize` off (SAN-1630 phase 4) is per job, in that job's `.env`. Once its log says "adopted" or "up to date", add:
+   - `DB_SYNCHRONIZE=false`;
+   - `MIGRATIONS_STRICT=true`, so a drifted database stops the deploy instead of being left to synchronize.
+
+   Then rebuild. With synchronize off, the app checks the schema at boot:
+   - `SCHEMA_CHECK_MODE=log` (default) logs any difference as an error and keeps running;
+   - `enforce` refuses to start.
+
+   Go back by removing `DB_SYNCHRONIZE`.
 
 **Open questions:**
 - Does each `SaaS API - Client NN` job run its own `npm ci && npm run build`, or does it copy `dist/` from `SaaS API - Builder`? The step needs `dist/`, `node_modules` and the client's `.env` in the job's folder.
