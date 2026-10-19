@@ -1,6 +1,6 @@
 # AI-Native CRM — Linear issues still to be created
 
-**Status:** blocked on Linear workspace capacity, not on any technical decision.
+**Status:** CANCELED 2026-10-19 — the AI-Native CRM project was shut down and all its Linear issues canceled; never implemented. Do not create the issues below.
 **Created:** 2026-08-07
 **Project:** [AI-Native CRM — Client Pipeline, Revenue Intelligence & Invoice Automation](https://linear.app/sanchiconnect/project/ai-native-crm-client-pipeline-revenue-intelligence-and-invoice-f33e4c9fa226)
 **Source:** `SanchiConnect_AI_CRM_BRD_v2.pdf` (BRD v1.0, Prabs, Aug 07 2026)
