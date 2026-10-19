@@ -10,9 +10,9 @@ For each module's detail, follow its spec link or the repo's `specs/<repo>-modul
 |---|---|---|---|
 | sanchiconnect-saas-tenants | 11 | 0 | 0 |
 | sc-saas-backend | 70 | 0 | 0 |
-| sc-saas-frontend | 86 | 1 | 0 |
+| sc-saas-frontend | 87 | 0 | 0 |
 | sc-saas-admin | 74 | 4 | 0 |
-| sanchiconnect-saas-tenants-admin | 12 | 1 | 0 |
+| sanchiconnect-saas-tenants-admin | 13 | 0 | 0 |
 | ai-startups-analyzer | 1 | 0 | 0 |
 | sc-saas-3rdparty-webservices | 8 | 0 | 0 |
 
@@ -38,7 +38,7 @@ graph LR
     backend -->|8| webservices
     backend -->|1| frontend
     frontend -->|5| tenants
-    frontend -->|99| backend
+    frontend -->|101| backend
 ```
 
 ## Cross-repo module dependencies
@@ -210,6 +210,8 @@ graph LR
 | frontend / service-provider | backend / service-providers | frontend_consumers |
 | frontend / startup | backend / startup | backend_modules, frontend_consumers |
 | frontend / startup-kit | backend / startup | backend_modules |
+| frontend / startup-recognition-verify | backend / startup | backend_modules |
+| frontend / startup-recognition-verify | backend / startup-recognition-id | backend_modules |
 | frontend / team | backend / user | backend_modules |
 | frontend / tickets | backend / global | backend_modules |
 | frontend / tickets | backend / tickets | backend_modules |
@@ -331,7 +333,7 @@ Tenant flags (boolean columns of `TenantUsersEntity`) and the modules whose spec
 | `startup_financial_form` |  | startup | startup | core-bootstrap, csv, finance-memberships |  |  |  |
 | `startup_id_cards` |  | id-cards | shared, utilities | certificates, id_card_builders, id_cards |  |  |  |
 | `startup_kit` |  | startup-kit | public, resources, startup-kit |  |  |  |  |
-| `startup_recognition_enabled` |  | program-management, startup, startup-recognition-id | account, programs | startup_recognition_management |  |  |  |
+| `startup_recognition_enabled` |  | program-management, startup, startup-recognition-id | account, programs, startup-recognition-verify | startup_recognition_management |  |  |  |
 | `startup_supporting_documents` |  | startup | startup |  |  |  |  |
 | `startups` | tenants | auth, challenges, program-management, search, startup | auth, call-for-applications, global-search-page, programs, search, startup | document_types, finance-memberships |  |  |  |
 | `startups_company_domain_validation` |  | auth |  |  |  |  |  |
@@ -522,6 +524,7 @@ Flags no spec mentions (116): `active`, `admin_restriction`, `app_not_interested
 | share-links | draft | 2026-07-19 |  | [src/app/modules/share-links/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/share-links/module.spec.md) |
 | slider | draft | 2026-07-19 |  | [src/app/modules/slider/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/slider/module.spec.md) |
 | startup-kit | draft | 2026-07-19 | backend/startup | [src/app/modules/startup-kit/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/startup-kit/module.spec.md) |
+| startup-recognition-verify | draft | 2026-10-19 | backend/startup, backend/startup-recognition-id | [src/app/modules/startup-recognition-verify/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/startup-recognition-verify/module.spec.md) |
 | startup | draft | 2026-10-07 | backend/startup | [src/app/modules/startups/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/startups/module.spec.md) |
 | static-form-field | draft | 2026-07-19 |  | [src/app/modules/static-form-field/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/static-form-field/module.spec.md) |
 | team | draft | 2026-07-19 | backend/user | [src/app/modules/team/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/team/module.spec.md) |
@@ -620,6 +623,7 @@ Flags no spec mentions (116): `active`, `admin_restriction`, `app_not_interested
 | ajax | draft | 2026-07-16 |  | [modules/ajax/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/ajax/module.spec.md) |
 | auth | draft | 2026-07-16 |  | [modules/auth/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/auth/module.spec.md) |
 | aws | draft | 2026-07-19 |  | [modules/aws/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/aws/module.spec.md) |
+| client_stats | draft | 2026-10-19 |  | [modules/client_stats/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/client_stats/module.spec.md) |
 | cors_domain_management | in-review | 2026-08-20 | tenants/cors-domains | [modules/cors_domain_management/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/cors_domain_management/module.spec.md) |
 | csv | draft | 2026-07-19 |  | [modules/csv/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/csv/module.spec.md) |
 | developer | draft | 2026-07-16 |  | [modules/developer/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/developer/module.spec.md) |
@@ -651,17 +655,9 @@ Flags no spec mentions (116): `active`, `admin_restriction`, `app_not_interested
 
 Write the missing spec, fix the front matter, or correct the path, the next time the module is touched.
 
-### sc-saas-frontend
-
-- no spec: `src/app/modules/startup-recognition-verify/`
-
 ### sc-saas-admin
 
 - no spec: `modules/bulk_actions/`
 - no spec: `modules/notifications/`
 - no spec: `modules/partner-requests/`
 - no spec: `modules/quicklinks/`
-
-### sanchiconnect-saas-tenants-admin
-
-- no spec: `modules/client_stats/`
