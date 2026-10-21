@@ -364,3 +364,26 @@ Response (HTTP 200 when every check passes, 503 otherwise):
 - `checks.db` is the result of `SELECT 1` (MySQL; the PHP panels and the analyzer use the main database, with a 3 s cap).
 - The 3rd-party gateway has no database, so its `checks` is `{}` and it reports `ok` while the process answers.
 - Not yet included: the tenants ecosystem-push counter (items that arrived in the last day and week). The `ecosystem_*` tables have no `created_at`, so it needs a migration first.
+
+## Sentry prover (SAN-1572)
+
+Proves that a deployment's errors reach Sentry, in two modes:
+- `captured` sends one event through the SDK and returns or prints its id;
+- `uncaught` throws, so the error takes the same path as a real bug (the framework's error hook).
+
+Each run sends one test event titled `SAN-1572 Sentry prover: …`. Nothing runs it on a schedule. Don't delete it as dead code.
+
+| Service | How to run it | Off unless |
+|---|---|---|
+| sc-saas-backend | `GET https://<tenant api host>/api/ops/sentry-prove?mode=captured` with header `x-sentry-prover-token: <value>` | `SENTRY_PROVER_TOKEN` is set |
+| sanchiconnect-saas-tenants | same, on the cockpit api host | `SENTRY_PROVER_TOKEN` is set |
+| sc-saas-3rdparty-webservices | same, on the gateway host | `SENTRY_PROVER_TOKEN` is set |
+| ai-startups-analyzer | `GET https://<analyzer host>/api/v1/ops/sentry-prove?mode=captured`, same header | `SENTRY_PROVER_TOKEN` is set |
+| sc-saas-admin | `php cli/sentry_prove.php --mode=captured` on the server | always available, command line only |
+| sanchiconnect-saas-tenants-admin | `php cli/sentry_prove.php --mode=captured` on the server | always available, command line only |
+| sc-saas-frontend | open any page with `?sentry-prove=captured` | the build's `environmentName` is `production` |
+
+- **Turning it on:** set `SENTRY_PROVER_TOKEN` to a random value in that deployment's environment only while you prove it, then remove it.
+  - Without the token, or with a wrong one, the route answers 404 and sends nothing to Sentry.
+  - The routes are left out of the OpenAPI documents.
+- **Readable frames:** the frontend's frames are readable only when that build's source maps were uploaded (`scripts/upload-sourcemaps.js`).
