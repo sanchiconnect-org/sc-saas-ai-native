@@ -2,14 +2,14 @@
 id: SAN-1927
 title: "generate-thesis times out at the 20s THESIS_LLM_TIMEOUT_S default (AI-STARTUPS-ANALYZER-4)"
 type: bug-fix
-status: todo
+status: in-review
 linear: https://linear.app/sanchiconnect/issue/SAN-1927
 sentry: [AI-STARTUPS-ANALYZER-4]
 repos: [ai-analyzer]
 related: [SAN-186, SAN-187]
-commit: none — not started (ai-startups-analyzer is not cloned in this workspace)
+commit: ai-startups-analyzer (see the Linear handover note)
 created: 2026-10-15
-updated: 2026-10-15
+updated: 2026-10-21
 ---
 
 # SAN-1927: thesis generation timeout on a large-form program
@@ -23,11 +23,20 @@ updated: 2026-10-15
   * Enrichment returned nothing (`sources=[]`, empty `website_text`), so the LLM call alone took more than 20 s.
 * **Earlier tickets:** SAN-186 (thesis timing out) and SAN-187 (Gemini quota), both Done.
 
+## Root cause
+The thesis LLM call ran on `executor`, the shared scoring thread pool (`ANALYZER_GLOBAL_CONCURRENCY`, default 10). Scoring batches from any tenant can hold every thread. The thesis call then queued behind them, and the queue wait counted against `THESIS_LLM_TIMEOUT_S` (20 s). So it returned 504 without the provider being slow. SAN-1920's prose-mode change did not touch this.
+
+Raising the timeout is not an option. The admin's caller is capped at 25 s, under PHP's 30 s, and the worst case is already 8 s of enrichment plus 20 s of LLM.
+
 ## Fix
-Not started. The code has to be checked out first. Options:
-* Check the prod `THESIS_LLM_TIMEOUT_S` and `DEFAULT_PROVIDER`.
-* Raise the timeout, keeping it within sc-saas-admin's caller timeout.
-* Or trim the prompt for large forms (summarise or cap the field hints) or stream the response.
+`api/app/api/v1/routes.py`: a dedicated `_thesis_executor` (`ANALYZER_THESIS_CONCURRENCY`, default 4) for the `generate_thesis` call. Scoring, the timeouts, the prompt and the API contract are unchanged. Documented in the analyzer's `CLAUDE.md` and `knowledge.md`.
 
 ## Verification
-Pending.
+- New `api/tests/test_thesis_executor.py` fills the scoring pool, stubs the provider and enrichment, and sets `THESIS_LLM_TIMEOUT_S=1`.
+  - With the fix it passes.
+  - Without it, the call waits about 1 s and fails (504).
+- `make gates`: ruff 0, test 0 (23 passing, floor 21).
+
+## Open
+- The production `DEFAULT_PROVIDER`, `THESIS_LLM_TIMEOUT_S` and thesis model are unchecked; that needs the analyzer host.
+- The two other short prose endpoints (`generate-screening-summary`, `generate-prior-art`) still use the scoring pool.
