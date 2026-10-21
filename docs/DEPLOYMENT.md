@@ -340,3 +340,27 @@ Chosen method (Nirmal, 2026-10-14): **revert in git, then rebuild.** None of the
 
 - **Database schema (sc-saas-backend and sanchiconnect-saas-tenants).** Both run TypeORM `synchronize: true` with no migrations, so the app alters its tables at startup. Reverting the code does not remove a column the bad deploy added, and if it dropped or renamed a column, that column's data is already gone. Before deploying any change to an entity, take an RDS snapshot; it is the only undo for the database. The PHP panels and the 3rd-party gateway have no schema step, so for them the revert is a full rollback.
 - **Cached frontend (sc-saas-frontend is a PWA).** Browsers keep the cached build, so after a rollback some users still run the bad version until they reload or the service worker updates.
+
+## Health endpoints (SAN-1574)
+
+Every service answers an unauthenticated `GET` for the Observability Command Centre probes. It runs one trivial read and returns booleans and a timestamp only: no secrets, no tenant data, `Cache-Control: no-store`.
+
+| Service | URL |
+|---|---|
+| sc-saas-backend | `https://<tenant api host>/api/health` |
+| sanchiconnect-saas-tenants | `https://<cockpit api host>/api/health` |
+| sc-saas-3rdparty-webservices | `https://<gateway host>/api/health` |
+| ai-startups-analyzer | `https://<analyzer host>/api/v1/health` |
+| sc-saas-admin | `https://<tenant admin host>/health.php` |
+| sanchiconnect-saas-tenants-admin | `https://<tenants-admin host>/health.php` |
+
+Response (HTTP 200 when every check passes, 503 otherwise):
+
+```json
+{ "status": "ok", "service": "sc-saas-backend", "checks": { "db": true }, "timestamp": "2026-10-21T09:48:24.000Z" }
+```
+
+- `status` is `ok` or `degraded`.
+- `checks.db` is the result of `SELECT 1` (MySQL; the PHP panels and the analyzer use the main database, with a 3 s cap).
+- The 3rd-party gateway has no database, so its `checks` is `{}` and it reports `ok` while the process answers.
+- Not yet included: the tenants ecosystem-push counter (items that arrived in the last day and week). The `ecosystem_*` tables have no `created_at`, so it needs a migration first.
