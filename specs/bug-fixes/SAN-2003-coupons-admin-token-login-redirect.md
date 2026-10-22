@@ -27,7 +27,8 @@ Product decision: coupons need no authorization, because users who haven't regis
 
 ## Open
 - The `build` gate is red on the branch independently of this fix (`deploy-migrate.ts`).
-- Optional frontend hardening (separate issue, Repo: Frontend): mark `getCouponList()` with `SKIP_UNAUTHORIZED_REDIRECT` so a failed coupon list never logs the user out.
+- Frontend safety net done in SAN-2004 (`baad7d0dc`): a coupon-list 401 no longer logs the user out.
+- Needs a merge to `ai_native_setup` / `development` and a redeploy, then a browser check logged in and logged out.
 
 ## Commit
 `232e07f4` on `ai_native_setup_vishali` (sc-saas-backend), pushed 2026-10-22. Linear: Done.
