@@ -1,52 +1,78 @@
-# Release plan: security fortnight fixes to production (SAN-1939)
+# Release plan: `ai_native_setup` to production (SAN-1939)
 
-Checked against git on 2026-10-19. Release path from `docs/DEPLOYMENT.md`: `ai_native_setup → development → stagingdemo → main/master`, each step a PR approved by someone other than its author (branch protection is on), then "Build now" on that branch's Jenkins jobs.
+Updated 2026-10-26 against git; first written 2026-10-19. Release path from `docs/DEPLOYMENT.md`: `ai_native_setup → development → stagingdemo → main/master`. Each step is a PR approved by someone other than its author, merged with a **merge commit**, then "Build now" on that branch's Jenkins jobs.
 
-## What this release carries
+**Decided (Nirmal, 2026-10-19): full release.** Each step ships everything on `ai_native_setup`, which is what dev has been testing.
 
-`development`, `stagingdemo` and the production branch are level in every repo, so each step ships **everything** on `ai_native_setup`, not only the security fixes (about 280 commits). Hotfixes already on production (#84–#86, #2628, and #204 once merged) are on `ai_native_setup` as `-x` cherry-picks, so they arrive a second time with the same content.
+## Where each repo stands (2026-10-26)
 
-| Repo | Prod branch | Commits | Security | Other notable changes | Schema (`synchronize: true`) |
+Commits each branch is missing compared with the one before it (GitHub compare):
+
+| Repo | Prod branch | `ai_native_setup` not in `development` | `development` not in `stagingdemo` | `stagingdemo` not in prod | Status |
 |---|---|---|---|---|---|
-| sanchiconnect-saas-tenants | `master` | 42 | 16: SAN-44 S1/S2/S4/S5 (no secrets in `verify_tenant`; `currency_api_key` withheld), exact hostname match (#204), S7 log mode, SAN-852 guard | generated contract types (SAN-1595), CI | none |
-| sc-saas-backend | `main` | 63 | 19: SAN-1160/1161 (SMTP password and OTPs no longer stored), SAN-1158/1559 (no tokens in logs), SAN-35 share token, SAN-44 S7 key | push and WhatsApp notifications, tentative rounds, **consent ledger (new users default to marketing/digest email off)**, typed API responses, QA OTP wildcard | **additive only**: new tables `whatsapp_held_messages`, `user_consents`, `push_subscriptions`; new columns `forms.public_share_token`, `users.what_you_missed_sent_at` |
-| sc-saas-frontend | `main` | 50 | 9: SAN-1892 socket handshake | push notifications and digest settings, community feed tests, typed OTP response | none |
-| sc-saas-admin | `main` | 64 | 32: SAN-22, 23, 24, 26, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 1894, 1906, 1909; DB-link fix (`b29a7bf1`, `b67d4f4a`) | bulk actions (SAN-1485), notification centre sections, AI-credit schema checks | none |
-| sanchiconnect-saas-tenants-admin | `main` | 23 | 11: SAN-42, 43, 46, 1907; DB-link fix (`c724e9f`, `e3f8b17`) | Client Stats page (SAN-1910) | none |
-| ai-startups-analyzer | `main` | 19 | 4 | Serper/Firecrawl counts (SAN-1723); already-hotfixed thesis/auth changes | none |
-| sc-saas-3rdparty-webservices | `master` | 19 | 4 | CI only (`ci-secret-test.txt` was added and removed on 13 Oct; not in the tree) | none |
+| sc-saas-admin | `main` | 7 | 0 | 0 | **Released to `main` on 2026-10-26**, except today's 7 commits. Hotfix PR #2642 (SAN-2043) is open. |
+| ai-startups-analyzer | `main` | 6 | 0 | 0 | **Released to `main` on 2026-10-26**, except today's CI/revert commits. |
+| sc-saas-3rdparty-webservices | `master` | 0 | 0 | 40 | Waiting for stage 3. |
+| sanchiconnect-saas-tenants | `master` | 18 | 65 | 0 | Waiting for stage 2. `development` is frozen at 2026-10-22. |
+| sc-saas-backend | `main` | 25 | 154 | 0 | Waiting for stage 2. `development` is frozen at 2026-10-22. |
+| sanchiconnect-saas-tenants-admin | `main` | 9 | 44 | 0 | Waiting for stage 2. |
+| sc-saas-frontend | `main` (+ `sanchiconnect`) | 30 | 111 | 0 | Waiting for stage 2. |
 
-**Decided (Nirmal, 2026-10-19): full release.** Each step ships everything on `ai_native_setup`, which is what dev has been testing, rather than a security-only cherry-pick set that has never run anywhere as a whole.
+## Urgent: production admin is ahead of production backend
 
-## Before the first PR
+The plan required the backend before the admin. The admin went first, so once production admin is built from today's `main`, two features fail until the backend is released:
 
-1. **Dev sign-off**: the fixes are tested on dev server 1 (`thub.sanchidev.in`), per the standing "test on dev before release".
-2. **#204 merged and deployed** (tenants hotfix). Stops the `tenant-settings/%25` leak today, independent of this release.
-3. **RDS snapshot** of every tenant database and the cockpit database, right before the backend and tenants builds: the backend adds tables and columns at startup.
-4. **Environment variables**, set before each app restarts:
-   - every sc-saas-backend `.env`: `AI_CREDITS_INTERNAL_API_KEY` = the tenants API's value (SAN-44 S7);
-   - tenants API `.env`: `TENANT_SETTINGS_KEY_MODE=log`.
-5. **Reviewer lined up**: every PR needs one approval from someone who isn't its author.
-
-## Order
-
-Each repo goes through all three stages before its production build. Deploy order matters at the production stage:
-
-1. **sanchiconnect-saas-tenants** first. Its new log mode lets every call through, so it is safe before the backends send the key.
-2. **sc-saas-backend**, every client job (26), demo and SanchiConnect. Must be live **before sc-saas-admin**, because SAN-35 needs `forms.public_share_token` to exist.
-3. **sc-saas-3rdparty-webservices** and **ai-startups-analyzer** (independent; CI and small changes).
-4. **sc-saas-admin** and **sanchiconnect-saas-tenants-admin**.
-5. **sc-saas-frontend**: client `main`, demo `stagingdemo`, and the SanchiConnect `sanchiconnect` branch (needs its own PR from `main` or `stagingdemo`, since it sits outside the release path).
-
-## Each stage, per repo
-
-| Stage | PR | Build | Check |
+| Admin feature | Needs from the backend | Production backend today | Effect until the backend ships |
 |---|---|---|---|
-| 1 | `ai_native_setup → development` | dev server 2 jobs | app starts; smoke the changed areas |
-| 2 | `development → stagingdemo` | Demo jobs (production servers) | `sc-saas-e2e` against staging (Ritu); checks below on the demo tenant |
-| 3 | `stagingdemo → main/master` | client production jobs | checks below on one client, then roll out to all |
+| Form builder public submission link (SAN-35) | `forms.public_share_token` column (created by the backend at startup) | Column missing | Creating a link fails ("Could not create the link"); every share link returns 404 |
+| "Backdoor Access" / view as applicant (SAN-1959) | `POST v1/application-programs-management/admin/applicant-token` | Route missing | The button shows an error; there's no fallback to the old URL |
 
-Merge commits only (no squash), so the cherry-picked hotfix commits on the production branches reconcile cleanly.
+The backend's `development` branch (frozen 2026-10-22) has the column but **not** the applicant-token route. **Refresh `development` from `ai_native_setup` (stage 1 again) before stage 2**, for the backend and, to keep them consistent, for tenants, tenants-admin and the frontend.
+
+## New environment keys
+
+Set them **before** the app restarts. Every mode defaults to `log` (allow everything, log what's missing), so a key that's missing doesn't break anything until its mode is switched to `enforce`. On dev, `GATEWAY_KEY_MODE=enforce` without the key made every email and OTP fail with a 500: always set the key first, then the mode.
+
+| App | Key | Value | Needed when |
+|---|---|---|---|
+| tenants API | `TENANT_SETTINGS_KEY_MODE` | `log` | This release |
+| tenants API | `CURRENCY_API_KEY`, `FACTACY_API_KEY` | Provider keys | Only seeds missing `global_settings` rows; existing rows are unchanged |
+| every backend | `AI_CREDITS_INTERNAL_API_KEY` | The tenants API's value | This release (SAN-44 S7) |
+| every backend | `FACTACY_API_KEY` | The Factacy key | **This release.** Factacy now reads it from the backend's own environment (SAN-1941); unset means Factacy calls fail |
+| every backend | `GATEWAY_INTERNAL_API_KEY` | Same value as the 3rdparty gateway's | Before `GATEWAY_KEY_MODE=enforce` |
+| every backend | `ADMIN_BACKEND_INTERNAL_API_KEY` | Same value as that tenant's admin `.env` | Before `ADMIN_SERVER_KEY_MODE=enforce` |
+| every backend | `ADMIN_SERVER_KEY_MODE`, `APPLICANT_TOKEN_MODE` | Leave unset (`log`) | Switch to `enforce` after the checks below |
+| every backend | `SOCKET_AUTH_ENFORCE` | Leave unset (off) | `true` after the two-user chat check (SAN-1938) |
+| every backend | `APPLICANT_TOKEN_SECRET` | Optional, long random | Signs applicant tokens; without it the key is derived from `JWT_SECRET_KEY`, and boot never fails |
+| every backend | `TRUST_PROXY_HOPS` | Default `1` | Only if a server sits behind more than one proxy |
+| every backend | `DEFAULT_ADMIN_PASSWORD` / `DEFAULT_ADMIN_EMAIL` | 12+ characters | Only for a **new** tenant's first boot (SAN-2015); unset means the seeded admin starts locked |
+| every backend | `QA_FIXED_OTP`, `QA_FIXED_OTP_EMAILS` | **Never set on production** | Dev/QA only (SAN-1864) |
+| 3rdparty gateway | `GATEWAY_INTERNAL_API_KEY` | Long random | Before `GATEWAY_KEY_MODE=enforce` |
+| 3rdparty gateway | `GATEWAY_KEY_MODE` | `log` | `enforce` once every backend sends the key |
+| every admin | `ADMIN_BACKEND_INTERNAL_API_KEY` | Same value as that tenant's backend | Nothing is sent while it's unset |
+| analyzer | `ANALYZER_CORS_ORIGINS` | Leave unset | No browser calls the analyzer any more (SAN-2017) |
+
+## Before the next PRs
+
+1. Merge hotfix **#2642** (SAN-2043, "Couldn't prepare analysis" for forms with image/video answers) and build the production admin jobs.
+2. **Stage 1 again:** `ai_native_setup → development` for backend, tenants, tenants-admin and frontend, and build dev server 2.
+3. **RDS snapshot** of every tenant database and the cockpit database, right before the backend and tenants production builds.
+4. Set the keys above on each server before its build.
+5. A non-author reviewer for every PR.
+
+## Production order
+
+1. **sanchiconnect-saas-tenants** (log mode lets every call through).
+2. **sc-saas-backend**, every client job, demo and SanchiConnect. **Most urgent**: production admin already needs it.
+3. **sc-saas-3rdparty-webservices** (stage 3 only, `GATEWAY_KEY_MODE=log`).
+4. **sanchiconnect-saas-tenants-admin**.
+5. **sc-saas-frontend**: client `main`, demo `stagingdemo`, and the `sanchiconnect` branch (its own PR from `main`).
+
+## Schema (backend and tenants, `synchronize: true`)
+
+**Additive only**; no column is removed or renamed in either repo (checked against the entity diff).
+- **Backend:** new tables `whatsapp_held_messages`, `user_consents`, `push_subscriptions`, `startup_kit_categories`, `startup_kit_submissions`; new columns `forms.public_share_token`, `users.what_you_missed_sent_at`, `verifications.attempts`. Integer `width` removed from entity definitions (SAN-1630), which stops repeated ALTERs and doesn't change data.
+- **Tenants:** new `organizations_contracts` table.
 
 ## Checks after each production build
 
@@ -54,23 +80,29 @@ Merge commits only (no squash), so the cherry-picked hotfix commits on the produ
 |---|---|---|
 | tenants | `GET /api/v1/public/global/tenant-settings/%25` | 404 |
 | tenants | `GET .../verify_tenant/<one letter>` | 404 |
-| tenants | pm2 log `SAN-44 S7 [log mode]` lines | one per backend still missing the key; set it there |
-| backend | the app starts; `users`/`forms` tables have the new columns | no errors in the pm2 log |
-| admin | Developer zone → DB Administration link | `../db_admin.php`, no password in the URL |
+| tenants | pm2 log `[log mode]` lines | One per backend still missing its key; set it there |
+| backend | App starts; new tables and columns exist | No errors in the pm2 log |
+| backend | `GET /api/v1/health` | `ok` |
+| backend + admin | Form builder: create a public submissions link, open it | Link works; an old id link returns 404 |
+| backend + admin | Backdoor Access on an application | Opens the PWA with the application |
+| backend | Factacy lookup on a startup | Returns data (needs `FACTACY_API_KEY`) |
+| 3rdparty | Send an OTP and an email | Delivered; gateway log shows `GATEWAY_KEY_MODE=log` lines only for callers without the key |
+| admin | Developer zone → DB Administration | `../db_admin.php`, no password in the URL |
 | admin / tenants-admin | `GET /adminer/adminer.php` without a session | 403 |
-| admin | `GET /form_builder/public_submissions/<id>/<slug>` (old id link) | 404 |
-| admin | filemanager, aws, csv export endpoints without a session | redirect to login, or 403 |
-| frontend | chat between two users; typing; notifications | still work (handshake fix SAN-1892) |
+| admin | Prepare an AI analysis on a form with an image answer | Runs (after #2642) |
+| frontend | Chat between two users, typing, notifications | Still work (SAN-1892) |
 
-Then hand over to **SAN-1563** (Aman): non-author verification of each finding, with the request and response pasted on the finding.
+Then `sc-saas-e2e` against staging (Ritu) at stage 2. After production, hand over to **SAN-1563** (Aman) for non-author verification.
 
-## After the release
+## After the release, in order
 
-1. **Rotate** per `docs/SECRET-ROTATION-LOG.md`: RDS again, every custom-SMTP password, `factacy_api_key`, Azure client secrets, analyzer tokens, WATI token. Clear `ses_email_queue.email_data` SMTP copies and `service_usage` OTP subjects in each tenant DB.
-2. **SAN-1938**: two-user smoke test, then `SOCKET_AUTH_ENFORCE=true` on every backend.
-3. **SAN-44 S7**: once the tenants log shows no `[log mode]` lines, set `TENANT_SETTINGS_KEY_MODE=enforce`.
+1. Once each log is clean, switch to `enforce` one at a time and re-check: `TENANT_SETTINGS_KEY_MODE`, `GATEWAY_KEY_MODE`, `ADMIN_SERVER_KEY_MODE`, `APPLICANT_TOKEN_MODE`, then `SOCKET_AUTH_ENFORCE=true` (SAN-1938).
+2. Remove each scanner `stagedGuards` entry once its mode is `enforce` everywhere (SAN-1561).
+3. Dependabot ignore rules (SAN-2044) take effect once they're on the default branches.
 4. Record each production deploy (repo, job, date, who) on SAN-1939.
+
+Rotation of the Factacy and currency keys and of the old seeded admin password is **not** planned (decision 2026-10-26, SAN-1914 / SAN-2015).
 
 ## Rollback
 
-As in `docs/DEPLOYMENT.md`: revert the merge on the production branch through a hotfix PR, then "Build now". The backend's new tables and columns stay (additive, harmless to the old code); restore from the RDS snapshot only if data was damaged. Users may keep the cached PWA until they reload.
+As in `docs/DEPLOYMENT.md`: revert the merge on the production branch through a hotfix PR, then "Build now". The backend's new tables and columns stay (additive, harmless to old code). Restore from the RDS snapshot only if data was damaged. Users may keep the cached PWA until they reload.
