@@ -2,7 +2,8 @@
 
 - **Linear:** [SAN-2052](https://linear.app/sanchiconnect/issue/SAN-2052) (Repo: Backend), [SAN-2053](https://linear.app/sanchiconnect/issue/SAN-2053) (Repo: Frontend). Improvement, Medium, assignee Vishali. Follow-ups to SAN-2041 / SAN-2042 ([record](SAN-2041-SAN-2042-chat-conversation-list-slow.md)).
 - **Classification:** CODE_ERROR (performance).
-- **Branch:** `ai_native_setup_vishali` in both repos. Commits: backend `40db17a3`, frontend `6838288ec`.
+- **Branch:** `ai_native_setup_vishali` in both repos. Commits: backend `40db17a3` + `cdc45519` (lint fix, below), frontend `6838288ec`. Merged to `ai_native_setup` (backend PR #2052).
+- **Still slow after a hard refresh?** The main cause was the emoji picker, not this API. See [SAN-2054 follow-up](SAN-2054-chat-slow-to-open-from-other-pages.md#follow-up-2026-10-27--17-s-main-thread-freeze-from-the-emoji-picker).
 
 ## Problem
 
@@ -36,6 +37,6 @@ File messages get S3 signed URLs, but signing is local (aws-sdk `getSignedUrl`, 
 
 ## Verification
 
-- Backend: `tsc --noEmit` exit 0. `jest src/modules/chat`: 5 passed. `npm run gates`: test (1709 passed, 23 skipped), test-floors, openapi-floors, build and unguarded-routes all exit 0. Lint fails on CRLF only (`Delete ␍`, 0 other errors).
+- Backend: `tsc --noEmit` exit 0. `jest src/modules/chat`: 5 passed. `npm run gates`: test (1709 passed, 23 skipped), test-floors, openapi-floors, build and unguarded-routes all exit 0. Lint locally showed only CRLF noise (`Delete ␍`), but that hid one real prettier error: the `@Index('IDX_chat_messages_conversation_created', [...])` line in `chat-messages.entity.ts` was too long. CI's lint gate failed with exit 123 on PR #2052, and `cdc45519` wraps the line. To spot real errors locally, run `bash scripts/gates.sh lint 2>&1 | grep -v 'Delete ␍'`.
 - Frontend: `tsc` exit 0. Chat specs 11 SUCCESS. `npm run gates` passed (1319 unit tests, floor 1295).
 - Not done: the `migrations` CI workflow (needs MySQL 8) wasn't run locally. No latency measured before/after. No manual browser check.

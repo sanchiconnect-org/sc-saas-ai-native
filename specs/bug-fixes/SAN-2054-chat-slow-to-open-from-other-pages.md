@@ -40,3 +40,45 @@ Everything ran back to back:
 
 - Existing behaviour, not fixed: a conversation older than the newest 20 is not in page 1 of the list, so opening it from Connections shows "Conversation not found" and redirects. Fixing it needs a single-conversation endpoint (API contract change) or page-through logic. It needs its own issue.
 - A message arriving between the prefetch and joining the room (≤30 s) can be missing until the next refresh.
+
+## Follow-up (2026-10-27) — 17 s main-thread freeze from the emoji picker
+
+**Report.** After the fixes above were deployed to dev (frontend PR #1966, backend PR #2052; the served chunks contain `takePrefetchedMessages`), chat was still slow:
+- on a hard refresh of `/chat/conversations/:uuid`;
+- when opening it from the sidebar "Messages" button;
+- when opening it from a connection's chat icon.
+
+The APIs themselves were fast (messages 53 ms, list 156 ms).
+
+**Evidence.** A Chrome Performance trace of a hard refresh on thub.sanchidev.in (`Trace-20261027T110430.json.gz`):
+- JS was loaded by about 0.7 s, and the list and messages requests were sent at about 1.0 s.
+- At 1108 ms one main-thread task ran for **17,256 ms**, inside `ScConversationsComponent.getConversationsList()` → `detectChanges()`.
+- The list, the socket polls and `mark-read` only *finished* at about 18.4 s because the thread was blocked. The server was not slow.
+- CPU profile of that task:
+  - 55% `getImageData` in the `emojiFallback` pipe (`supportsEmoji()`);
+  - 35% `parseFromString` / `getInertBodyElement` (Angular `[innerHTML]` sanitising, about 2,415 inert documents);
+  - both are under the `emoji-button` template.
+
+**Root cause.** `ngx-emoji-picker` 0.1.6:
+- `EmojiPickerApiDirective`'s constructor calls `initPicker()`. That builds the whole `EmojiPickerComponent` (every emoji as an `emoji-button`) as soon as `[(emojiPickerIf)]` renders, then only shows or hides it.
+- Each button creates a canvas, draws the emoji and reads back a pixel to test emoji support, then sanitises its `innerHTML`.
+- `chat-message-form` renders with the chat page, so every chat open or refresh paid this cost. The library is the same version as before; the cost was always there, hidden behind the slow APIs until they were fixed.
+
+**Fix (sc-saas-frontend, `8dd06de39`, `chat-message-form.component.{html,ts,spec.ts}`).**
+- The 😄 button is a plain `<span>` until it is first clicked.
+- `openEmojiPicker()` then sets `emojiPickerMounted = true` and `toggled = true`, so the directive mounts already open. From then on it behaves as before.
+- The first click is marked `emojiPickerExempt`, which the picker's `document:click` close handler ignores. Without it, the mounting click would close the picker straight away.
+- The cost is now paid only on the first open of the picker, not on every page render. `emojiPickerIf` is used nowhere else in the app.
+
+**Verification.**
+- `bash scripts/gates.sh build`: exit 0.
+- `bash scripts/gates.sh unit-tests`: 1328/1328 SUCCESS, including 2 new specs (not mounted before the click; mounts and opens on the first click, with the click exempt).
+- Not done: no manual browser check of the picker and no new trace after deploy. To check after deploy: 😄 opens the picker, an outside click closes it, and selecting an emoji inserts it.
+
+**Other dev-server findings (not code; for infra / Nirmal, no issue filed).** thub.sanchidev.in:
+- serves JS without gzip/brotli (`vendor.js` 3.6 MB raw);
+- sends `Cache-Control: no-cache, no-store` on content-hashed files;
+- speaks HTTP/1.1 only (ALPN) on both the frontend and the API;
+- runs Angular in dev mode (`production:false`). `docs/DEPLOYMENT.md`'s `--configuration devserver` does not exist in `angular.json`.
+
+These are minor next to the freeze.
