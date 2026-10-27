@@ -3,7 +3,7 @@
 - **Linear:** [SAN-2102](https://linear.app/sanchiconnect/issue/SAN-2102) (Repo: Frontend). Medium, assignee Vishali. Milestone: Enhancement → In-house chat speed up. Related: SAN-2062, SAN-2060.
 - **Classification:** UI/layout plus one small behaviour fix. All changes are in sc-saas-frontend; there is no API, flag or tenant-scoping impact.
 - **Branch:** `ai_native_setup_vishali`. Commit: `944ac969b`.
-- **Status:** In Review in Linear (2026-10-27). Not yet merged into `ai_native_setup` or deployed.
+- **Status:** Done in Linear (2026-10-27). Not yet merged into `ai_native_setup` or deployed.
 
 ## Problem
 
