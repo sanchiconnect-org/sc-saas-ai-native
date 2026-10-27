@@ -33,3 +33,12 @@ In a group chat, the header's **Setup Instant meeting** / **Schedule meeting** b
 - To check after deploy:
   - the group-chat header at desktop and mobile widths;
   - the CometChat header for non-in-house tenants.
+
+## Correction (2026-10-27) — this fix did not take effect; superseded by SAN-2062
+
+QA ([SAN-2062](https://linear.app/sanchiconnect/issue/SAN-2062), found while testing SAN-2061 on dev at 1440px) showed the buttons still wrapping under a long group name and touching each other. The header's computed style was `gap: normal` and `align-items: normal`.
+
+- **The utilities don't exist.** The app's compiled CSS ships only a hand-picked subset of Bootstrap utilities. `gap-3` and `d-inline-flex` are not in it, so those classes did nothing.
+- **The button stretch was missed.** Both buttons still had `ngbDropdownItem`, a leftover from a commented-out dropdown. It adds `.dropdown-item` (`display: block; width: 100%`).
+
+The working fix is `305c121e9`, which moves the layout into component SCSS. See [SAN-2062](SAN-2062-group-chat-meeting-buttons-wrap-on-desktop.md).

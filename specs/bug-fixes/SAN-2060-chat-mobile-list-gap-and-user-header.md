@@ -35,3 +35,13 @@ The page-level fix would be `g-0` on the `.row`, but that also moves the desktop
   - the chat list has an even gap on both sides;
   - a one-to-one chat header shows the avatar and name on the left;
   - desktop is unchanged.
+
+## Correction (2026-10-27) — desktop padding regression, fixed in SAN-2062
+
+`px-lg-4` is not in the app's compiled CSS, which ships only a subset of Bootstrap utilities. So `px-7 px-lg-4` applied 28px of padding on **desktop** too, and the "desktop unchanged" claim above was wrong.
+
+Fixed in `305c121e9` ([SAN-2062](SAN-2062-group-chat-meeting-buttons-wrap-on-desktop.md)):
+- the list header and rows are back to `px-4`;
+- a new `.chat-list-gutter` class in `message-list.component.scss` sets `padding: 0 1.75rem` only at `max-width: 991.98px`.
+
+The one-to-one header change (`justify-content-start align-items-center`) was fine: both classes exist.
