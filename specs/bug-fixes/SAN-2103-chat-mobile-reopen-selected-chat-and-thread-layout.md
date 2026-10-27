@@ -3,7 +3,7 @@
 - **Linear:** [SAN-2103](https://linear.app/sanchiconnect/issue/SAN-2103) (Repo: Frontend). Medium, assignee Vishali. Milestone: Enhancement → In-house chat speed up. Follow-up to [SAN-2102](https://linear.app/sanchiconnect/issue/SAN-2102).
 - **Classification:** mobile UI/layout plus one navigation bug. All changes are in sc-saas-frontend; there is no API, flag or tenant-scoping impact.
 - **Branch:** `ai_native_setup_vishali`. Commit: `76f4ebb24`.
-- **Status:** In Review in Linear (2026-10-27). Not yet merged into `ai_native_setup` or deployed.
+- **Status:** Done in Linear (2026-10-27). Not yet merged into `ai_native_setup` or deployed.
 
 ## Problem
 
