@@ -134,6 +134,11 @@ for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-adm
 done
 ```
 
+**Still missing (SAN-1627, checked 2026-10-26):** the workspace repo `sc-saas-ai-native` runs `module-map.yml`, which checks out all seven repos. It has no `CONTRACT_CHECK_TOKEN`, so the job fails every day with `CONTRACT_CHECK_TOKEN is not set in this repo`. To fix:
+1. Add `sc-saas-3rdparty-webservices` to the token's repository access.
+2. Run `gh secret set CONTRACT_CHECK_TOKEN -R sanchiconnect-org/sc-saas-ai-native`.
+3. Re-run `module-map`.
+
 ### Slack alerts for CI (SAN-1600)
 
 `ci-alerts.yml` in each of the seven repos posts to Slack when `ci`, `secret-scan` or a contract check fails on `main`/`master`, `stagingdemo` or `development` (a merge, or a release PR from one of them), and once more when that workflow is green again. `ai_native_setup` is left out on purpose. Without the secret the workflow only logs a warning.
@@ -191,7 +196,23 @@ The tenants API, tenants-admin and the AI analyzer deploy to production from `ma
 
 **How a deploy starts (Nirmal, 2026-10-14):** every deploy, on dev and production Jenkins alike, is started **by hand with "Build now"** on the job. No job runs by itself on a push (no webhook or poll trigger), and this stays manual for now. Merging to a branch therefore does not deploy it: the change goes live only when someone builds that branch's job, which is how a branch and its server drift apart (SAN-589).
 
-**Not recorded yet:** the dev Jenkins job names, and each dev job's server/URL.
+**Dev server 1 (`122.176.150.231`), recorded 2026-10-26.** DNS for `sanchidev.in` is at ClouDNS.
+
+| Service | Host | How it runs | Jenkins job builds |
+|---|---|---|---|
+| Frontend (PWA) | thub.sanchidev.in | Docker `sanchi-saas-dev-frontend` (Apache serving the build) | `sanchi-saas/frontend`: `ng build --configuration devserver --aot --build-optimizer --vendor-chunk=true --subresource-integrity`. `devserver` (SAN-158) is an optimised build with `environment.devserver.ts`: dev cockpit, Sentry environment `development`, Angular dev mode kept on purpose |
+| Backend | api.thub.sanchidev.in | Docker (pm2-runtime inside) | `ai_native_setup` |
+| Admin | adm.thub.sanchidev.in | Docker | `ai_native_setup` |
+| Tenants API / tenants-admin | api.tenants.sanchidev.in / adm.tenants.sanchidev.in | Docker | `ai_native_setup` |
+| 3rdparty gateway | (internal) | Docker | `ai_native_setup` |
+| AI analyzer | api.analyzer.sanchidev.in | **systemd** `ai-analyzer-dev` (user jenkins, uvicorn on 127.0.0.1:8005, nginx in front), code in `/var/www/ai-startups-analyzer` | `ai-services/ai-analyzer`: `git reset --hard origin/ai_native_setup`, a fresh venv with `pip install -r api/requirements.txt`, then `sudo -n systemctl restart ai-analyzer-dev` (a sudoers.d entry allows only that command) and a `curl /api/v1/health` check |
+
+Lessons from 2026-10-26 (SAN-2040, SAN-2044):
+- Until then the analyzer job checked out `AI_Analyzer`, a branch deleted on GitHub, so dev silently stayed on 31 July code.
+- A uvicorn started outside systemd held port 8005, so every restart failed with `address already in use`. If the analyzer looks stale, check `sudo ss -ltnp 'sport = :8005'` against `systemctl show -p MainPID ai-analyzer-dev`.
+- The dev server runs **Python 3.10**; production runs 3.11 or newer. A package that needs a newer Python fails the dev build (SQLAlchemy 2.1); the analyzer's CI tests both versions.
+
+**Not recorded yet:** dev server 2's job names and URLs.
 
 ## Deploy workflow (SAN-1602; all seven repos since 2026-10-19)
 
