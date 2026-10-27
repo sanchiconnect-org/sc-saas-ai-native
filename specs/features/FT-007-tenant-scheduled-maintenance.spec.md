@@ -2,7 +2,7 @@
 id: FT-007
 title: Tenant-scoped scheduled maintenance mode (per tenant or all tenants, with advance notice)
 type: feature
-status: in-review               # draft → approved → in-progress → in-review → done. Open questions resolved by Nirmal 2026-10-27; implemented 2026-10-27 (uncommitted), all four issues In Review.
+status: done                    # draft → approved → in-progress → in-review → done. Verified on dev by Nirmal 2026-10-27; SAN-2105..2108 Done (+ SAN-2109 build fix).
 linear: https://linear.app/sanchiconnect/project/enhancement-7825a8dad14b
 linear_milestone: FT-007 — Tenant-scoped scheduled maintenance mode
 owner: nirmal.s@sanchiconnect.com
