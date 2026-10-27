@@ -2,7 +2,7 @@
 
 - **Linear:** [SAN-2054](https://linear.app/sanchiconnect/issue/SAN-2054) (Repo: Frontend). Improvement, Medium, assignee Vishali. Follow-up to SAN-2042 / SAN-2053 ([list record](SAN-2041-SAN-2042-chat-conversation-list-slow.md), [messages record](SAN-2052-SAN-2053-chat-messages-slow.md)).
 - **Classification:** CODE_ERROR (performance).
-- **Branch:** `ai_native_setup_vishali`. Commits: `56b1ba06c` and `9d25a0310`. The second only restores the header file's CRLF line endings, so read the change as `git diff 56b1ba06c~1 9d25a0310`.
+- **Branch:** `ai_native_setup_vishali`. Commits: `56b1ba06c` and `9d25a0310` (`9d25a0310` only restores the header file's CRLF line endings, so read the change as `git diff 56b1ba06c~1 9d25a0310`). Follow-ups: `8dd06de39` (lazy emoji picker) and `beeebc903` (fast picker build), below.
 
 ## Problem
 
@@ -82,3 +82,30 @@ The APIs themselves were fast (messages 53 ms, list 156 ms).
 - runs Angular in dev mode (`production:false`). `docs/DEPLOYMENT.md`'s `--configuration devserver` does not exist in `angular.json`.
 
 These are minor next to the freeze.
+
+## Follow-up 2 (2026-10-27) — the first 😄 click was still slow
+
+**Report.** After `8dd06de39` the chat page itself was fast, but the first click on 😄 took a long time to open the picker. That is expected: the lazy mount moved the picker's build cost to that click rather than removing it.
+
+**Cause.** The picker renders 1,185 `emoji-button`s through the library's `emojiFallback` pipe, which for every emoji:
+- draws on a new canvas to test emoji support (`supportsEmoji()`), although the answer is the same for the whole browser;
+- returns a plain string, which Angular then sanitises for `[innerHTML]` (`parseFromString`).
+
+These are the same two hot spots as in the 17 s trace (55% + 35%).
+
+**Fix (sc-saas-frontend, `beeebc903`).**
+- New `src/app/modules/chat/emoji-fallback.patch.ts`. `patchEmojiFallbackPipe()` is called once when `chat.module.ts` loads and patches `EmojiFallback.prototype` (exported by the library as `ɵb`):
+  - `supportsEmoji()` runs the canvas test once and caches the result;
+  - `transform()` returns supported emoji as `bypassSecurityTrustHtml(emoji)`, so `[innerHTML]` skips sanitising. This is safe because the pipe only receives the library's own emoji table, never user input. Unsupported browsers still use the library's twemoji fallback.
+- `emoji-fallback.patch.spec.ts`: 3 specs.
+  - The canvas is probed at most once.
+  - A supported emoji comes back as trusted HTML.
+  - Empty input is left alone.
+
+**Measured.** A throwaway Karma bench (ChromeHeadless, `TestBed.createComponent(EmojiPickerComponent)` + `detectChanges()`) took **317 ms** without the patch and **29 ms** with it.
+
+**Verification.**
+- `bash scripts/gates.sh build unit-tests`: build exit 0, unit-tests 1338/1338 SUCCESS.
+- Not done: no manual browser check of the first 😄 click.
+
+**Upgrade note.** The patch reaches into `ngx-emoji-picker` 0.1.6 internals: the `ɵb` export, `domSanitizer`, `supportsEmoji` and `transform`. If the library is upgraded, the specs will fail if the patch no longer applies. At that point, consider replacing the picker, for example with `@ctrl/ngx-emoji-mart`, which is already a dependency through CometChat.

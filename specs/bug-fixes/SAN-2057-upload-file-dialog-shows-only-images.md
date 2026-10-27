@@ -3,6 +3,7 @@
 - **Linear:** [SAN-2057](https://linear.app/sanchiconnect/issue/SAN-2057) (Repo: Frontend). Bug, Medium, assignee Vishali.
 - **Classification:** CODE_ERROR.
 - **Branch:** `ai_native_setup_vishali`. Commit: `e7a1cceed`.
+- **Status:** Done in Linear (2026-10-27, closed at the request of the assignee). Pushed to `ai_native_setup_vishali`; not yet merged into `ai_native_setup`.
 
 ## Problem
 

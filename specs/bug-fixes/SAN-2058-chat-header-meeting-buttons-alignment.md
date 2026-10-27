@@ -3,6 +3,7 @@
 - **Linear:** [SAN-2058](https://linear.app/sanchiconnect/issue/SAN-2058) (Repo: Frontend). Improvement, Low, assignee Vishali.
 - **Classification:** UI/layout.
 - **Branch:** `ai_native_setup_vishali`. Commit: `68f8442b5`.
+- **Status:** Done in Linear (2026-10-27, closed at the request of the assignee). Pushed to `ai_native_setup_vishali`; not yet merged into `ai_native_setup`.
 
 ## Problem
 
