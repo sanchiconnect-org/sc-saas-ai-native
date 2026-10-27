@@ -124,20 +124,17 @@ On 2026-10-14 the repos moved from the `sanchiconnect` personal account to the *
 
 | Secret | Repos | What it is | Used by |
 |---|---|---|---|
-| `CONTRACT_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin, ai-startups-analyzer | Fine-grained personal access token created from the `sanchiconnect` account with **Resource owner: `sanchiconnect-org`** (a token owned by the personal account cannot read the org's repos). Repository access: those five repos **plus sanchiconnect-saas-tenants-admin** (tenants' `tenant-contract.yml` reads both PHP panels' copy of the ai_credit_* schema, SAN-1595), nothing else. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year (current token expires 2027-10-15); renew before it lapses. | The L3 contract checks, which check out the other repos of a contract to compare them: `flags.yml` (SAN-1592), `scoring-contract.yml` (SAN-1594) and `tenant-contract.yml` (SAN-1591). GitHub's built-in token can only read the repo it runs in. |
+| `CONTRACT_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin, ai-startups-analyzer, sc-saas-ai-native | Fine-grained personal access token created from the `sanchiconnect` account with **Resource owner: `sanchiconnect-org`** (a token owned by the personal account cannot read the org's repos). Repository access: the seven product repos (the five above **plus sanchiconnect-saas-tenants-admin**, which tenants' `tenant-contract.yml` reads for the ai_credit_* schema, SAN-1595, **and sc-saas-3rdparty-webservices**, which `module-map` reads, SAN-1627), nothing else. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year (current token expires 2027-10-15); renew before it lapses. | The L3 contract checks, which check out the other repos of a contract to compare them: `flags.yml` (SAN-1592), `scoring-contract.yml` (SAN-1594), `tenant-contract.yml` (SAN-1591), the frontend's `api-types.yml`, and the workspace's `module-map.yml` (SAN-1627). GitHub's built-in token can only read the repo it runs in. |
 
-To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token (fine-grained tokens are always created from a personal account's settings, never the org's), set Resource owner to `sanchiconnect-org`, then the settings above. Check the token's page afterwards: it must list the six repos and Contents: Read-only. A token saved with repositories but no permission keeps no repositories at all, and the checks then fail at checkout with `403 Write access to repository not granted`. Test it with `curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $T" https://api.github.com/repos/sanchiconnect-org/sc-saas-backend/contents/README.md` (200 = good, 404 = no access). Then add it as a secret to the five repos that run the checks (tenants-admin only needs to be readable, it runs none) without pasting it anywhere else:
+To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token (fine-grained tokens are always created from a personal account's settings, never the org's), set Resource owner to `sanchiconnect-org`, then the settings above. Check the token's page afterwards: it must list the seven product repos and Contents: Read-only. A token saved with repositories but no permission keeps no repositories at all, and the checks then fail at checkout with `403 Write access to repository not granted`. Test it with `curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $T" https://api.github.com/repos/sanchiconnect-org/sc-saas-backend/contents/README.md` (200 = good, 404 = no access). Then add it as a secret to the six repos that run the checks (tenants-admin and 3rdparty only need to be readable; they run none) without pasting it anywhere else:
 
 ```bash
-for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer; do
+for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer sc-saas-ai-native; do
   gh secret set CONTRACT_CHECK_TOKEN -R sanchiconnect-org/$r   # paste the token when prompted
 done
 ```
 
-**Still missing (SAN-1627, checked 2026-10-26):** the workspace repo `sc-saas-ai-native` runs `module-map.yml`, which checks out all seven repos. It has no `CONTRACT_CHECK_TOKEN`, so the job fails every day with `CONTRACT_CHECK_TOKEN is not set in this repo`. To fix:
-1. Add `sc-saas-3rdparty-webservices` to the token's repository access.
-2. Run `gh secret set CONTRACT_CHECK_TOKEN -R sanchiconnect-org/sc-saas-ai-native`.
-3. Re-run `module-map`.
+**Token regenerated 2026-10-27** (SAN-1627) and set on all six repos above. A regenerated token must be updated on all six, or their contract checks fail at checkout.
 
 ### Slack alerts for CI (SAN-1600)
 
