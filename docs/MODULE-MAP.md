@@ -11,8 +11,8 @@ For each module's detail, follow its spec link or the repo's `specs/<repo>-modul
 | sanchiconnect-saas-tenants | 11 | 0 | 0 |
 | sc-saas-backend | 70 | 0 | 0 |
 | sc-saas-frontend | 87 | 0 | 0 |
-| sc-saas-admin | 78 | 0 | 0 |
-| sanchiconnect-saas-tenants-admin | 13 | 0 | 0 |
+| sc-saas-admin | 76 | 0 | 0 |
+| sanchiconnect-saas-tenants-admin | 12 | 0 | 0 |
 | ai-startups-analyzer | 1 | 0 | 0 |
 | sc-saas-3rdparty-webservices | 8 | 0 | 0 |
 
@@ -392,7 +392,7 @@ Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested
 | voice-agent | in-review | 2026-10-06 |  | [src/core/voice-agent/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/core/voice-agent/module.spec.md) |
 | zenxai | in-review | 2026-09-29 |  | [src/core/zenxai/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/core/zenxai/module.spec.md) |
 | zoho | draft | 2026-07-17 |  | [src/core/zoho/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/core/zoho/module.spec.md) |
-| application-management | draft | 2026-10-08 |  | [src/modules/application-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/application-management/module.spec.md) |
+| application-management | draft | 2026-10-22 |  | [src/modules/application-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/application-management/module.spec.md) |
 | audit-log | draft | 2026-06-17 |  | [src/modules/audit-log/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/audit-log/module.spec.md) |
 | auth | draft | 2026-07-16 |  | [src/modules/auth/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/auth/module.spec.md) |
 | auth-external | draft | 2026-06-17 |  | [src/modules/auth-external/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/auth-external/module.spec.md) |
@@ -413,7 +413,7 @@ Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested
 | events | draft | 2026-10-08 |  | [src/modules/events/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/events/module.spec.md) |
 | facility_management | draft | 2026-07-16 |  | [src/modules/facility_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/facility_management/module.spec.md) |
 | factacy | draft | 2026-06-17 |  | [src/modules/factacy/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/factacy/module.spec.md) |
-| form-management | draft | 2026-06-17 |  | [src/modules/form-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/form-management/module.spec.md) |
+| form-management | draft | 2026-10-22 |  | [src/modules/form-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/form-management/module.spec.md) |
 | global | draft | 2026-09-24 |  | [src/modules/global/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/global/module.spec.md) |
 | glossary | draft | 2026-06-17 |  | [src/modules/glossary/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/glossary/module.spec.md) |
 | grants | draft | 2026-06-17 |  | [src/modules/grants/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/grants/module.spec.md) |
@@ -439,9 +439,9 @@ Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested
 | partner | draft | 2026-10-07 |  | [src/modules/partner/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/partner/module.spec.md) |
 | partner-branding | in-review | 2026-08-20 |  | [src/modules/partner-branding/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/partner-branding/module.spec.md) |
 | partner-domain-access | in-review | 2026-08-20 |  | [src/modules/partner-domain-access/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/partner-domain-access/module.spec.md) |
-| payment-management | draft | 2026-06-17 |  | [src/modules/payment-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/payment-management/module.spec.md) |
+| payment-management | draft | 2026-10-22 |  | [src/modules/payment-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/payment-management/module.spec.md) |
 | portfolio-management | draft | 2026-06-17 |  | [src/modules/portfolio-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/portfolio-management/module.spec.md) |
-| power-pitch-module | draft | 2026-06-19 | frontend/pitch-deck-management | [src/modules/power-pitch-module/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/power-pitch-module/module.spec.md) |
+| power-pitch-module | draft | 2026-10-22 | frontend/pitch-deck-management | [src/modules/power-pitch-module/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/power-pitch-module/module.spec.md) |
 | program-management | draft | 2026-10-08 |  | [src/modules/program-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/program-management/module.spec.md) |
 | program-office-members | draft | 2026-10-07 |  | [src/modules/program-office-members/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/program-office-members/module.spec.md) |
 | public-portal | draft | 2026-09-09 |  | [src/modules/public-portal/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/public-portal/module.spec.md) |
@@ -454,8 +454,8 @@ Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested
 | startup-recognition-id | draft | 2026-08-13 |  | [src/modules/startup-recognition-id/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/startup-recognition-id/module.spec.md) |
 | task-management | draft | 2026-06-17 |  | [src/modules/task-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/task-management/module.spec.md) |
 | tickets | draft | 2026-07-16 |  | [src/modules/tickets/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/tickets/module.spec.md) |
-| user | draft | 2026-10-12 |  | [src/modules/user/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/user/module.spec.md) |
-| verifications | draft | 2026-07-16 |  | [src/modules/verifications/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/verifications/module.spec.md) |
+| user | draft | 2026-10-22 |  | [src/modules/user/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/user/module.spec.md) |
+| verifications | draft | 2026-10-22 |  | [src/modules/verifications/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/verifications/module.spec.md) |
 | vs-programs-management | draft | 2026-10-08 |  | [src/modules/vs-programs-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/vs-programs-management/module.spec.md) |
 
 ### sc-saas-frontend
@@ -488,7 +488,7 @@ Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested
 | custom-onboarding | draft | 2026-08-06 | backend/global | [src/app/modules/custom-onboarding/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/custom-onboarding/module.spec.md) |
 | dashboard | draft | 2026-10-08 | backend/dashboard, backend/metrics, backend/notifications, backend/startup | [src/app/modules/dashboard-v2/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/dashboard-v2/module.spec.md) |
 | deeptech-news | draft | 2026-07-19 | backend/global | [src/app/modules/deeptech-news/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/deeptech-news/module.spec.md) |
-| dynamic-forms | draft | 2026-10-07 |  | [src/app/modules/dynamic-forms/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/dynamic-forms/module.spec.md) |
+| dynamic-forms | draft | 2026-10-23 |  | [src/app/modules/dynamic-forms/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/dynamic-forms/module.spec.md) |
 | event-agenda | draft | 2026-07-16 | backend/events, backend/global | [src/app/modules/event-agenda/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/event-agenda/module.spec.md) |
 | external-facilities-management | draft | 2026-07-19 | backend/facility_management | [src/app/modules/external-facilities-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/external-facilities-management/module.spec.md) |
 | facilities | draft | 2026-07-16 | backend/facility_management, tenants/ecosystem-facilities | [src/app/modules/facilities-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/facilities-management/module.spec.md) |
@@ -526,7 +526,7 @@ Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested
 | product-updates | draft | 2026-07-19 | backend/global | [src/app/modules/product-updates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/product-updates/module.spec.md) |
 | program-office | draft | 2026-10-07 |  | [src/app/modules/program-office/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/program-office/module.spec.md) |
 | program-office-team | draft | 2026-07-19 |  | [src/app/modules/program-office-team/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/program-office-team/module.spec.md) |
-| programs | draft | 2026-10-07 | backend/application-management, backend/meetings, backend/payment-management | [src/app/modules/programs/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/programs/module.spec.md) |
+| programs | draft | 2026-10-23 | backend/application-management, backend/meetings, backend/payment-management | [src/app/modules/programs/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/programs/module.spec.md) |
 | public | draft | 2026-07-19 |  | [src/app/modules/public/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/public/module.spec.md) |
 | public-events | draft | 2026-07-19 | backend/events | [src/app/modules/public-events/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/public-events/module.spec.md) |
 | public-shared | draft | 2026-07-19 |  | [src/app/modules/public-shared/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/public-shared/module.spec.md) |
@@ -558,7 +558,7 @@ Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested
 | command_centre | draft | 2026-10-12 | tenants/subscriptions | [modules/command_centre.module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/command_centre.module.spec.md) |
 | ads-management | draft | 2026-07-17 |  | [modules/ads-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/ads-management/module.spec.md) |
 | ai_credits | draft | 2026-09-29 (ZenxAI voice-call billing — SAN-1136/SAN-1139; ledger display + voice append-only trail — SAN-1150) | backend/voice-agent | [modules/ai_credits/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/ai_credits/module.spec.md) |
-| ajax-handlers | draft | 2026-07-16 | backend/ecosystem | [modules/ajax/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/ajax/module.spec.md) |
+| ajax-handlers | draft | 2026-10-20 | backend/ecosystem | [modules/ajax/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/ajax/module.spec.md) |
 | application-management | draft | 2026-10-08 | analyzer/core-bootstrap, backend/application-management, backend/program-management, backend/voice-agent, backend/zenxai | [modules/application_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/application_management/module.spec.md) |
 | auth | draft | 2026-07-16 | backend/auth, backend/global | [modules/auth/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/auth/module.spec.md) |
 | aws | draft | 2026-07-17 |  | [modules/aws/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/aws/module.spec.md) |
@@ -580,7 +580,6 @@ Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested
 | events | draft | 2026-09-25 |  | [modules/events/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/events/module.spec.md) |
 | events-meetings | draft | 2026-07-16 | backend/events, backend/meetings | [modules/events-meetings/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/events-meetings/module.spec.md) |
 | facilities | draft | 2026-07-16 | backend/facility_management, tenants/ecosystem-facilities, tenants/ip-management + ecosystem-facilities | [modules/facilities/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/facilities/module.spec.md) |
-| filemanager | draft | 2026-07-17 |  | [modules/filemanager/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/filemanager/module.spec.md) |
 | finance-memberships | draft | 2026-07-16 | backend/memberships, backend/payment-management | [modules/finance-memberships/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/finance-memberships/module.spec.md) |
 | finance_management | draft | 2026-07-17 | tenants-admin/ai_credits | [modules/finance_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/finance_management/module.spec.md) |
 | form-management | draft | 2026-07-16 | backend/form-management | [modules/form-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/form-management/module.spec.md) |
@@ -617,7 +616,6 @@ Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested
 | recruitment-partners | draft | 2026-07-17 |  | [modules/recruitment-partners/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/recruitment-partners/module.spec.md) |
 | reporting | draft | 2026-07-16 |  | [modules/reporting/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/reporting/module.spec.md) |
 | reporting-certificates | draft | 2026-06-18 |  | [modules/reporting-certificates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/reporting-certificates/module.spec.md) |
-| reporting_backup | draft | 2026-07-17 |  | [modules/reporting_backup/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/reporting_backup/module.spec.md) |
 | resource-files | draft | 2026-07-17 |  | [modules/resource-files/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/resource-files/module.spec.md) |
 | scrapper | draft | 2026-07-17 |  | [modules/scrapper/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/scrapper/module.spec.md) |
 | stakeholder-crud | draft | 2026-08-20 | backend/auth, backend/corporate, backend/investor, backend/mentors, backend/partner, backend/startup, tenants/ecosystem | [modules/stakeholder-crud/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/stakeholder-crud/module.spec.md) |
@@ -646,7 +644,6 @@ Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested
 | cors_domain_management | in-review | 2026-08-20 | tenants/cors-domains | [modules/cors_domain_management/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/cors_domain_management/module.spec.md) |
 | csv | draft | 2026-07-19 |  | [modules/csv/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/csv/module.spec.md) |
 | developer | draft | 2026-07-16 |  | [modules/developer/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/developer/module.spec.md) |
-| filemanager | draft | 2026-07-19 |  | [modules/filemanager/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/filemanager/module.spec.md) |
 | finance_management | draft | 2026-07-19 |  | [modules/finance_management/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/finance_management/module.spec.md) |
 | tenant_management | in-review | 2026-09-28 |  | [modules/tenant_management/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/tenant_management/module.spec.md) |
 | upload | draft | 2026-07-19 |  | [modules/upload/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/upload/module.spec.md) |
