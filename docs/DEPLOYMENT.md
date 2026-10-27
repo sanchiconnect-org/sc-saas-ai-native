@@ -202,11 +202,12 @@ The tenants API, tenants-admin and the AI analyzer deploy to production from `ma
 | Admin | adm.thub.sanchidev.in | Docker | `ai_native_setup` |
 | Tenants API / tenants-admin | api.tenants.sanchidev.in / adm.tenants.sanchidev.in | Docker | `ai_native_setup` |
 | 3rdparty gateway | (internal) | Docker | `ai_native_setup` |
-| AI analyzer | api.analyzer.sanchidev.in | **systemd** `ai-analyzer-dev` (user jenkins, uvicorn on 127.0.0.1:8005, nginx in front), code in `/var/www/ai-startups-analyzer` | `ai-services/ai-analyzer`: `git reset --hard origin/ai_native_setup`, a fresh venv with `pip install -r api/requirements.txt`, then `sudo -n systemctl restart ai-analyzer-dev` (a sudoers.d entry allows only that command) and a `curl /api/v1/health` check |
+| AI analyzer | api.analyzer.sanchidev.in | **systemd** `ai-analyzer-dev` (user jenkins, uvicorn on 127.0.0.1:8005, nginx in front), code in `/var/www/ai-startups-analyzer` | `ai-services/ai-analyzer`: `git reset --hard origin/ai_native_setup`, a fresh venv with `pip install -r api/requirements.txt`, then `sudo -n systemctl restart ai-analyzer-dev` (`/etc/sudoers.d/jenkins-ai-analyzer` allows only that command). It then waits up to 5 min for `/api/v1/health` with `"db":true` and fails unless the service's MainPID is the process on 8005. **No pm2**: until 2026-10-27 the job also ran `pm2 start ecosystem.config.js`, a second uvicorn on 8005 that fought systemd for the port |
 
 Lessons from 2026-10-26 (SAN-2040, SAN-2044):
 - Until then the analyzer job checked out `AI_Analyzer`, a branch deleted on GitHub, so dev silently stayed on 31 July code.
-- A uvicorn started outside systemd held port 8005, so every restart failed with `address already in use`. If the analyzer looks stale, check `sudo ss -ltnp 'sport = :8005'` against `systemctl show -p MainPID ai-analyzer-dev`.
+- The job also started the analyzer with pm2 (`ai-analyzer-dev-api`, from `api/ecosystem.config.js`), so pm2 and systemd fought for port 8005: about 100 `address already in use` Sentry events (AI-STARTUPS-ANALYZER-8). Fixed 2026-10-27: pm2's entry deleted (`pm2 delete ai-analyzer-dev-api; pm2 save`, with `PATH=/var/lib/jenkins/.npm-global/bin:/home/sanchiconnect/.nvm/versions/node/v22.17.1/bin` and `PM2_HOME=/var/lib/jenkins/.pm2`), and the job restarts only the systemd service. If the analyzer looks stale, check `sudo ss -ltnp 'sport = :8005'` against `systemctl show -p MainPID ai-analyzer-dev`.
+- After a restart the analyzer can stop answering for 1–2 minutes while it resumes stopped runs; the job's health check allows 5 minutes.
 - The dev server runs **Python 3.10**; production runs 3.11 or newer. A package that needs a newer Python fails the dev build (SQLAlchemy 2.1); the analyzer's CI tests both versions.
 
 **Not recorded yet:** dev server 2's job names and URLs.
