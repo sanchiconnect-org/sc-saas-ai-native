@@ -227,9 +227,12 @@ Change them in every repo together. They grew out of the sc-saas-3rdparty-webser
 
 | Push to | Tag | Environment |
 |---|---|---|
+| `ai_native_setup` | none (a `dev-YYYY.MM.DD-<sha7>` label is only passed to Jenkins; no git tag, no Release) | `development` |
 | `stagingdemo` | `staging-YYYY.MM.DD-<sha7>` | `staging` |
 | `main`/`master` | `YYYY.MM.DD-<sha7>` | `production` |
 | `sanchiconnect` (frontend only) | `sanchiconnect-YYYY.MM.DD-<sha7>` | `sanchiconnect` |
+
+**Decided 2026-10-27 (Aman, after Nirmal): only dev deploys automatically.** The `development` Environment holds the dev Jenkins secrets (a Jenkins user that can only build the dev jobs; for a job inside a Jenkins folder, put the folder in `JENKINS_URL`, e.g. `https://<dev-jenkins>/job/sanchi-saas`, and the job name alone in `JENKINS_JOB`). `staging` and `production` get **no Jenkins secrets**: the workflow still tags the release, then says "deploy by hand with Build now" and ends green. Production has many client jobs, so each is built by a person.
 
 The `sanchiconnect` Environment holds the `Demo - Frontend Sanchi Connect` job and needs its own reviewer. Every repo's deploy stays inert until its Environments and secrets exist (SAN-1597).
 
