@@ -269,7 +269,7 @@ sc-saas-admin (SAN-2108)
 - [ ] AC-19 While live, every route through `index.php` (module pages, `auth/login`, partner portal) returns
       HTTP 503 with a maintenance page showing message and expected end; `ajax/*` and other XHR requests get a
       JSON 503 instead of HTML. `health.php` and `easebuzz_callback.php` keep working. Bypass (Q4): `auth/login` stays reachable for
-      everyone; after login, users passing `checkIsDevOrSuperAdminRole()` (`includes/core_functions.php:984`)
+      everyone; after login, developers (`tenantMaintenanceCanBypass()`: `is_dev` or the developer role)
       get through with a visible "maintenance is live" notice, everyone else is logged-in-blocked with the 503
       page. Non-bypass users who try to log in see the 503 page after authentication.
 - [ ] AC-20 After `ends_at` (or End now / Cancel), the admin works again on the next request with no deploy.
@@ -330,7 +330,7 @@ Cross-repo
 3. `themes/default/html/index.php:147` → `$maintenance = $this->maintenanceMessage;` then test the local
    (C3). Times through `convertToKolkataTime()`.
 4. Root `index.php`, right after `config/config.php` / before the jury NDA gate (`:71`): if live, let
-   `auth/login` (and logout) through; for every other route, unless `checkIsDevOrSuperAdminRole()` is true
+   `auth/login` (and logout) through; for every other route, unless `tenantMaintenanceCanBypass()` is true (developers only)
    (Q4) → `http_response_code(503)`, `Retry-After`, then JSON for XHR/`modules/ajax/*` requests or a new
    `modules/maintenance-live.php` page (self-contained like `database-connectivity-error.php`, added to
    `tests/auth-gates.json` `allowList` as `public` with reason/owner). Bypassing users see a top notice
@@ -421,8 +421,9 @@ None — all resolved by Nirmal on 2026-10-27 (see Decisions).
 1. **Link table.** One window can cover several selected tenants (`tenant_maintenance_tenants`).
 2. **sc-saas-backend 503 enforcement → phase 2.** No backend change in this spec.
 3. **No advance email/notification in v1.** The banner (PWA + sc-saas-admin) is the notice.
-4. **Bypass.** sc-saas-admin: developer + super admin (`checkIsDevOrSuperAdminRole()`) can use the panel
-   while live; `auth/login` stays reachable for everyone so they can sign in; everyone else gets the 503 page.
+4. **Bypass.** sc-saas-admin: **developers only** (`tenantMaintenanceCanBypass()`: `is_dev` or the
+   `developer_role_id` role) can use the panel while live — narrowed from "developer + super admin" by Nirmal on
+   2026-10-27 after the dev check; super admins see the maintenance page like everyone else; `auth/login` stays reachable for everyone so they can sign in; everyone else gets the 503 page.
    `db_admin.php` is untouched (already `is_dev`-only). PWA: **no bypass** — every user sees the
    maintenance page.
 5. **Legacy global-switch rows** stay as `scope = 'all'` manual-override rows (AC-2). The `maintenance_mode`
