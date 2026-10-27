@@ -47,6 +47,18 @@ created: 2026-09-01
 
 # Platform-wide maintenance mode — admin switch + branded frontend page
 
+> **Superseded in part by [FT-007](FT-007-tenant-scheduled-maintenance.spec.md) (2026-10-27, SAN-2105..2108).**
+> Read FT-007 first. The following points here are no longer true (FT-007 contradiction C5):
+> - Evidence #6 ("`sc-saas-admin` has zero references to `maintenance_mode`"): it already read `tenant_maintenance`
+>   (`modules/index.php`), and since FT-007 it shows the notice banner and **blocks the panel with a 503 while
+>   maintenance is live** (developers / super admins can still sign in and work).
+> - Evidence #7 ("tenants-admin has no UI for `tenant_maintenance`"): `modules/maintenance_mode.php` exists (59c91ea)
+>   and since FT-007 schedules windows for all or selected tenants.
+> - Out of scope "admins and partner staff must keep working during a maintenance window", the related acceptance
+>   criterion, and the "global, all-tenants-at-once by design" / "no time-based activation" exclusions: replaced
+>   by FT-007 (per-tenant windows, notice / start / end, sc-saas-admin blocked while live).
+> The branded frontend maintenance page described here still applies; FT-007 adds inputs to it.
+
 ## Reference
 
 Rough idea, not sourced from an existing Linear issue — no `/from-linear` pull. Drafted directly from a
