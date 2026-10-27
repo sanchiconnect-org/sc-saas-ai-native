@@ -10,6 +10,23 @@ One row per production deploy, added the same day by the person who pressed "Bui
 4. **Smoke check** (the release plan's checks, or at least: the app starts, one tenant loads, and the changed feature works).
 5. **Add the row below**: newest first. "Verified by" is a person other than the deployer when possible.
 
+## Merged, waiting for a build
+
+Merged to a production branch but not built yet: a merge alone changes nothing on the servers. On 27 Oct the production backend was still running code from 14 Oct (SC-SAAS-BACKEND-3M, fixed on `main` by SAN-1872, still fired at 14:31 IST). Builds are planned for 31 Oct – 1 Nov (SAN-1939). When a job is built, move its row into the deploy table below and fill in who deployed, who verified it and the smoke result.
+
+| Merged (IST) | Merge commit | Repo → branch | What |
+|---|---|---|---|
+| 2026-10-27 16:30 | #1972 `ae1608db` | sc-saas-frontend → `stagingdemo` | SAN-1939 stage 2: 89 commits incl. SAN-1959/2000 applicant token, SAN-1490 socket auth, SAN-2018 |
+| 2026-10-27 11:39 | #49 `628b8263` | sanchiconnect-saas-tenants-admin → `main` | SAN-1939 release `stagingdemo → main` |
+| 2026-10-27 11:37 | #2054 `cc8fb88d` | sc-saas-backend → `main` | SAN-1939 release `stagingdemo → main`: applicant-token route and `forms.public_share_token` (needed by the production admin since 26 Oct), SAN-1872. Needs `FACTACY_API_KEY` and the `log`-mode keys first |
+| 2026-10-27 11:34 | #210 `5ba82490` | sanchiconnect-saas-tenants → `master` | SAN-1939 release `stagingdemo → master` (`TENANT_SETTINGS_KEY_MODE=log`) |
+| 2026-10-27 10:55 | #2053 `c0356b69` | sc-saas-backend → `stagingdemo` | SAN-1939 stage 2 |
+| 2026-10-27 10:23 | #209 `7c0a9dbe` | sanchiconnect-saas-tenants → `stagingdemo` | SAN-1939 stage 2 |
+| 2026-10-27 10:22 | #48 `658ea81c` | sanchiconnect-saas-tenants-admin → `stagingdemo` | SAN-1939 stage 2 |
+| 2026-10-27 10:09 | #2643 `0763339a` | sc-saas-admin → `main` | SAN-2048 hotfix: Learning Management → Reports "Subquery returns more than 1 row" |
+| 2026-10-27 10:09 | #40 `af1c90e7` | sc-saas-3rdparty-webservices → `master` | SAN-1939 release (`GATEWAY_KEY_MODE=log`); SAN-2049 SMTP 465 is not in it (still on `ai_native_setup`) |
+| 2026-10-26 | #93 `277ceb34` | ai-startups-analyzer → `main` | Already in the table below as "not live yet"; still needs "Build now" |
+
 | Date (IST) | Tag / commit | Repo → branch | Jobs / tenants | What (PRs, issues) | Deployed by | Verified by | Smoke result | Sentry release |
 |---|---|---|---|---|---|---|---|---|
 | 2026-10-26 | #2642 (merge `039df75a`, untagged) | sc-saas-admin → `main` | SaaS - Backoffice (Admin) | SAN-2043: analysis worker defines `imagekit_url` ("Couldn't prepare analysis" on forms with image/video answers) | _to fill_ | _to fill_ | _to fill_ | not set |
