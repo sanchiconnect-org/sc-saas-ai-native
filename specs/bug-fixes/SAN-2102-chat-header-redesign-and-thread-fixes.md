@@ -66,6 +66,44 @@ In the in-house chat (`modules/chat/.../conversation-details`):
     - switching chats with a thread open;
     - the CometChat header for non-in-house tenants.
 
+## Follow-up (2026-10-28): long chat names hid the meeting buttons on mobile and tablet
+
+No separate Linear issue; this fixes a layout gap in the header redesign above. Commit: `sc-saas-frontend@51a7dc1e9` on `ai_native_setup_vishali`, pushed.
+
+### Problem
+
+With a long chat name (e.g. "Pilani Innovation Entrepreneurship Development Society (Pieds) - Meity Incubator / Vami Dummy"):
+- **Mobile and tablet (<992px):** the header grew past the card. The name didn't truncate, and "Setup Instant meeting" / "Schedule meeting" were pushed off the right edge.
+- **iPad Pro (1032px, chat list beside the chat):** the desktop single-row header had no room. The name shrank to "P…" and "Schedule meeting" was cut off. The message area's right edge was clipped as well.
+
+### Root cause
+
+- **Below 992px — Metronic's wrap.** The global `.card-header` sets `flex-wrap: wrap`. In the header's column layout, a wrapping line is as wide as its widest item, so the long `nowrap` name set the header's width. The desktop rule already set `nowrap`, which is why desktop was unaffected.
+- **992px and up — no room for one row.** The single-row layout kept the full-label buttons at their natural width (`flex-shrink: 0`), however narrow the card was.
+- **Clipped messages.** The header's minimum width (the buttons plus padding) could stretch `.chat-main-wrapper`, which had no `min-width: 0`, past its column. This is the likely cause of the clipped right edge.
+
+### Fix
+
+In `conversation-details.component.scss`:
+- **Mobile/tablet header:** `flex-wrap: nowrap` in the base `#kt_chat_messenger_header` rule, so the name truncates and the buttons sit on their own row.
+- **Desktop header (≥992px):** `flex-wrap: wrap`, with a 260px `flex-basis` on `.chat-header-info` and `margin-left: auto; max-width: 100%` on `.chat-header-actions`. When the card is too narrow, the buttons wrap to their own right-aligned row. At 1440px and wider they stay on one row.
+- **Chat wrapper:** `.chat-main-wrapper { min-width: 0 }`.
+
+In `add-meeting-button.component.scss`:
+- **Button group:** `.meeting-actions` gets `flex-wrap: wrap; justify-content: flex-end`, so on narrow phones the two buttons stack instead of overflowing.
+- **CometChat header:** it uses the same component. It only changes if the buttons don't fit on one line.
+
+### Verification
+
+- Tested in headless Chrome on a page built with the app's real `build.css`, the protected-layout wrappers and a 280px sidebar.
+  - The bug reproduced there before the fix.
+  - After the fix, at 500, 700, 960, 1032, 1440 and 1920px, the name truncates with "…", both buttons are visible, and the card stays inside its column.
+- Not done:
+  - `npm run gates` was not run.
+  - No automated tests were added (no guardian skill yet).
+  - No check in the running app. On dev, check a long-named group chat in iPhone, iPad Pro and 1440px views, with and without a thread open.
+- On that test page the chat page also scrolls sideways a little at 1032 and 1440px. This comes from the page's own `.row` margins (with the container's padding set to 0), not from the chat header. It wasn't changed; if it shows up in the real app, it needs its own issue.
+
 ## Open
 
 - On mobile, the thread panel still takes 40% of the width (`w-40`). This is outside SAN-2102's scope; a separate issue is needed if it should become full-screen on small viewports.
