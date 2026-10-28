@@ -2,7 +2,7 @@
 id: SAN-2112
 title: "createMembership() for application_programs orders inserts a null profile_type (root cause behind SAN-2026)"
 type: bug-fix
-status: in-review
+status: done
 linear: https://linear.app/sanchiconnect/issue/SAN-2112
 sentry: [SC-SAAS-BACKEND-66]
 repos: [backend]
