@@ -32,9 +32,15 @@ The most recent production "is duplicated" event (H7, 2026-10-11, `hub.startupsi
 
 Lowering is manual (`node scripts/loader-floor.js lower`); the check prints that hint when the count falls.
 
-## Not done (phase 2)
-Give the 6 shared components their own `loaderId` (or the `renderLoader` switch SAN-920 used). A bulk rename of all
-91 is unsafe because modals rely on the shared master loader.
+## Phase 2 (2026-10-21): own loaderId where the component drives its own loader
+Three shared components start and stop their own loader. They now use a named loader instead of `master`:
+- `change-profile-type-modal` (`change-profile-type-loader`). Opened from the profile menu over any page, so it clashed with that page's bare loader.
+- `book-facilitys` (`book-facilitys-loader`). Embedded in `facility-details`, which has no loader of its own.
+- `book-facility` (`book-facility-loader`). Currently not used anywhere.
+
+Each has `start()`/`stop()` → `startLoader(id)`/`stopLoader(id)`. The floor went from 91 to 88.
+
+Left as they are, on purpose: `dashboard-common-calender` and `supporting-documents`. They never start a loader themselves; their bare loader is the only `master` display on most dashboard pages (no page-level loader there), so renaming it would remove those pages' spinners. `dashboard-common-calender` already has the SAN-920 `renderLoader` switch for pages that do have their own loader. A bulk rename of the rest stays unsafe, because modals rely on the shared master loader.
 
 ## Verification
 No automated test framework covers build scripts; verified by running it:

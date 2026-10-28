@@ -42,6 +42,8 @@ REPOS = [
     ("sc-saas-3rdparty-webservices", "webservices", ["src/modules"]),
 ]
 SHORT = {r: s for r, s, _ in REPOS}
+# folders under a module root that hold no module: Alembic migrations and the test suite
+NOT_MODULES = {("ai-startups-analyzer", "api/migrations"), ("ai-startups-analyzer", "api/tests")}
 REPO_RE = re.compile(r"(sanchiconnect-saas-tenants-admin|sanchiconnect-saas-tenants|sc-saas-backend|sc-saas-frontend|"
                      r"sc-saas-admin|ai-startups-analyzer|sc-saas-3rdparty-webservices)/([\w./-]*)")
 REVERSE_KEYS = ("consumer", "consumed_by")
@@ -95,7 +97,7 @@ def load():
             for root in roots:
                 if f.startswith(root + "/"):
                     rest = f[len(root) + 1:].split("/")
-                    if len(rest) > 1:
+                    if len(rest) > 1 and (repo, root + "/" + rest[0]) not in NOT_MODULES:
                         folders[repo].add(root + "/" + rest[0])
         for f in sorted(files):
             if not f.endswith("module.spec.md"):

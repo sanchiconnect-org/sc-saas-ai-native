@@ -28,7 +28,13 @@ ai_native_setup → development → stagingdemo → main / master
 
 "Automatically delete head branches" is **off** in every repo. It was briefly on (13 Oct) and deleted the long-lived `ai_native_setup_<name>` branches as soon as their PRs merged; those were restored at their exact commits. Turn it on only once the team works on short-lived per-issue branches.
 
-The per-developer `ai_native_setup_<name>` branches are replaced by short-lived topic branches (`<name>/san-123-slug`, the branch name Linear generates), deleted after merge.
+Each developer keeps one long-lived personal branch, `ai_native_setup_<name>` (confirmed 2026-10-19, replacing the 2026-10-13 plan to move to short-lived topic branches). Work starts on it, and it reaches the release path through `ai_native_setup`:
+
+```
+ai_native_setup_<name> → ai_native_setup → development → stagingdemo → main / master
+```
+
+The personal branches are not deployed and are never deleted ("Automatically delete head branches" stays off). Only `ai_native_setup` and the branches after it deploy.
 
 ## Production hotfixes
 
@@ -53,6 +59,16 @@ Every deploying branch has a gate; nothing deploys unverified.
 | `stagingdemo` | Checks + review on the PR | Review required since 13 Oct 2026; checks required from L2 |
 | `main` / `master` | Checks + review on the PR (hotfixes included) | Review required since 13 Oct 2026; checks required from L2 |
 
+**Unguarded routes (SAN-1937, 2026-10-19).** `npm run gates` in sc-saas-backend, sanchiconnect-saas-tenants and sc-saas-3rdparty-webservices includes a required `unguarded-routes` gate (`scripts/unguarded-routes.js`, same file in all three).
+- It fails on any controller route without an auth guard that is neither allow-listed (kind, reason, owner) nor among the recorded known gaps (`unreviewed`, which may only shrink).
+- Baseline:
+
+| Repo | Routes | Guarded | Allow-listed | Known gaps |
+|---|---|---|---|---|
+| backend | 853 | 447 | 2 | 404 |
+| tenants | 72 | 13 | 4 | 55 |
+| 3rd-party | 36 | 0 | 1 | 35 |
+
 ### Branch protection settings (SAN-1569)
 
 GitHub repository rulesets, identical in all seven repos. **In effect** (re-checked 2026-10-14): the rulesets moved with the repos to `sanchiconnect-org` under the same IDs, were unenforceable for a few hours while the organization was on the free plan (the API answered "Upgrade to GitHub Pro"), and are enforced again since the organization moved to **GitHub Team** the same day. Both rulesets are `active` with no bypass actors in all seven repos, and GitHub reports `deletion, non_fast_forward, pull_request` on every release branch and `deletion, non_fast_forward` on `ai_native_setup`. Keep the organization on a paid plan: on the free plan, private repositories get no rulesets, branch protection, secret scanning or CodeQL.
@@ -62,7 +78,12 @@ GitHub repository rulesets, identical in all seven repos. **In effect** (re-chec
 | release branches | `main`, `master`, `stagingdemo`, `development`; in sc-saas-frontend also `sanchiconnect` (added 2026-10-14) | Pull request required (no direct pushes); 1 approving review, never the author's own; stale approvals dismissed on new commits; the last push must be approved by someone else; no force-push; no deletion; no bypass actors |
 | dev branch | `ai_native_setup` | No force-push; no deletion; direct pushes allowed |
 
-Not yet enabled, at L2: required status checks (SAN-1583) and required CODEOWNERS review (SAN-1584). The contract checks (`flags`, `scoring-contract`, `tenant-contract`, `api-contract`) can be made required: they run on every PR and push and decide in their first step whether the files they protect changed (SAN-1596), so an unrelated PR gets a passing check in seconds instead of a check that never reports. Never add an `on.paths` filter to a workflow that is, or will be, a required check. The Playwright smoke check `smoke / e2e` (`smoke.yml` in sc-saas-frontend and sc-saas-admin, calling `sc-saas-e2e`'s `e2e.yml` against staging on every PR to `main`) reports only until SAN-1585 adds it to the `main` ruleset of both repos, after two green weeks with no quarantined test older than a week; it needs a `staging` Environment holding the QA secrets in each of the two repos. In an emergency the account owner can disable a ruleset in the repo's Settings → Rules; that change is logged and should be reversed the same day.
+Not yet enabled, at L2: required status checks (SAN-1583) and required CODEOWNERS review (SAN-1584). **SAN-1583's rulesets exist but are disabled** (2026-10-19). Each repo has a `required checks (L2, SAN-1583)` ruleset on `main`/`master` (plus `sanchiconnect` in the frontend), with branches required to be up to date. The required checks are:
+- the CI job: `node`, `php`, `python`, or the frontend's `build` + `unit-tests`;
+- `gitleaks`;
+- the repo's contract checks, plus `migrations` in backend and tenants.
+
+They stay disabled until the SAN-1939 release puts the CI workflows on each production branch. Until then a required check could never run, which would block every hotfix PR (such as #204). To turn one on, first confirm on any PR into the branch that every listed check reports. Then set the ruleset's Enforcement to Active. The ruleset IDs are on SAN-1583. The contract checks (`flags`, `scoring-contract`, `tenant-contract`, `api-contract`) can be made required: they run on every PR and push and decide in their first step whether the files they protect changed (SAN-1596), so an unrelated PR gets a passing check in seconds instead of a check that never reports. Never add an `on.paths` filter to a workflow that is, or will be, a required check. The Playwright smoke check `smoke / e2e` (`smoke.yml` in sc-saas-frontend and sc-saas-admin, calling `sc-saas-e2e`'s `e2e.yml` against staging on every PR to `main`) reports only until SAN-1585 adds it to the `main` ruleset of both repos, after two green weeks with no quarantined test older than a week; it needs a `staging` Environment holding the QA secrets in each of the two repos. In an emergency the account owner can disable a ruleset in the repo's Settings → Rules; that change is logged and should be reversed the same day.
 
 ## Current state per repo
 
@@ -103,15 +124,17 @@ On 2026-10-14 the repos moved from the `sanchiconnect` personal account to the *
 
 | Secret | Repos | What it is | Used by |
 |---|---|---|---|
-| `CONTRACT_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin, ai-startups-analyzer | Fine-grained personal access token created from the `sanchiconnect` account with **Resource owner: `sanchiconnect-org`** (a token owned by the personal account cannot read the org's repos). Repository access: those five repos **plus sanchiconnect-saas-tenants-admin** (tenants' `tenant-contract.yml` reads both PHP panels' copy of the ai_credit_* schema, SAN-1595), nothing else. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year (current token expires 2027-10-15); renew before it lapses. | The L3 contract checks, which check out the other repos of a contract to compare them: `flags.yml` (SAN-1592), `scoring-contract.yml` (SAN-1594) and `tenant-contract.yml` (SAN-1591). GitHub's built-in token can only read the repo it runs in. |
+| `CONTRACT_CHECK_TOKEN` | sanchiconnect-saas-tenants, sc-saas-backend, sc-saas-frontend, sc-saas-admin, ai-startups-analyzer, sc-saas-ai-native | Fine-grained personal access token created from the `sanchiconnect` account with **Resource owner: `sanchiconnect-org`** (a token owned by the personal account cannot read the org's repos). Repository access: the seven product repos (the five above **plus sanchiconnect-saas-tenants-admin**, which tenants' `tenant-contract.yml` reads for the ai_credit_* schema, SAN-1595, **and sc-saas-3rdparty-webservices**, which `module-map` reads, SAN-1627), nothing else. Permissions: **Contents: Read-only** (nothing else). Expiry: 1 year (current token expires 2027-10-15); renew before it lapses. | The L3 contract checks, which check out the other repos of a contract to compare them: `flags.yml` (SAN-1592), `scoring-contract.yml` (SAN-1594), `tenant-contract.yml` (SAN-1591), the frontend's `api-types.yml`, and the workspace's `module-map.yml` (SAN-1627). GitHub's built-in token can only read the repo it runs in. |
 
-To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token (fine-grained tokens are always created from a personal account's settings, never the org's), set Resource owner to `sanchiconnect-org`, then the settings above. Check the token's page afterwards: it must list the six repos and Contents: Read-only. A token saved with repositories but no permission keeps no repositories at all, and the checks then fail at checkout with `403 Write access to repository not granted`. Test it with `curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $T" https://api.github.com/repos/sanchiconnect-org/sc-saas-backend/contents/README.md` (200 = good, 404 = no access). Then add it as a secret to the five repos that run the checks (tenants-admin only needs to be readable, it runs none) without pasting it anywhere else:
+To create it: github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token (fine-grained tokens are always created from a personal account's settings, never the org's), set Resource owner to `sanchiconnect-org`, then the settings above. Check the token's page afterwards: it must list the seven product repos and Contents: Read-only. A token saved with repositories but no permission keeps no repositories at all, and the checks then fail at checkout with `403 Write access to repository not granted`. Test it with `curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $T" https://api.github.com/repos/sanchiconnect-org/sc-saas-backend/contents/README.md` (200 = good, 404 = no access). Then add it as a secret to the six repos that run the checks (tenants-admin and 3rdparty only need to be readable; they run none) without pasting it anywhere else:
 
 ```bash
-for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer; do
+for r in sanchiconnect-saas-tenants sc-saas-backend sc-saas-frontend sc-saas-admin ai-startups-analyzer sc-saas-ai-native; do
   gh secret set CONTRACT_CHECK_TOKEN -R sanchiconnect-org/$r   # paste the token when prompted
 done
 ```
+
+**Token regenerated 2026-10-27** (SAN-1627) and set on all six repos above. A regenerated token must be updated on all six, or their contract checks fail at checkout.
 
 ### Slack alerts for CI (SAN-1600)
 
@@ -170,9 +193,50 @@ The tenants API, tenants-admin and the AI analyzer deploy to production from `ma
 
 **How a deploy starts (Nirmal, 2026-10-14):** every deploy, on dev and production Jenkins alike, is started **by hand with "Build now"** on the job. No job runs by itself on a push (no webhook or poll trigger), and this stays manual for now. Merging to a branch therefore does not deploy it: the change goes live only when someone builds that branch's job, which is how a branch and its server drift apart (SAN-589).
 
-**Not recorded yet:** the dev Jenkins job names, and each dev job's server/URL.
+**Dev server 1 (`122.176.150.231`), recorded 2026-10-26.** DNS for `sanchidev.in` is at ClouDNS.
 
-## Deploy workflow (SAN-1602, pilot: sc-saas-3rdparty-webservices)
+| Service | Host | How it runs | Jenkins job builds |
+|---|---|---|---|
+| Frontend (PWA) | thub.sanchidev.in | Docker `sanchi-saas-dev-frontend` (Apache serving the build) | `sanchi-saas/frontend`: `ng build --configuration devserver --aot --build-optimizer --vendor-chunk=true --subresource-integrity`. `devserver` (SAN-158) is an optimised build with `environment.devserver.ts`: dev cockpit, Sentry environment `development`, Angular dev mode kept on purpose |
+| Backend | api.thub.sanchidev.in | Docker (pm2-runtime inside) | `ai_native_setup` |
+| Admin | adm.thub.sanchidev.in | Docker | `ai_native_setup` |
+| Tenants API / tenants-admin | api.tenants.sanchidev.in / adm.tenants.sanchidev.in | Docker | `ai_native_setup` |
+| 3rdparty gateway | (internal) | Docker | `ai_native_setup` |
+| AI analyzer | api.analyzer.sanchidev.in | **systemd** `ai-analyzer-dev` (user jenkins, uvicorn on 127.0.0.1:8005, nginx in front), code in `/var/www/ai-startups-analyzer` | `ai-services/ai-analyzer`: `git reset --hard origin/ai_native_setup`, a fresh venv with `pip install -r api/requirements.txt`, then `sudo -n systemctl restart ai-analyzer-dev` (`/etc/sudoers.d/jenkins-ai-analyzer` allows only that command). It then waits up to 5 min for `/api/v1/health` with `"db":true` and fails unless the service's MainPID is the process on 8005. **No pm2**: until 2026-10-27 the job also ran `pm2 start ecosystem.config.js`, a second uvicorn on 8005 that fought systemd for the port |
+
+Lessons from 2026-10-26 (SAN-2040, SAN-2044):
+- Until then the analyzer job checked out `AI_Analyzer`, a branch deleted on GitHub, so dev silently stayed on 31 July code.
+- The job also started the analyzer with pm2 (`ai-analyzer-dev-api`, from `api/ecosystem.config.js`), so pm2 and systemd fought for port 8005: about 100 `address already in use` Sentry events (AI-STARTUPS-ANALYZER-8). Fixed 2026-10-27: pm2's entry deleted (`pm2 delete ai-analyzer-dev-api; pm2 save`, with `PATH=/var/lib/jenkins/.npm-global/bin:/home/sanchiconnect/.nvm/versions/node/v22.17.1/bin` and `PM2_HOME=/var/lib/jenkins/.pm2`), and the job restarts only the systemd service. If the analyzer looks stale, check `sudo ss -ltnp 'sport = :8005'` against `systemctl show -p MainPID ai-analyzer-dev`.
+- After a restart the analyzer can stop answering for 1–2 minutes while it resumes stopped runs; the job's health check allows 5 minutes.
+- The dev server runs **Python 3.10**; production runs 3.11 or newer. A package that needs a newer Python fails the dev build (SQLAlchemy 2.1); the analyzer's CI tests both versions.
+
+**Not recorded yet:** dev server 2's job names and URLs.
+
+## Deploy workflow (SAN-1602; all seven repos since 2026-10-19)
+
+**All seven repos now carry the same three files** (2026-10-19):
+- `.github/workflows/deploy.yml`;
+- `.github/scripts/deploy-rollout.sh`;
+- `.github/scripts/jenkins-build.sh`.
+
+Change them in every repo together. They grew out of the sc-saas-3rdparty-webservices pilot described below, and keep its settings, so a pilot setup keeps working.
+
+**Jobs per Environment:** either the secret `JENKINS_JOB` (one job) or the variable `JENKINS_JOB_PATTERN` (a regex over Jenkins' enabled jobs; the backend's per-tenant case is below).
+
+**Branches and Environments:**
+
+| Push to | Tag | Environment |
+|---|---|---|
+| `ai_native_setup` | none (a `dev-YYYY.MM.DD-<sha7>` label is only passed to Jenkins; no git tag, no Release) | `development` |
+| `stagingdemo` | `staging-YYYY.MM.DD-<sha7>` | `staging` |
+| `main`/`master` | `YYYY.MM.DD-<sha7>` | `production` |
+| `sanchiconnect` (frontend only) | `sanchiconnect-YYYY.MM.DD-<sha7>` | `sanchiconnect` |
+
+**Decided 2026-10-27 (Aman, after Nirmal): only dev deploys automatically.** The `development` Environment holds the dev Jenkins secrets (a Jenkins user that can only build the dev jobs; for a job inside a Jenkins folder, put the folder in `JENKINS_URL`, e.g. `https://<dev-jenkins>/job/sanchi-saas`, and the job name alone in `JENKINS_JOB`). `staging` and `production` get **no Jenkins secrets**: the workflow still tags the release, then says "deploy by hand with Build now" and ends green. Production has many client jobs, so each is built by a person.
+
+The `sanchiconnect` Environment holds the `Demo - Frontend Sanchi Connect` job and needs its own reviewer. Every repo's deploy stays inert until its Environments and secrets exist (SAN-1597).
+
+The rest of this section describes the original pilot:
 
 Decided by Aman on 2026-10-15: Jenkins and the servers stay; a GitHub Actions workflow (`.github/workflows/deploy.yml`) **tags every release and triggers the Jenkins job through its API**. Staging follows `stagingdemo`, production follows `main`/`master`, the same as the release path above. The workflow never touches a server.
 
@@ -192,9 +256,100 @@ The tag is what the rollback redeploys (SAN-1604) and what Sentry's release shou
 
 **Open questions for Nirmal** (they cannot be answered from the repos): is the production Jenkins reachable from GitHub's runners (if it sits behind an IP allow-list, a self-hosted runner is needed); which job is the **staging** job for this service (the dashboard above lists none for `sc-saas-3rdparty-webservices`); is the production job parameterised.
 
-**Not in the pilot yet:** the smoke suite (sc-saas-e2e covers the PWA and the admin panel, not this service; the `SERVICE_URL` check is the substitute), a Sentry release created by the workflow, and the other repos. The backend needs more than one trigger (up to 26 client jobs), see SAN-1603.
+**Not in the pilot yet:** the smoke suite (sc-saas-e2e covers the PWA and the admin panel, not this service; the `SERVICE_URL` check is the substitute), a Sentry release created by the workflow, and the other repos except the backend (below).
+
+### Backend: one rollout over every tenant job (SAN-1603)
+
+`sc-saas-backend/.github/workflows/deploy.yml` follows the pilot, but deploys one Jenkins job per tenant. Pushes to `stagingdemo` go to the staging Environment, pushes to `main` to production.
+- **The tenant list comes from Jenkins at run time:** every enabled job whose name matches the Environment variable `JENKINS_JOB_PATTERN`, in name order. The tenants DB has no tenant-to-job mapping, so a client job added, disabled or removed in Jenkins changes the rollout with no workflow edit.
+- **One job, one approval.** GitHub asks a reviewer for every job that uses the `production` Environment, so the rollout is one job that deploys the tenants one after another, not 26 jobs.
+- **The first failure stops the rollout.** The tenants after it keep the previous version and the run fails. GitHub's failed-run notification is the page.
+- **The step summary** has a row per tenant: its result (SUCCESS, FAILURE, TIMEOUT or not started) and its Jenkins build link.
+
+Each Environment needs:
+- the secrets `JENKINS_URL`, `JENKINS_USER` and `JENKINS_TOKEN`;
+- the variable `JENKINS_JOB_PATTERN`, for example production `^SaaS API - Client [0-9]+ - ` and staging `^(Demo - SaaS API|SanchiConnect - Live - SaaS API)`.
+
+Optional variables:
+- `JENKINS_BUILDER_JOB`: `SaaS API - Builder` or `Demo - API Builder`, built once before the tenants, if the client jobs depend on it;
+- `JENKINS_TAG_PARAMETER`;
+- `JENKINS_WAIT_MINUTES` (default 30 per job).
+
+Same setup order as above: the Environment and its reviewer first, then the secrets.
+
+Open questions, the same as the pilot's, plus one: do the client jobs build their own `dist/` or copy it from the Builder job?
+
+## Deploy log, release tags and the Sentry release (SAN-1626)
+
+Every production deploy gets a row in `docs/DEPLOY-LOG.md` (what, where, who deployed, who verified, smoke result). Before pressing "Build now", tag the production branch with `scripts/tag-release.sh <repo> ...` (creates and pushes `release-YYYY-MM-DD`, `-2` for a second release the same day).
+
+So that Sentry shows which release is live, each production Jenkins job sets `SENTRY_RELEASE` to that tag before restarting the app. Add this to the job's shell step after the checkout (the analyzer's `.env` is in `api/`; the frontend needs nothing, it reports its build commit):
+
+```bash
+git fetch --quiet --tags origin
+TAG="$(git describe --tags --exact-match --match 'release-*' HEAD 2>/dev/null || git rev-parse --short HEAD)"
+if grep -q '^SENTRY_RELEASE=' .env; then
+  sed -i "s/^SENTRY_RELEASE=.*/SENTRY_RELEASE=${TAG}/" .env
+else
+  echo "SENTRY_RELEASE=${TAG}" >> .env
+fi
+```
+
+An untagged build falls back to the short commit, which still identifies what's live.
+
+## Database migrations step (SAN-1605)
+
+`sc-saas-backend` and `sanchiconnect-saas-tenants` change their schema through TypeORM migrations (SAN-1630). Each Jenkins job for either service runs the migrations against its own database **after the build and before the app restarts**, and stops if they fail. For the backend that means every client job, each against the database in its own `.env`.
+
+Add this to the job's shell step, between `npm run build` and the pm2 restart:
+
+```bash
+set -e
+npm run migration:deploy   # exit 1: a migration failed, so the app is not restarted
+```
+
+`set -e` is what stops the job: Jenkins marks the build failed and the old version keeps running. Make sure the job's failure notification reaches a person (email or Slack), since that is the only page.
+
+What the step does (`src/core/database/deploy-migrate.ts` in each repo):
+
+| Database | Result |
+|---|---|
+| Nothing pending | "is up to date", exit 0 |
+| Has recorded migrations, some pending | runs them, one transaction each, exit 0. On failure: exit 1, the failed one isn't recorded. |
+| Never recorded a migration, empty | runs every migration (builds the schema), exit 0 |
+| Never recorded a migration, matches the entities | **adopts** it: records every migration as applied without running it (`--fake`), exit 0 |
+| Never recorded a migration, differs from the entities | prints the differences. While `synchronize` is still on (until SAN-1630 phase 4) it exits 0 and leaves them to `synchronize`. With `MIGRATIONS_STRICT=true` it exits 1. |
+| Can't connect | exit 2 |
+
+It holds a MySQL lock (`GET_LOCK('sc_deploy_migrate')`) while it works, so two jobs on one database (the three Demo API jobs) take turns.
+
+MySQL can't roll back DDL (`CREATE`, `ALTER`, `DROP`), so a migration that fails halfway can leave part of its change behind. Write one schema change per migration. If one fails, read the log, fix the database or the migration, and rebuild.
+
+**Rollout**
+1. Add the step to the dev server 1 jobs (backend and tenants) and build. The log should say "adopted". If it says "left to synchronize", that database has drift: build once more after the app has started (synchronize applies the drift at boot), and the next run adopts it.
+2. Then dev server 2, the Demo jobs, SanchiConnect, one client job, every other client job, and the cockpit job, in that order. Record each one in `docs/DEPLOY-LOG.md`.
+3. Turning `synchronize` off (SAN-1630 phase 4) is per job, in that job's `.env`. Once its log says "adopted" or "up to date", add:
+   - `DB_SYNCHRONIZE=false`;
+   - `MIGRATIONS_STRICT=true`, so a drifted database stops the deploy instead of being left to synchronize.
+
+   Then rebuild. With synchronize off, the app checks the schema at boot:
+   - `SCHEMA_CHECK_MODE=log` (default) logs any difference as an error and keeps running;
+   - `enforce` refuses to start.
+
+   Go back by removing `DB_SYNCHRONIZE`.
+
+**Open questions:**
+- Does each `SaaS API - Client NN` job run its own `npm ci && npm run build`, or does it copy `dist/` from `SaaS API - Builder`? The step needs `dist/`, `node_modules` and the client's `.env` in the job's folder.
+- Which notification does a failed production build send today?
 
 ## Rollback
+
+**Redeploy a previous tag (SAN-1604, built 2026-10-19).** Actions → deploy → Run workflow, and set `rollback_tag` to an earlier release tag, e.g. `2026.10.18-abc1234`.
+- **No new tag is made.** The tag's prefix picks the Environment, and that Environment's reviewer approves as usual.
+- **Every job is rebuilt with that tag**, in order, stopping at the first failure.
+- **The tag is checked first:** a name that is not a tag this workflow makes, or a tag that does not exist, is refused before anything runs.
+- **It needs `JENKINS_TAG_PARAMETER` and Jenkins jobs that check out the tag they are given.** A job that builds its branch tip would "roll back" to the current code. So without the parameter the rollback refuses to run, and the git revert below is the way back.
+- **Not drilled yet:** a drill needs a parameterised job. Until then, the method below is the one that has been used.
 
 Chosen method (Nirmal, 2026-10-14): **revert in git, then rebuild.** None of the repos has a Jenkinsfile or a rollback script, and Jenkins jobs build the tip of their branch, so the branch itself is what gets rolled back.
 
@@ -207,3 +362,50 @@ Chosen method (Nirmal, 2026-10-14): **revert in git, then rebuild.** None of the
 
 - **Database schema (sc-saas-backend and sanchiconnect-saas-tenants).** Both run TypeORM `synchronize: true` with no migrations, so the app alters its tables at startup. Reverting the code does not remove a column the bad deploy added, and if it dropped or renamed a column, that column's data is already gone. Before deploying any change to an entity, take an RDS snapshot; it is the only undo for the database. The PHP panels and the 3rd-party gateway have no schema step, so for them the revert is a full rollback.
 - **Cached frontend (sc-saas-frontend is a PWA).** Browsers keep the cached build, so after a rollback some users still run the bad version until they reload or the service worker updates.
+
+## Health endpoints (SAN-1574)
+
+Every service answers an unauthenticated `GET` for the Observability Command Centre probes. It runs one trivial read and returns booleans and a timestamp only: no secrets, no tenant data, `Cache-Control: no-store`.
+
+| Service | URL |
+|---|---|
+| sc-saas-backend | `https://<tenant api host>/api/health` |
+| sanchiconnect-saas-tenants | `https://<cockpit api host>/api/health` |
+| sc-saas-3rdparty-webservices | `https://<gateway host>/api/health` |
+| ai-startups-analyzer | `https://<analyzer host>/api/v1/health` |
+| sc-saas-admin | `https://<tenant admin host>/health.php` |
+| sanchiconnect-saas-tenants-admin | `https://<tenants-admin host>/health.php` |
+
+Response (HTTP 200 when every check passes, 503 otherwise):
+
+```json
+{ "status": "ok", "service": "sc-saas-backend", "checks": { "db": true }, "timestamp": "2026-10-21T09:48:24.000Z" }
+```
+
+- `status` is `ok` or `degraded`.
+- `checks.db` is the result of `SELECT 1` (MySQL; the PHP panels and the analyzer use the main database, with a 3 s cap).
+- The 3rd-party gateway has no database, so its `checks` is `{}` and it reports `ok` while the process answers.
+- Not yet included: the tenants ecosystem-push counter (items that arrived in the last day and week). The `ecosystem_*` tables have no `created_at`, so it needs a migration first.
+
+## Sentry prover (SAN-1572)
+
+Proves that a deployment's errors reach Sentry, in two modes:
+- `captured` sends one event through the SDK and returns or prints its id;
+- `uncaught` throws, so the error takes the same path as a real bug (the framework's error hook).
+
+Each run sends one test event titled `SAN-1572 Sentry prover: …`. Nothing runs it on a schedule. Don't delete it as dead code.
+
+| Service | How to run it | Off unless |
+|---|---|---|
+| sc-saas-backend | `GET https://<tenant api host>/api/ops/sentry-prove?mode=captured` with header `x-sentry-prover-token: <value>` | `SENTRY_PROVER_TOKEN` is set |
+| sanchiconnect-saas-tenants | same, on the cockpit api host | `SENTRY_PROVER_TOKEN` is set |
+| sc-saas-3rdparty-webservices | same, on the gateway host | `SENTRY_PROVER_TOKEN` is set |
+| ai-startups-analyzer | `GET https://<analyzer host>/api/v1/ops/sentry-prove?mode=captured`, same header | `SENTRY_PROVER_TOKEN` is set |
+| sc-saas-admin | `php cli/sentry_prove.php --mode=captured` on the server | always available, command line only |
+| sanchiconnect-saas-tenants-admin | `php cli/sentry_prove.php --mode=captured` on the server | always available, command line only |
+| sc-saas-frontend | open any page with `?sentry-prove=captured` | the build's `environmentName` is `production` |
+
+- **Turning it on:** set `SENTRY_PROVER_TOKEN` to a random value in that deployment's environment only while you prove it, then remove it.
+  - Without the token, or with a wrong one, the route answers 404 and sends nothing to Sentry.
+  - The routes are left out of the OpenAPI documents.
+- **Readable frames:** the frontend's frames are readable only when that build's source maps were uploaded (`scripts/upload-sourcemaps.js`).

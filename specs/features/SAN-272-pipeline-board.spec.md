@@ -2,7 +2,7 @@
 id: SAN-272
 title: Pipeline board — Kanban of clients by stage
 type: feature
-status: in-review
+status: canceled  # 2026-10-19: AI-Native CRM project shut down, never implemented (Linear issue Canceled)
 linear: https://linear.app/sanchiconnect/issue/SAN-272/an-account-manager-can-move-a-client-through-the-pipeline-by-dragging
 owner: sandeep.k@sanchiconnect.com
 repos: [sanchiconnect-saas-tenants-admin]

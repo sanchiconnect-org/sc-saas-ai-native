@@ -8,13 +8,13 @@ For each module's detail, follow its spec link or the repo's `specs/<repo>-modul
 
 | Repo | Specs | Module folders without a spec | Specs with unreadable front matter |
 |---|---|---|---|
-| sanchiconnect-saas-tenants | 11 | 0 | 1 |
+| sanchiconnect-saas-tenants | 11 | 0 | 0 |
 | sc-saas-backend | 70 | 0 | 0 |
-| sc-saas-frontend | 86 | 1 | 4 |
-| sc-saas-admin | 74 | 4 | 7 |
-| sanchiconnect-saas-tenants-admin | 12 | 1 | 1 |
-| ai-startups-analyzer | 1 | 2 | 1 |
-| sc-saas-3rdparty-webservices | 8 | 0 | 1 |
+| sc-saas-frontend | 87 | 0 | 0 |
+| sc-saas-admin | 76 | 0 | 0 |
+| sanchiconnect-saas-tenants-admin | 12 | 0 | 0 |
+| ai-startups-analyzer | 1 | 0 | 0 |
+| sc-saas-3rdparty-webservices | 8 | 0 | 0 |
 
 ## Repo dependencies
 
@@ -29,21 +29,16 @@ graph LR
     tenants_admin["sanchiconnect-saas-tenants-admin"]
     analyzer["ai-startups-analyzer"]
     webservices["sc-saas-3rdparty-webservices"]
-    analyzer -->|1| admin
-    tenants -->|1| admin
-    tenants -->|1| backend
-    tenants -->|1| frontend
     tenants_admin -->|1| tenants
-    webservices -->|1| backend
     admin -->|1| analyzer
-    admin -->|6| tenants
+    admin -->|7| tenants
     admin -->|1| tenants_admin
-    admin -->|41| backend
-    backend -->|4| tenants
-    backend -->|7| webservices
+    admin -->|58| backend
+    backend -->|5| tenants
+    backend -->|8| webservices
     backend -->|1| frontend
-    frontend -->|4| tenants
-    frontend -->|97| backend
+    frontend -->|5| tenants
+    frontend -->|101| backend
 ```
 
 ## Cross-repo module dependencies
@@ -51,45 +46,63 @@ graph LR
 | From | To | Recorded in |
 |---|---|---|
 | admin / ai_credits | backend / voice-agent | admin_consumers |
-| admin / ajax | backend / ecosystem | front matter |
-| admin / application_management | analyzer / app | front matter |
-| admin / application_management | backend / application-management | admin_consumers |
-| admin / application_management | backend / src/modules/application-programs-management (path not found) | front matter |
-| admin / application_management | backend / src/modules/programs-management (path not found) | front matter |
-| admin / application_management | backend / voice-agent | admin_consumers |
-| admin / application_management | backend / zenxai | admin_consumers |
+| admin / ajax-handlers | backend / ecosystem | backend_modules |
+| admin / application-management | analyzer / core-bootstrap | ai_analyzer, consumed_by |
+| admin / application-management | backend / application-management | admin_consumers, backend_modules |
+| admin / application-management | backend / program-management | backend_modules |
+| admin / application-management | backend / voice-agent | admin_consumers |
+| admin / application-management | backend / zenxai | admin_consumers |
 | admin / auth | backend / auth | admin_consumers |
-| admin / auth | backend / src/modules/admin-actions (path not found) | backend_modules |
+| admin / auth | backend / global | backend_modules |
+| admin / bulk_actions | backend / corporate | backend_modules |
+| admin / bulk_actions | backend / global | backend_modules |
+| admin / bulk_actions | backend / individual | backend_modules |
+| admin / bulk_actions | backend / investor | backend_modules |
+| admin / bulk_actions | backend / mentors | backend_modules |
+| admin / bulk_actions | backend / partner | backend_modules |
+| admin / bulk_actions | backend / program-office-members | backend_modules |
+| admin / bulk_actions | backend / service-providers | backend_modules |
+| admin / bulk_actions | backend / startup | backend_modules |
 | admin / challenges | backend / challenges | admin_consumers, backend_modules |
 | admin / command_centre | tenants / subscriptions | consumers |
 | admin / community-connections | backend / community-wall | admin_consumers, backend_modules |
 | admin / community-connections | backend / connections | backend_modules |
-| admin / content-management | backend / src/modules/content (path not found) | backend_modules |
+| admin / content-management | backend / global | backend_modules |
+| admin / content-management | backend / glossary | backend_modules |
+| admin / content-management | backend / news | backend_modules |
+| admin / content-management | backend / resources | backend_modules |
+| admin / content-management | backend / startup-kit | backend_modules |
 | admin / core-bootstrap | backend / voice-agent | admin_consumers |
 | admin / core-bootstrap | backend / zenxai | admin_consumers |
 | admin / core-bootstrap | tenants / core-bootstrap | consumers |
+| admin / core-bootstrap | tenants / tenants | consumers |
 | admin / events-meetings | backend / events | backend_modules |
 | admin / events-meetings | backend / meetings | backend_modules |
-| admin / facilities | backend / src/modules/facilities (path not found) | backend_modules |
+| admin / facilities | backend / facility_management | backend_modules |
 | admin / facilities | tenants / ecosystem-facilities | consumers |
 | admin / facilities | tenants / ip-management + ecosystem-facilities | consumers |
 | admin / finance-memberships | backend / memberships | admin_consumers, backend_modules |
 | admin / finance-memberships | backend / payment-management | admin_consumers, backend_modules |
 | admin / finance_management | tenants-admin / ai_credits | backend_modules |
-| admin / form-management | backend / src/modules/forms (path not found) | backend_modules |
+| admin / form-management | backend / form-management | backend_modules |
+| admin / growth-metrics | backend / metrics | backend_modules |
 | admin / growth-metrics | backend / milestones | backend_modules |
-| admin / growth-metrics | backend / src/modules/growth-metrics (path not found) | backend_modules |
 | admin / integrations | backend / ecosystem | backend_modules |
 | admin / integrations | tenants / ip-management + ecosystem-facilities | consumers |
-| admin / jury | backend / src/modules/application-programs-management (path not found) | front matter |
-| admin / jury | backend / src/modules/programs-management (path not found) | front matter |
+| admin / jury | backend / application-management | backend_modules |
+| admin / jury | backend / program-management | backend_modules |
 | admin / learning-management | backend / learning-management | admin_consumers, backend_modules |
 | admin / milestones | backend / milestones | backend_counterpart |
-| admin / outreach-communications | backend / src/modules/application-programs-management (path not found) | front matter |
+| admin / notifications | backend / cron | api_calls, backend_modules |
+| admin / notifications | backend / notifications | backend_modules |
+| admin / outreach-communications | backend / application-management | backend_modules |
+| admin / partner-requests | backend / global | backend_modules |
+| admin / partner-requests | backend / partner | backend_modules |
 | admin / partners-recruitment | backend / partner | admin_consumers, backend_modules |
 | admin / profile_audit_logs | backend / audit-log | backend_counterpart |
-| admin / program-management | backend / src/modules/mentor-application-management (path not found) | backend_modules |
-| admin / program-management | backend / src/modules/programs (path not found) | backend_modules |
+| admin / program-management | backend / mentors | backend_modules |
+| admin / program-management | backend / program-management | backend_modules |
+| admin / quicklinks | backend / public-portal | backend_modules |
 | admin / stakeholder-crud | backend / auth | admin_consumers |
 | admin / stakeholder-crud | backend / corporate | admin_consumers |
 | admin / stakeholder-crud | backend / investor | admin_consumers |
@@ -99,10 +112,10 @@ graph LR
 | admin / stakeholder-crud | tenants / ecosystem | consumers |
 | admin / venture-studio | backend / application-management | admin_consumers |
 | admin / venture-studio | backend / vs-programs-management | backend_modules |
-| analyzer / app | admin / application_management | front matter |
 | backend / ecosystem | tenants / ecosystem | consumers |
 | backend / power-pitch-module | frontend / pitch-deck-management | consumed_by |
 | backend / src/core/constants (no spec) | tenants / core-bootstrap | consumers |
+| backend / src/core/constants (no spec) | tenants / tenants | consumers |
 | backend / src/core/services (no spec) | tenants / cors-domains | consumers |
 | backend / src/core/services (no spec) | tenants / global | consumers |
 | backend / src/core/services (no spec) | webservices / 3rdparty-webservices | consumed_by |
@@ -111,9 +124,10 @@ graph LR
 | backend / src/core/services (no spec) | webservices / sendGrid | consumed_by |
 | backend / src/core/services (no spec) | webservices / ses | consumed_by |
 | backend / src/core/services (no spec) | webservices / shortIo | consumed_by |
+| backend / src/core/services (no spec) | webservices / sms | consumed_by |
 | backend / src/core/services (no spec) | webservices / videoSDK | consumed_by |
 | frontend / account | backend / certificates | backend_modules |
-| frontend / ad-viewer | backend / global | front matter |
+| frontend / ad-viewer | backend / global | backend_modules, flags |
 | frontend / admin-actions | backend / global | backend_modules |
 | frontend / auth | backend / auth | backend_modules, frontend_consumers |
 | frontend / auth | backend / auth-external | frontend_consumers |
@@ -155,6 +169,7 @@ graph LR
 | frontend / core | backend / partner | backend_modules |
 | frontend / core | tenants / core-bootstrap | consumers |
 | frontend / core | tenants / global | consumers |
+| frontend / core | tenants / tenants | consumers |
 | frontend / corporate | backend / corporate | backend_modules, frontend_consumers |
 | frontend / custom-onboarding | backend / global | backend_modules |
 | frontend / dashboard | backend / dashboard | backend_modules |
@@ -167,6 +182,7 @@ graph LR
 | frontend / external-facilities-management | backend / facility_management | backend_modules |
 | frontend / facilities | backend / facility_management | backend_modules |
 | frontend / facilities | tenants / ecosystem-facilities | consumers |
+| frontend / global-search-page | backend / search | backend_modules |
 | frontend / glossary | backend / glossary | backend_modules |
 | frontend / individual | backend / individual | backend_modules, frontend_consumers |
 | frontend / individual | backend / user | backend_modules |
@@ -194,6 +210,7 @@ graph LR
 | frontend / programs | backend / application-management | frontend_consumers |
 | frontend / programs | backend / meetings | backend_modules |
 | frontend / programs | backend / payment-management | frontend_consumers |
+| frontend / public-events | backend / events | backend_modules |
 | frontend / resource-reports | backend / global | backend_modules |
 | frontend / resources | backend / glossary | backend_modules |
 | frontend / resources | backend / news | backend_modules |
@@ -207,17 +224,15 @@ graph LR
 | frontend / service-provider | backend / service-providers | frontend_consumers |
 | frontend / startup | backend / startup | backend_modules, frontend_consumers |
 | frontend / startup-kit | backend / startup | backend_modules |
+| frontend / startup-recognition-verify | backend / startup | backend_modules |
+| frontend / startup-recognition-verify | backend / startup-recognition-id | backend_modules |
 | frontend / team | backend / user | backend_modules |
 | frontend / tickets | backend / global | backend_modules |
 | frontend / tickets | backend / tickets | backend_modules |
 | frontend / tracker | backend / mentorship | backend_modules |
 | frontend / utilities | backend / certificates | backend_modules |
 | frontend / webinars | backend / global | backend_modules |
-| tenants / tenants | admin / core-bootstrap | front matter |
-| tenants / tenants | backend / src/core/constants (no spec) | front matter |
-| tenants / tenants | frontend / core | front matter |
 | tenants-admin / cors_domain_management | tenants / cors-domains | consumers, db_access |
-| webservices / sms | backend / src/core/services (no spec) | front matter |
 
 ## Feature flags by module
 
@@ -225,10 +240,12 @@ Tenant flags (boolean columns of `TenantUsersEntity`) and the modules whose spec
 
 | Flag | tenants | backend | frontend | admin | tenants-admin | analyzer | webservices |
 |---|---|---|---|---|---|---|---|
-| `ai_credits_enabled` |  |  |  | ai_credits |  |  |  |
-| `application_management` |  |  |  | content-management, core-bootstrap, program-management |  |  |  |
+| `ai_analyzer_enabled` | tenants |  |  |  |  |  |  |
+| `ai_credits_enabled` |  |  |  | ai_credits, application-management |  |  |  |
+| `ai_voice_agent_enabled` | tenants |  |  | application-management |  |  |  |
+| `application_management` | tenants |  |  | application-management, content-management, core-bootstrap, jury, program-management |  |  |  |
 | `application_video_pitch` |  |  |  | core-bootstrap |  |  |  |
-| `approved_startups_can_apply_on_programs` |  | application-management, program-management | call-for-applications, programs |  |  |  |  |
+| `approved_startups_can_apply_on_programs` | tenants | application-management, program-management | call-for-applications, programs |  |  |  |  |
 | `business_challenge_collections_enabled` |  |  | challenge-collection, challenges |  |  |  |  |
 | `business_challenges` |  | challenges, startup | call-for-applications, challenge-collection, challenge-public-view, challenge-search, challenges, dashboard, shared |  |  |  |  |
 | `calendar` |  |  | shared |  |  |  |  |
@@ -246,58 +263,64 @@ Tenant flags (boolean columns of `TenantUsersEntity`) and the modules whose spec
 | `certificates_partner` |  |  |  | certificate_builders, certificates |  |  |  |
 | `certificates_service_provider` |  |  |  | certificate_builders, certificates |  |  |  |
 | `certificates_startup` |  |  |  | certificate_builders, certificates |  |  |  |
-| `chat` |  | auth, chat, investor, meetings, mentors, partner, program-office-members, service-providers, startup, user | chat, meetings, shared |  |  |  |  |
+| `chat` | tenants | auth, chat, investor, meetings, mentors, partner, program-office-members, service-providers, startup, user | chat, meetings, shared |  |  |  |  |
 | `community_feed` |  | community-wall | community-feed, shared |  |  |  |  |
 | `connections` |  | connections | connection-v4, growth-matrics, shared |  |  |  |  |
 | `convert_pitch_decks` |  | global |  |  |  |  |  |
 | `corporates` |  | challenges, corporate, search | corporate, search |  |  |  |  |
 | `cron_enabled` |  | cron |  |  |  |  |  |
-| `custom_onboarding_design_enabled` |  | global | custom-onboarding | onboarding_design |  |  |  |
+| `custom_onboarding_design_enabled` | tenants | global | custom-onboarding | onboarding_design |  |  |  |
 | `custom_smtp` |  |  |  | email_logs |  |  |  |
-| `deeptech_news` |  | global | deeptech-news, resources | news |  |  |  |
+| `deeptech_news` |  | global | deeptech-news, global-search-page, resources | news |  |  |  |
 | `direct_accept_connection_enabled` |  |  | connections-v3 |  |  |  |  |
 | `disable_startup_profile_update` |  |  | shared |  |  |  |  |
 | `ecosystem_enabled` |  | ecosystem, individual, investor, mentors, partner, program-management, program-office-members, service-providers, startup, startup-recognition-id |  | startup_recognition_management |  |  |  |
-| `elastic_search` |  | cron, elastic-search | search |  |  |  |  |
+| `elastic_search` | tenants | cron, elastic-search | search |  |  |  |  |
 | `enable_sub_industries` |  |  | program-office | core-bootstrap, stakeholder-crud |  |  |  |
 | `events` |  | cron, events, notifications | calender, event-agenda |  |  |  |  |
 | `events_exhibitors_menu_enabled` |  |  | partners-details |  |  |  |  |
 | `external_sign_in_enabled` |  | auth-external | auth |  |  |  |  |
 | `external_sign_in_server_enabled` |  | auth-external |  |  |  |  |  |
-| `facility_management` |  | facility_management | external-facilities-management, facilities | facilities, finance-memberships, partners, partners-recruitment |  |  |  |
+| `facility_management` | tenants | facility_management | external-facilities-management, facilities | facilities, finance-memberships, partners, partners-recruitment |  |  |  |
 | `factacy_enabled` |  | factacy |  |  |  |  |  |
-| `glossary` |  | glossary | glossary, resources |  |  |  |  |
+| `glossary` |  | glossary | glossary, public, resources |  |  |  |  |
 | `growth_metrics` |  | metrics | dashboard, growth-matrics |  |  |  |  |
-| `hub_spoke_domain_enabled` |  | auth, global, partner, partner-branding, partner-domain-access, program-management |  | core-bootstrap, partners |  |  |  |
+| `hub_spoke_domain_enabled` | tenants | auth, global, partner, partner-branding, partner-domain-access, program-management |  | core-bootstrap, partners |  |  |  |
 | `individual_registration` |  | auth |  |  |  |  |  |
 | `individuals` |  | individual, search, vs-programs-management, zoho | individual, individual-profile, search |  |  |  |  |
 | `industries_technologies_section` |  | investor |  |  |  |  |  |
 | `intellectual_property_section` |  |  | search | core-bootstrap, integrations |  |  |  |
 | `investment_banking_section` |  |  |  | core-bootstrap |  |  |  |
-| `investors` |  | investor, search | investor, search |  |  |  |  |
-| `ip_management` |  | ip-management | search |  |  |  |  |
+| `investors` | tenants | investor, search | investor, search |  |  |  |  |
+| `ip_based_restriction` | tenants |  |  |  |  |  |  |
+| `ip_management` | tenants | ip-management | search |  |  |  |  |
+| `is_patent_hub` |  |  |  | intellectual_property |  |  |  |
 | `job_seekers` |  | auth, job | jobs |  |  |  |  |
 | `job_seekers_registration` |  | auth | auth |  |  |  |  |
 | `jobs` |  | job, search | applied-jobs, job-details, job-public-details, job-search, jobs, shared |  |  |  |  |
-| `learning_management` |  | learning-management | learning-management | finance-memberships, learning-management |  |  |  |
-| `limited_access` |  |  | individual, program-office | core-bootstrap, stakeholder-crud |  |  |  |
+| `jury_nda_enabled` | tenants |  |  |  |  |  |  |
+| `learning_management` | tenants | learning-management | learning-management | finance-memberships, learning-management |  |  |  |
+| `limited_access` |  |  | individual, program-office | core-bootstrap, outreach-communications, stakeholder-crud |  |  |  |
 | `logout_on_rejection` |  |  | corporate, individual, individual-profile, mentor, partner, program-office, programs, service-provider, startup |  |  |  |  |
 | `looking_for_section` |  |  |  | core-bootstrap |  |  |  |
 | `meeting_moderation_enabled` |  | meetings | meetings |  |  |  |  |
 | `membership_enabled` |  |  | account |  |  |  |  |
 | `membership_moderation_enabled` |  |  | membership |  |  |  |  |
+| `mentor_application_management` |  |  |  | jury |  |  |  |
 | `mentor_hours` |  | mentorship | mentor, tracker |  |  |  |  |
-| `mentors` |  | mentors, mentorship, search | mentor, search |  |  |  |  |
+| `mentors` | tenants | mentors, mentorship, search | mentor, search |  |  |  |  |
 | `milestone_management` |  | milestones | milestones-tickets |  |  |  |  |
 | `mobile_otp_verification` |  | auth |  |  |  |  |  |
 | `multiple_profiles` |  | user | individual |  |  |  |  |
-| `new_dashboard_layout` |  |  | individual-profile |  |  |  |  |
-| `notification_centre_enabled` |  | connections, cron, job, notifications, startup | account, calender, call-for-applications, challenge-search, community-feed, connections-v3, dashboard, job-details, jobs, notifications | broadcast_messages, command_centre, outreach_requests, task_management, tickets |  |  |  |
+| `new_dashboard_layout` | tenants |  | individual-profile |  |  |  |  |
+| `notification_centre_enabled` |  | connections, cron, job, notifications, startup | account, calender, call-for-applications, challenge-search, community-feed, connections-v3, dashboard, job-details, jobs, notifications | broadcast_messages, command_centre, notifications, outreach_requests, task_management, tickets |  |  |  |
 | `online_meetings` |  | meetings | account, meetings, shared |  |  |  |  |
 | `operational_cost_reimbursement_enabled` |  | operational-cost-reimbursement | operational-cost-reimbursement | operation_cost |  |  |  |
+| `partner_visibility_requests_enabled` |  |  |  | partner-requests |  |  |  |
 | `partners` |  | partner, search | partner, search |  |  |  |  |
 | `partners_contacts` |  |  |  | partners-recruitment |  |  |  |
 | `partners_enable_dashboard` |  |  |  | partners, partners-recruitment |  |  |  |
+| `partners_ip_management` |  |  |  | intellectual_property |  |  |  |
 | `partners_photo_gallery` |  |  |  | facilities, partners, partners-recruitment |  |  |  |
 | `partners_program_management` |  |  |  | partners-recruitment |  |  |  |
 | `partners_programs_creation_limit_enabled` |  |  |  | partners |  |  |  |
@@ -310,27 +333,29 @@ Tenant flags (boolean columns of `TenantUsersEntity`) and the modules whose spec
 | `program_offices_registration` |  |  | program-office |  |  |  |  |
 | `programs_payment_enabled` |  |  | call-for-applications |  |  |  |  |
 | `programs_public_view` |  |  | call-for-applications, programs | core-bootstrap |  |  |  |
-| `promotions_enabled` |  |  |  | partners-recruitment |  |  |  |
+| `promotions_enabled` |  |  |  | notifications, outreach-communications, partners-recruitment |  |  |  |
+| `promotions_partners_enabled` |  |  |  | outreach-communications |  |  |  |
 | `public_portal_quicklinks_file_proxy_enabled` |  | public-portal |  |  |  |  |  |
 | `reports_downloads` |  | global | resource-reports | industry_reports |  |  |  |
-| `resources_downloads` |  | resources | resources |  |  |  |  |
+| `resources_downloads` |  | resources | public, resources |  |  |  |  |
 | `send_mobile_otp_login` |  | verifications |  |  |  |  |  |
 | `service_kit_application_connection` |  | startup-kit | resources |  |  |  |  |
 | `service_kit_stakeholder_accounts` |  |  |  | content-management, core-bootstrap, startup-booster-kit |  |  |  |
 | `service_providers` |  | search, service-providers | search, service-provider |  |  |  |  |
-| `single_session_login_enabled` |  | auth, sockets, user |  |  |  |  |  |
+| `single_session_login_enabled` | tenants | auth, sockets, user |  |  |  |  |  |
+| `sso_login_enabled` | tenants |  |  |  |  |  |  |
 | `stakeholder_access_management_enabled` |  | individual, investor |  |  |  |  |  |
 | `startup_financial_form` |  | startup | startup | core-bootstrap, csv, finance-memberships |  |  |  |
 | `startup_id_cards` |  | id-cards | shared, utilities | certificates, id_card_builders, id_cards |  |  |  |
-| `startup_kit` |  | startup-kit | resources, startup-kit |  |  |  |  |
-| `startup_recognition_enabled` |  | program-management, startup, startup-recognition-id | account, programs | startup_recognition_management |  |  |  |
+| `startup_kit` |  | startup-kit | public, resources, startup-kit |  |  |  |  |
+| `startup_recognition_enabled` |  | program-management, startup, startup-recognition-id | account, programs, startup-recognition-verify | startup_recognition_management |  |  |  |
 | `startup_supporting_documents` |  | startup | startup |  |  |  |  |
-| `startups` |  | auth, challenges, program-management, search, startup | auth, call-for-applications, programs, search, startup | document_types, finance-memberships |  |  |  |
+| `startups` | tenants | auth, challenges, program-management, search, startup | auth, call-for-applications, global-search-page, programs, search, startup | document_types, finance-memberships |  |  |  |
 | `startups_company_domain_validation` |  | auth |  |  |  |  |  |
 | `task_management` |  |  |  | command_centre, task_management |  |  |  |
 | `ticket_management` |  | tickets | ip-request, milestones-tickets, tickets |  |  |  |  |
-| `venture_studio` |  | vs-programs-management |  |  |  |  |  |
-| `venture_studio_application_management` |  |  |  | venture-studio |  |  |  |
+| `venture_studio` | tenants | vs-programs-management |  |  |  |  |  |
+| `venture_studio_application_management` |  |  |  | jury, venture-studio |  |  |  |
 | `video_pitch_mandatory` |  |  | pitch-deck-management |  |  |  |  |
 | `vs_programs_public_view` |  |  | call-for-applications, vs-programs |  |  |  |  |
 | `wa_enable` |  | auth, verifications |  |  |  |  |  |
@@ -338,7 +363,7 @@ Tenant flags (boolean columns of `TenantUsersEntity`) and the modules whose spec
 | `webinar_videos` |  | global | event-agenda, programs, webinars |  |  |  |  |
 | `zoho_service_enabled` |  |  |  | core-bootstrap, integrations, zoho |  |  |  |
 
-Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enabled`, `ai_voice_agent_enabled`, `app_not_interested_types`, `application_management_check_status_section`, `application_management_invite_transfer_section`, `application_management_round_status_updates`, `application_programs_recommendation_field`, `ask_startup_to_mentor_connection_question`, `associated_partners_visibility_enabled`, `call_for_applications_analysis_enabled`, `call_for_applications_bypass_verification`, `call_for_applications_download_attachments_enabled`, `call_for_applications_download_pdfs_enabled`, `call_for_applications_download_reports_enabled`, `call_for_applications_import_applications`, `call_for_applications_mark_payment_done_enabled`, `call_for_applications_mask_info_jury`, `call_for_applications_menu_settings`, `call_for_applications_pitch_deck_enabled`, `call_for_applications_promotion_by_partner_enabled`, `call_for_applications_promotion_enabled`, `call_for_applications_promotion_with_partners_enabled`, `call_for_applications_promotion_with_tenants_enabled`, `call_for_applications_score_rating_enabled`, `call_for_applications_submission_details_in_email`, `call_for_applications_video_enabled`, `challenges_collections_filters_enabled`, `company_identification_cin`, `company_identification_dpiit`, `company_identification_gst`, `connection_request_limit_enabled`, `corporate_backdoor_login_enabled`, `corporate_profile_registration_confirmation_enabled`, `corporates_enagement_form`, `corporates_registration`, `custom_forms`, `custom_forms_filters`, `custom_onboarding_design_golive_enabled`, `custom_reporting`, `dashboard_plan_info`, `domain_based_restriction`, `email_otp_verification`, `enable_file_viewer`, `events_agenda_menu_enabled`, `events_notifications`, `events_one_to_one_feature`, `events_payment_enabled`, `events_questions`, `facility_enable_admin_booking_creation`, `facility_enable_admin_facility_creation`, `facility_enable_checkin_checkout`, `facility_enable_pricing`, `facility_enable_ratings`, `facility_hourly_basis_booking_enabled`, `filing_email_address_enabled`, `form_video_transcript_enabled`, `frontend_restriction`, `government`, `growth_metrics_duration_set`, `has_pp_partner_account`, `incubator_module_enabled`, `individual_investor`, `investor_pitch_deck_access_enabled`, `investors_registration`, `ip_based_restriction`, `is_facility_hub`, `is_patent_hub`, `jury_nda_enabled`, `jury_questions`, `limit_jury_access_enabled`, `meeting_feedback_enabled`, `membership_certificate_generation_enabled`, `mentor_application_management`, `mentor_domain_expertise_tab`, `mentorship_areas_new_layout`, `new_search_layout`, `partner_visibility_requests_enabled`, `partners_can_add_booking`, `partners_can_invite_stakeholders`, `partners_enable_ecosystem`, `partners_enable_jury_in_app_management`, `partners_enable_qna_in_app_management`, `partners_facility_enable_checkin_checkout`, `partners_ip_management`, `partners_registration`, `post_revenue_fields`, `powerpitch_transcript_enabled`, `primary_industry`, `program_management_with_profile_form`, `program_timeline_enabled`, `programs_document_enabled`, `programs_mark_payment_done_enabled`, `programs_menu_enabled`, `programs_score_rating_enabled`, `programs_video_enabled`, `promotions_partners_enabled`, `public_portal_api_enabled`, `registration_enterprise_sales_popup`, `registration_invite_only`, `registration_turnoff_programs`, `request_call_jury`, `service_providers_registration`, `short_links`, `show_dashboard`, `show_documents_to_jury`, `show_ecosystem`, `spoke_stakeholders_meeting_moderation_enabled`, `sso_login_enabled`, `startup_approval_email_to_investors`, `startup_city_enabled`, `startup_district_subdistrict_enabled`, `startup_founders_advisory`, `startup_grant_release_format_download_enable`, `startup_kit_parallel_email`, `startup_onboarding_modal`, `startup_programs_recommendation_field`, `startup_show_programs`, `startups_registration`, `syndicate`, `tripura_certificate_theme_enabled`, `venture_studio_can_close_program`, `venture_studio_team_formation`, `whatsapp_otp_verification`
+Flags no spec mentions (115): `active`, `admin_restriction`, `app_not_interested_types`, `application_management_check_status_section`, `application_management_invite_transfer_section`, `application_management_round_status_updates`, `application_programs_recommendation_field`, `ask_startup_to_mentor_connection_question`, `associated_partners_visibility_enabled`, `call_for_applications_analysis_enabled`, `call_for_applications_bypass_verification`, `call_for_applications_download_attachments_enabled`, `call_for_applications_download_pdfs_enabled`, `call_for_applications_download_reports_enabled`, `call_for_applications_import_applications`, `call_for_applications_mark_payment_done_enabled`, `call_for_applications_mask_info_jury`, `call_for_applications_menu_settings`, `call_for_applications_pitch_deck_enabled`, `call_for_applications_promotion_by_partner_enabled`, `call_for_applications_promotion_enabled`, `call_for_applications_promotion_with_partners_enabled`, `call_for_applications_promotion_with_tenants_enabled`, `call_for_applications_score_rating_enabled`, `call_for_applications_submission_details_in_email`, `call_for_applications_video_enabled`, `challenges_collections_filters_enabled`, `company_identification_cin`, `company_identification_dpiit`, `company_identification_gst`, `connection_request_limit_enabled`, `corporate_backdoor_login_enabled`, `corporate_profile_registration_confirmation_enabled`, `corporates_enagement_form`, `corporates_registration`, `custom_forms`, `custom_forms_filters`, `custom_onboarding_design_golive_enabled`, `custom_reporting`, `dashboard_plan_info`, `domain_based_restriction`, `email_otp_verification`, `enable_file_viewer`, `events_agenda_menu_enabled`, `events_notifications`, `events_one_to_one_feature`, `events_payment_enabled`, `events_questions`, `facility_enable_admin_booking_creation`, `facility_enable_admin_facility_creation`, `facility_enable_checkin_checkout`, `facility_enable_pricing`, `facility_enable_ratings`, `facility_hourly_basis_booking_enabled`, `filing_email_address_enabled`, `form_video_transcript_enabled`, `frontend_restriction`, `government`, `growth_metrics_duration_set`, `has_pp_partner_account`, `incubator_module_enabled`, `individual_investor`, `investor_pitch_deck_access_enabled`, `investors_registration`, `is_facility_hub`, `jury_questions`, `limit_jury_access_enabled`, `meeting_feedback_enabled`, `membership_certificate_generation_enabled`, `mentor_domain_expertise_tab`, `mentorship_areas_new_layout`, `new_search_layout`, `partners_can_add_booking`, `partners_can_invite_stakeholders`, `partners_enable_ecosystem`, `partners_enable_jury_in_app_management`, `partners_enable_qna_in_app_management`, `partners_facility_enable_checkin_checkout`, `partners_registration`, `post_revenue_fields`, `powerpitch_transcript_enabled`, `primary_industry`, `program_management_with_profile_form`, `program_timeline_enabled`, `programs_document_enabled`, `programs_mark_payment_done_enabled`, `programs_menu_enabled`, `programs_score_rating_enabled`, `programs_video_enabled`, `public_portal_api_enabled`, `registration_enterprise_sales_popup`, `registration_invite_only`, `registration_turnoff_programs`, `request_call_jury`, `service_providers_registration`, `short_links`, `show_dashboard`, `show_documents_to_jury`, `show_ecosystem`, `spoke_stakeholders_meeting_moderation_enabled`, `startup_approval_email_to_investors`, `startup_city_enabled`, `startup_district_subdistrict_enabled`, `startup_founders_advisory`, `startup_grant_release_format_download_enable`, `startup_kit_parallel_email`, `startup_onboarding_modal`, `startup_programs_recommendation_field`, `startup_show_programs`, `startups_registration`, `syndicate`, `tripura_certificate_theme_enabled`, `venture_studio_can_close_program`, `venture_studio_team_formation`, `whatsapp_otp_verification`
 
 ## Module inventory
 
@@ -356,7 +381,7 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | ip-management + ecosystem-facilities | draft | 2026-07-16 |  | [src/modules/ip-management/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants/blob/ai_native_setup/src/modules/ip-management/module.spec.md) |
 | organizations | draft | 2026-07-16 |  | [src/modules/organizations/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants/blob/ai_native_setup/src/modules/organizations/module.spec.md) |
 | subscriptions | draft | 2026-06-18 |  | [src/modules/subscriptions/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants/blob/ai_native_setup/src/modules/subscriptions/module.spec.md) |
-| tenants | ? |  | admin/core-bootstrap, backend/src/core/constants (no spec), frontend/core | [src/modules/tenants/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants/blob/ai_native_setup/src/modules/tenants/module.spec.md) |
+| tenants | draft | 2026-09-28 |  | [src/modules/tenants/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants/blob/ai_native_setup/src/modules/tenants/module.spec.md) |
 
 ### sc-saas-backend
 
@@ -367,7 +392,7 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | voice-agent | in-review | 2026-10-06 |  | [src/core/voice-agent/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/core/voice-agent/module.spec.md) |
 | zenxai | in-review | 2026-09-29 |  | [src/core/zenxai/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/core/zenxai/module.spec.md) |
 | zoho | draft | 2026-07-17 |  | [src/core/zoho/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/core/zoho/module.spec.md) |
-| application-management | draft | 2026-10-08 |  | [src/modules/application-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/application-management/module.spec.md) |
+| application-management | draft | 2026-10-22 |  | [src/modules/application-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/application-management/module.spec.md) |
 | audit-log | draft | 2026-06-17 |  | [src/modules/audit-log/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/audit-log/module.spec.md) |
 | auth | draft | 2026-07-16 |  | [src/modules/auth/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/auth/module.spec.md) |
 | auth-external | draft | 2026-06-17 |  | [src/modules/auth-external/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/auth-external/module.spec.md) |
@@ -388,7 +413,7 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | events | draft | 2026-10-08 |  | [src/modules/events/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/events/module.spec.md) |
 | facility_management | draft | 2026-07-16 |  | [src/modules/facility_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/facility_management/module.spec.md) |
 | factacy | draft | 2026-06-17 |  | [src/modules/factacy/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/factacy/module.spec.md) |
-| form-management | draft | 2026-06-17 |  | [src/modules/form-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/form-management/module.spec.md) |
+| form-management | draft | 2026-10-22 |  | [src/modules/form-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/form-management/module.spec.md) |
 | global | draft | 2026-09-24 |  | [src/modules/global/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/global/module.spec.md) |
 | glossary | draft | 2026-06-17 |  | [src/modules/glossary/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/glossary/module.spec.md) |
 | grants | draft | 2026-06-17 |  | [src/modules/grants/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/grants/module.spec.md) |
@@ -414,9 +439,9 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | partner | draft | 2026-10-07 |  | [src/modules/partner/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/partner/module.spec.md) |
 | partner-branding | in-review | 2026-08-20 |  | [src/modules/partner-branding/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/partner-branding/module.spec.md) |
 | partner-domain-access | in-review | 2026-08-20 |  | [src/modules/partner-domain-access/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/partner-domain-access/module.spec.md) |
-| payment-management | draft | 2026-06-17 |  | [src/modules/payment-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/payment-management/module.spec.md) |
+| payment-management | draft | 2026-10-22 |  | [src/modules/payment-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/payment-management/module.spec.md) |
 | portfolio-management | draft | 2026-06-17 |  | [src/modules/portfolio-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/portfolio-management/module.spec.md) |
-| power-pitch-module | draft | 2026-06-19 | frontend/pitch-deck-management | [src/modules/power-pitch-module/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/power-pitch-module/module.spec.md) |
+| power-pitch-module | draft | 2026-10-22 | frontend/pitch-deck-management | [src/modules/power-pitch-module/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/power-pitch-module/module.spec.md) |
 | program-management | draft | 2026-10-08 |  | [src/modules/program-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/program-management/module.spec.md) |
 | program-office-members | draft | 2026-10-07 |  | [src/modules/program-office-members/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/program-office-members/module.spec.md) |
 | public-portal | draft | 2026-09-09 |  | [src/modules/public-portal/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/public-portal/module.spec.md) |
@@ -429,17 +454,17 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | startup-recognition-id | draft | 2026-08-13 |  | [src/modules/startup-recognition-id/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/startup-recognition-id/module.spec.md) |
 | task-management | draft | 2026-06-17 |  | [src/modules/task-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/task-management/module.spec.md) |
 | tickets | draft | 2026-07-16 |  | [src/modules/tickets/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/tickets/module.spec.md) |
-| user | draft | 2026-10-12 |  | [src/modules/user/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/user/module.spec.md) |
-| verifications | draft | 2026-07-16 |  | [src/modules/verifications/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/verifications/module.spec.md) |
+| user | draft | 2026-10-22 |  | [src/modules/user/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/user/module.spec.md) |
+| verifications | draft | 2026-10-22 |  | [src/modules/verifications/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/verifications/module.spec.md) |
 | vs-programs-management | draft | 2026-10-08 |  | [src/modules/vs-programs-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-backend/blob/ai_native_setup/src/modules/vs-programs-management/module.spec.md) |
 
 ### sc-saas-frontend
 
 | Module | Status | Updated | Depends on (other repos) | Spec |
 |---|---|---|---|---|
-| core | draft | 2026-08-19 | backend/auth, backend/global, backend/partner, tenants/core-bootstrap, tenants/global | [src/app/core/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/core/module.spec.md) |
+| core | draft | 2026-08-19 | backend/auth, backend/global, backend/partner, tenants/core-bootstrap, tenants/global, tenants/tenants | [src/app/core/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/core/module.spec.md) |
 | account | draft | 2026-10-07 | backend/certificates | [src/app/modules/account/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/account/module.spec.md) |
-| ad-viewer | ? |  | backend/global | [src/app/modules/ad-viewer/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/ad-viewer/module.spec.md) |
+| ad-viewer | draft | 2026-07-19 | backend/global | [src/app/modules/ad-viewer/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/ad-viewer/module.spec.md) |
 | admin-actions | draft | 2026-07-19 | backend/global | [src/app/modules/admin-actions/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/admin-actions/module.spec.md) |
 | applied-jobs | draft | 2026-07-19 |  | [src/app/modules/applied-jobs/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/applied-jobs/module.spec.md) |
 | auth | draft | 2026-08-20 | backend/auth, backend/auth-external, backend/global | [src/app/modules/auth/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/auth/module.spec.md) |
@@ -463,11 +488,11 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | custom-onboarding | draft | 2026-08-06 | backend/global | [src/app/modules/custom-onboarding/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/custom-onboarding/module.spec.md) |
 | dashboard | draft | 2026-10-08 | backend/dashboard, backend/metrics, backend/notifications, backend/startup | [src/app/modules/dashboard-v2/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/dashboard-v2/module.spec.md) |
 | deeptech-news | draft | 2026-07-19 | backend/global | [src/app/modules/deeptech-news/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/deeptech-news/module.spec.md) |
-| dynamic-forms | draft | 2026-10-07 |  | [src/app/modules/dynamic-forms/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/dynamic-forms/module.spec.md) |
+| dynamic-forms | draft | 2026-10-23 |  | [src/app/modules/dynamic-forms/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/dynamic-forms/module.spec.md) |
 | event-agenda | draft | 2026-07-16 | backend/events, backend/global | [src/app/modules/event-agenda/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/event-agenda/module.spec.md) |
 | external-facilities-management | draft | 2026-07-19 | backend/facility_management | [src/app/modules/external-facilities-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/external-facilities-management/module.spec.md) |
 | facilities | draft | 2026-07-16 | backend/facility_management, tenants/ecosystem-facilities | [src/app/modules/facilities-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/facilities-management/module.spec.md) |
-| global-search-page | ? |  |  | [src/app/modules/global-search-page/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/global-search-page/module.spec.md) |
+| global-search-page | draft | 2026-07-19 | backend/search | [src/app/modules/global-search-page/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/global-search-page/module.spec.md) |
 | glossary | draft | 2026-07-19 | backend/glossary | [src/app/modules/glossary/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/glossary/module.spec.md) |
 | growth-matrics | draft | 2026-10-07 |  | [src/app/modules/growth-matrics/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/growth-matrics/module.spec.md) |
 | growth-matrics-print | draft | 2026-07-19 |  | [src/app/modules/growth-matrics-print/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/growth-matrics-print/module.spec.md) |
@@ -501,9 +526,9 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | product-updates | draft | 2026-07-19 | backend/global | [src/app/modules/product-updates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/product-updates/module.spec.md) |
 | program-office | draft | 2026-10-07 |  | [src/app/modules/program-office/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/program-office/module.spec.md) |
 | program-office-team | draft | 2026-07-19 |  | [src/app/modules/program-office-team/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/program-office-team/module.spec.md) |
-| programs | draft | 2026-10-07 | backend/application-management, backend/meetings, backend/payment-management | [src/app/modules/programs/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/programs/module.spec.md) |
-| public | ? |  |  | [src/app/modules/public/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/public/module.spec.md) |
-| public-events | ? |  |  | [src/app/modules/public-events/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/public-events/module.spec.md) |
+| programs | draft | 2026-10-23 | backend/application-management, backend/meetings, backend/payment-management | [src/app/modules/programs/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/programs/module.spec.md) |
+| public | draft | 2026-07-19 |  | [src/app/modules/public/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/public/module.spec.md) |
+| public-events | draft | 2026-07-19 | backend/events | [src/app/modules/public-events/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/public-events/module.spec.md) |
 | public-shared | draft | 2026-07-19 |  | [src/app/modules/public-shared/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/public-shared/module.spec.md) |
 | resource-reports | draft | 2026-07-19 | backend/global | [src/app/modules/resource-reports/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/resource-reports/module.spec.md) |
 | resources | draft | 2026-07-16 | backend/glossary, backend/news, backend/resources, backend/startup | [src/app/modules/resources/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/resources/module.spec.md) |
@@ -514,6 +539,7 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | share-links | draft | 2026-07-19 |  | [src/app/modules/share-links/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/share-links/module.spec.md) |
 | slider | draft | 2026-07-19 |  | [src/app/modules/slider/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/slider/module.spec.md) |
 | startup-kit | draft | 2026-07-19 | backend/startup | [src/app/modules/startup-kit/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/startup-kit/module.spec.md) |
+| startup-recognition-verify | draft | 2026-10-19 | backend/startup, backend/startup-recognition-id | [src/app/modules/startup-recognition-verify/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/startup-recognition-verify/module.spec.md) |
 | startup | draft | 2026-10-07 | backend/startup | [src/app/modules/startups/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/startups/module.spec.md) |
 | static-form-field | draft | 2026-07-19 |  | [src/app/modules/static-form-field/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/static-form-field/module.spec.md) |
 | team | draft | 2026-07-19 | backend/user | [src/app/modules/team/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/team/module.spec.md) |
@@ -528,15 +554,16 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 
 | Module | Status | Updated | Depends on (other repos) | Spec |
 |---|---|---|---|---|
-| core-bootstrap | draft | 2026-10-08 | backend/voice-agent, backend/zenxai, tenants/core-bootstrap | [module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/module.spec.md) |
+| core-bootstrap | draft | 2026-10-08 | backend/voice-agent, backend/zenxai, tenants/core-bootstrap, tenants/tenants | [module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/module.spec.md) |
 | command_centre | draft | 2026-10-12 | tenants/subscriptions | [modules/command_centre.module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/command_centre.module.spec.md) |
 | ads-management | draft | 2026-07-17 |  | [modules/ads-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/ads-management/module.spec.md) |
 | ai_credits | draft | 2026-09-29 (ZenxAI voice-call billing — SAN-1136/SAN-1139; ledger display + voice append-only trail — SAN-1150) | backend/voice-agent | [modules/ai_credits/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/ai_credits/module.spec.md) |
-| ajax | ? |  | backend/ecosystem | [modules/ajax/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/ajax/module.spec.md) |
-| application_management | ? |  | analyzer/app, backend/application-management, backend/src/modules/application-programs-management (path not found), backend/src/modules/programs-management (path not found), backend/voice-agent, backend/zenxai | [modules/application_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/application_management/module.spec.md) |
-| auth | draft | 2026-07-16 | backend/auth, backend/src/modules/admin-actions (path not found) | [modules/auth/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/auth/module.spec.md) |
+| ajax-handlers | draft | 2026-10-20 | backend/ecosystem | [modules/ajax/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/ajax/module.spec.md) |
+| application-management | draft | 2026-10-08 | analyzer/core-bootstrap, backend/application-management, backend/program-management, backend/voice-agent, backend/zenxai | [modules/application_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/application_management/module.spec.md) |
+| auth | draft | 2026-07-16 | backend/auth, backend/global | [modules/auth/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/auth/module.spec.md) |
 | aws | draft | 2026-07-17 |  | [modules/aws/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/aws/module.spec.md) |
 | broadcast_messages | draft | 2026-10-08 |  | [modules/broadcast_messages/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/broadcast_messages/module.spec.md) |
+| bulk_actions | draft | 2026-10-19 | backend/corporate, backend/global, backend/individual, backend/investor, backend/mentors, backend/partner, backend/program-office-members, backend/service-providers, backend/startup | [modules/bulk_actions/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/bulk_actions/module.spec.md) |
 | canned_responses | draft | 2026-07-17 |  | [modules/canned_responses/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/canned_responses/module.spec.md) |
 | certificate_builders | draft | 2026-07-17 |  | [modules/certificate_builders/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/certificate_builders/module.spec.md) |
 | certificates | draft | 2026-09-23 |  | [modules/certificates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/certificates/module.spec.md) |
@@ -545,49 +572,50 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | community_wall | draft | 2026-07-17 |  | [modules/community_wall/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/community_wall/module.spec.md) |
 | connections | draft | 2026-06-18 |  | [modules/connections/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/connections/module.spec.md) |
 | contacts | draft | 2026-07-17 |  | [modules/contacts/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/contacts/module.spec.md) |
-| content-management | draft | 2026-07-16 | backend/src/modules/content (path not found) | [modules/content-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/content-management/module.spec.md) |
+| content-management | draft | 2026-07-16 | backend/global, backend/glossary, backend/news, backend/resources, backend/startup-kit | [modules/content-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/content-management/module.spec.md) |
 | csv | draft | 2026-07-17 |  | [modules/csv/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/csv/module.spec.md) |
-| developer | ? |  |  | [modules/developer/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/developer/module.spec.md) |
+| developer | draft | 2026-09-25 (SAN-991 — location_master_import.php and its CLI worker/functions removed; replaced by location_master_manage.php, a manual verify/add/edit page for districts/sub_districts, in this same module) |  | [modules/developer/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/developer/module.spec.md) |
 | document_types | draft | 2026-07-17 |  | [modules/document_types/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/document_types/module.spec.md) |
 | email_logs | draft | 2026-09-30 |  | [modules/email_logs/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/email_logs/module.spec.md) |
 | events | draft | 2026-09-25 |  | [modules/events/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/events/module.spec.md) |
 | events-meetings | draft | 2026-07-16 | backend/events, backend/meetings | [modules/events-meetings/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/events-meetings/module.spec.md) |
-| facilities | draft | 2026-07-16 | backend/src/modules/facilities (path not found), tenants/ecosystem-facilities, tenants/ip-management + ecosystem-facilities | [modules/facilities/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/facilities/module.spec.md) |
-| filemanager | draft | 2026-07-17 |  | [modules/filemanager/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/filemanager/module.spec.md) |
+| facilities | draft | 2026-07-16 | backend/facility_management, tenants/ecosystem-facilities, tenants/ip-management + ecosystem-facilities | [modules/facilities/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/facilities/module.spec.md) |
 | finance-memberships | draft | 2026-07-16 | backend/memberships, backend/payment-management | [modules/finance-memberships/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/finance-memberships/module.spec.md) |
 | finance_management | draft | 2026-07-17 | tenants-admin/ai_credits | [modules/finance_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/finance_management/module.spec.md) |
-| form-management | draft | 2026-07-16 | backend/src/modules/forms (path not found) | [modules/form-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/form-management/module.spec.md) |
+| form-management | draft | 2026-07-16 | backend/form-management | [modules/form-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/form-management/module.spec.md) |
 | form_builder | draft | 2026-07-17 |  | [modules/form_builder/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/form_builder/module.spec.md) |
 | glossary | draft | 2026-07-17 |  | [modules/glossary/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/glossary/module.spec.md) |
-| growth-metrics | draft | 2026-07-16 | backend/milestones, backend/src/modules/growth-metrics (path not found) | [modules/growth-metrics/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/growth-metrics/module.spec.md) |
+| growth-metrics | draft | 2026-07-16 | backend/metrics, backend/milestones | [modules/growth-metrics/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/growth-metrics/module.spec.md) |
 | growth_metrics | draft | 2026-07-17 |  | [modules/growth_metrics/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/growth_metrics/module.spec.md) |
 | id_card_builders | draft | 2026-07-17 |  | [modules/id_card_builders/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/id_card_builders/module.spec.md) |
 | id_cards | draft | 2026-07-17 |  | [modules/id_cards/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/id_cards/module.spec.md) |
 | industry_reports | draft | 2026-07-17 |  | [modules/industry_reports/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/industry_reports/module.spec.md) |
 | integrations | draft | 2026-07-16 | backend/ecosystem, tenants/ip-management + ecosystem-facilities | [modules/integrations/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/integrations/module.spec.md) |
-| intellectual_property | ? |  |  | [modules/intellectual_property/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/intellectual_property/module.spec.md) |
-| jury | ? |  | backend/src/modules/application-programs-management (path not found), backend/src/modules/programs-management (path not found) | [modules/jury/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/jury/module.spec.md) |
+| intellectual_property | draft | 2026-07-17 |  | [modules/intellectual_property/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/intellectual_property/module.spec.md) |
+| jury | draft | 2026-09-01 | backend/application-management, backend/program-management | [modules/jury/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/jury/module.spec.md) |
 | learning-management | draft | 2026-06-18 | backend/learning-management | [modules/learning_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/learning_management/module.spec.md) |
 | meetings | draft | 2026-07-17 |  | [modules/meetings/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/meetings/module.spec.md) |
 | memberships | draft | 2026-06-18 |  | [modules/memberships/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/memberships/module.spec.md) |
 | metric_types | draft | 2026-07-17 |  | [modules/metric_types/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/metric_types/module.spec.md) |
 | milestones | draft | 2026-06-18 | backend/milestones | [modules/milestones/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/milestones/module.spec.md) |
 | news | draft | 2026-07-17 |  | [modules/news/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/news/module.spec.md) |
+| notifications | draft | 2026-10-19 | backend/cron, backend/notifications | [modules/notifications/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/notifications/module.spec.md) |
 | onboarding_design | in-review | 2026-08-06 |  | [modules/onboarding_design/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/onboarding_design/module.spec.md) |
 | operation_cost | in-review | 2026-09-15 |  | [modules/operation_cost/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/operation_cost/module.spec.md) |
-| outreach-communications | ? |  | backend/src/modules/application-programs-management (path not found) | [modules/outreach-communications/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/outreach-communications/module.spec.md) |
+| outreach-communications | draft | 2026-07-17 | backend/application-management | [modules/outreach-communications/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/outreach-communications/module.spec.md) |
 | outreach_requests | draft | 2026-10-12 |  | [modules/outreach_requests/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/outreach_requests/module.spec.md) |
+| partner-requests | draft | 2026-10-19 | backend/global, backend/partner | [modules/partner-requests/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/partner-requests/module.spec.md) |
 | partners | draft | 2026-08-24 |  | [modules/partners/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/partners/module.spec.md) |
 | partners-recruitment | draft | 2026-06-18 | backend/partner | [modules/partners-recruitment/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/partners-recruitment/module.spec.md) |
 | payment-gateways | draft | 2026-07-16 |  | [modules/payment_gateways/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/payment_gateways/module.spec.md) |
 | portfolio_management | draft | 2026-07-17 |  | [modules/portfolio_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/portfolio_management/module.spec.md) |
 | product_updates | draft | 2026-07-17 |  | [modules/product_updates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/product_updates/module.spec.md) |
 | profile_audit_logs | draft | 2026-07-16 | backend/audit-log | [modules/profile_audit_logs/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/profile_audit_logs/module.spec.md) |
-| program-management | draft | 2026-08-14 (documented Allow Re-application's Immediate duration option) | backend/src/modules/mentor-application-management (path not found), backend/src/modules/programs (path not found) | [modules/program-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/program-management/module.spec.md) |
+| program-management | draft | 2026-08-14 (documented Allow Re-application's Immediate duration option) | backend/mentors, backend/program-management | [modules/program-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/program-management/module.spec.md) |
+| quicklinks | draft | 2026-10-19 | backend/public-portal | [modules/quicklinks/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/quicklinks/module.spec.md) |
 | recruitment-partners | draft | 2026-07-17 |  | [modules/recruitment-partners/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/recruitment-partners/module.spec.md) |
 | reporting | draft | 2026-07-16 |  | [modules/reporting/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/reporting/module.spec.md) |
-| reporting-certificates | ? |  |  | [modules/reporting-certificates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/reporting-certificates/module.spec.md) |
-| reporting_backup | draft | 2026-07-17 |  | [modules/reporting_backup/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/reporting_backup/module.spec.md) |
+| reporting-certificates | draft | 2026-06-18 |  | [modules/reporting-certificates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/reporting-certificates/module.spec.md) |
 | resource-files | draft | 2026-07-17 |  | [modules/resource-files/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/resource-files/module.spec.md) |
 | scrapper | draft | 2026-07-17 |  | [modules/scrapper/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/scrapper/module.spec.md) |
 | stakeholder-crud | draft | 2026-08-20 | backend/auth, backend/corporate, backend/investor, backend/mentors, backend/partner, backend/startup, tenants/ecosystem | [modules/stakeholder-crud/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/stakeholder-crud/module.spec.md) |
@@ -612,10 +640,10 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | ajax | draft | 2026-07-16 |  | [modules/ajax/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/ajax/module.spec.md) |
 | auth | draft | 2026-07-16 |  | [modules/auth/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/auth/module.spec.md) |
 | aws | draft | 2026-07-19 |  | [modules/aws/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/aws/module.spec.md) |
+| client_stats | draft | 2026-10-19 |  | [modules/client_stats/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/client_stats/module.spec.md) |
 | cors_domain_management | in-review | 2026-08-20 | tenants/cors-domains | [modules/cors_domain_management/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/cors_domain_management/module.spec.md) |
 | csv | draft | 2026-07-19 |  | [modules/csv/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/csv/module.spec.md) |
-| developer | ? |  |  | [modules/developer/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/developer/module.spec.md) |
-| filemanager | draft | 2026-07-19 |  | [modules/filemanager/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/filemanager/module.spec.md) |
+| developer | draft | 2026-07-16 |  | [modules/developer/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/developer/module.spec.md) |
 | finance_management | draft | 2026-07-19 |  | [modules/finance_management/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/finance_management/module.spec.md) |
 | tenant_management | in-review | 2026-09-28 |  | [modules/tenant_management/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/tenant_management/module.spec.md) |
 | upload | draft | 2026-07-19 |  | [modules/upload/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/upload/module.spec.md) |
@@ -624,7 +652,7 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 
 | Module | Status | Updated | Depends on (other repos) | Spec |
 |---|---|---|---|---|
-| app | ? |  | admin/application_management | [api/app/module.spec.md](https://github.com/sanchiconnect-org/ai-startups-analyzer/blob/ai_native_setup/api/app/module.spec.md) |
+| core-bootstrap | draft | 2026-07-16 |  | [api/app/module.spec.md](https://github.com/sanchiconnect-org/ai-startups-analyzer/blob/ai_native_setup/api/app/module.spec.md) |
 
 ### sc-saas-3rdparty-webservices
 
@@ -636,59 +664,9 @@ Flags no spec mentions (125): `active`, `admin_restriction`, `ai_analyzer_enable
 | sendGrid | draft | 2026-07-16 |  | [src/modules/sendGrid/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-3rdparty-webservices/blob/ai_native_setup/src/modules/sendGrid/module.spec.md) |
 | ses | draft | 2026-06-19 |  | [src/modules/ses/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-3rdparty-webservices/blob/ai_native_setup/src/modules/ses/module.spec.md) |
 | shortIo | draft | 2026-07-16 |  | [src/modules/shortIo/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-3rdparty-webservices/blob/ai_native_setup/src/modules/shortIo/module.spec.md) |
-| sms | ? |  | backend/src/core/services (no spec) | [src/modules/sms/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-3rdparty-webservices/blob/ai_native_setup/src/modules/sms/module.spec.md) |
+| sms | draft | 2026-07-16 |  | [src/modules/sms/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-3rdparty-webservices/blob/ai_native_setup/src/modules/sms/module.spec.md) |
 | videoSDK | draft | 2026-08-21 |  | [src/modules/videoSDK/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-3rdparty-webservices/blob/ai_native_setup/src/modules/videoSDK/module.spec.md) |
 
 ## Gaps
 
 Write the missing spec, fix the front matter, or correct the path, the next time the module is touched.
-
-### sanchiconnect-saas-tenants
-
-- front matter not readable: [src/modules/tenants/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants/blob/ai_native_setup/src/modules/tenants/module.spec.md) (mapping values are not allowed here)
-
-### sc-saas-frontend
-
-- no spec: `src/app/modules/startup-recognition-verify/`
-- front matter not readable: [src/app/modules/ad-viewer/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/ad-viewer/module.spec.md) (while scanning for the next token)
-- front matter not readable: [src/app/modules/global-search-page/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/global-search-page/module.spec.md) (while parsing a block mapping)
-- front matter not readable: [src/app/modules/public-events/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/public-events/module.spec.md) (while parsing a block mapping)
-- front matter not readable: [src/app/modules/public/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-frontend/blob/ai_native_setup/src/app/modules/public/module.spec.md) (while parsing a block mapping)
-
-### sc-saas-admin
-
-- no spec: `modules/bulk_actions/`
-- no spec: `modules/notifications/`
-- no spec: `modules/partner-requests/`
-- no spec: `modules/quicklinks/`
-- front matter not readable: [modules/ajax/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/ajax/module.spec.md) (while scanning for the next token)
-- front matter not readable: [modules/application_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/application_management/module.spec.md) (mapping values are not allowed here)
-- front matter not readable: [modules/developer/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/developer/module.spec.md) (while parsing a block mapping)
-- front matter not readable: [modules/intellectual_property/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/intellectual_property/module.spec.md) (while parsing a block collection)
-- front matter not readable: [modules/jury/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/jury/module.spec.md) (mapping values are not allowed here)
-- front matter not readable: [modules/outreach-communications/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/outreach-communications/module.spec.md) (mapping values are not allowed here)
-- front matter not readable: [modules/reporting-certificates/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/reporting-certificates/module.spec.md) (mapping values are not allowed here)
-- names a path that doesn't exist: [modules/application_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/application_management/module.spec.md) → `sc-saas-backend/src/modules/application-programs-management/module.spec.md`
-- names a path that doesn't exist: [modules/application_management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/application_management/module.spec.md) → `sc-saas-backend/src/modules/programs-management/module.spec.md`
-- names a path that doesn't exist: [modules/auth/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/auth/module.spec.md) → `sc-saas-backend/src/modules/admin-actions/module.spec.md`
-- names a path that doesn't exist: [modules/content-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/content-management/module.spec.md) → `sc-saas-backend/src/modules/content/module.spec.md`
-- names a path that doesn't exist: [modules/facilities/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/facilities/module.spec.md) → `sc-saas-backend/src/modules/facilities/module.spec.md`
-- names a path that doesn't exist: [modules/form-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/form-management/module.spec.md) → `sc-saas-backend/src/modules/forms/module.spec.md`
-- names a path that doesn't exist: [modules/growth-metrics/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/growth-metrics/module.spec.md) → `sc-saas-backend/src/modules/growth-metrics/module.spec.md`
-- names a path that doesn't exist: [modules/program-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/program-management/module.spec.md) → `sc-saas-backend/src/modules/mentor-application-management/module.spec.md`
-- names a path that doesn't exist: [modules/program-management/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-admin/blob/ai_native_setup/modules/program-management/module.spec.md) → `sc-saas-backend/src/modules/programs/module.spec.md`
-
-### sanchiconnect-saas-tenants-admin
-
-- no spec: `modules/client_stats/`
-- front matter not readable: [modules/developer/module.spec.md](https://github.com/sanchiconnect-org/sanchiconnect-saas-tenants-admin/blob/ai_native_setup/modules/developer/module.spec.md) (mapping values are not allowed here)
-
-### ai-startups-analyzer
-
-- no spec: `api/migrations/`
-- no spec: `api/tests/`
-- front matter not readable: [api/app/module.spec.md](https://github.com/sanchiconnect-org/ai-startups-analyzer/blob/ai_native_setup/api/app/module.spec.md) (while parsing a block mapping)
-
-### sc-saas-3rdparty-webservices
-
-- front matter not readable: [src/modules/sms/module.spec.md](https://github.com/sanchiconnect-org/sc-saas-3rdparty-webservices/blob/ai_native_setup/src/modules/sms/module.spec.md) (while scanning a simple key)

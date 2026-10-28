@@ -2,7 +2,7 @@
 id: SAN-274
 title: Revenue dashboard — FY revenue, 30/60/90/120-day pipeline and overdue invoices
 type: feature
-status: in-review
+status: canceled  # 2026-10-19: AI-Native CRM project shut down, never implemented (Linear issue Canceled)
 linear: https://linear.app/sanchiconnect/issue/SAN-274/leadership-sees-total-fy-revenue-the-306090120-day-pipeline-and
 owner: sandeep.k@sanchiconnect.com
 repos: [sanchiconnect-saas-tenants-admin]
