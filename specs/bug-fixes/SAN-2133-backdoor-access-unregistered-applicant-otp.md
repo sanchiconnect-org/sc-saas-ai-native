@@ -33,6 +33,12 @@ SAN-2127 (`2adcbbb1`) added a branch to `modules/application_management/view_as_
 
 Production is a separate problem. The production admin (26 Oct) calls `admin/applicant-token`, which the old production backends don't have yet: IEEMA's returns 404, shown as "This application or its program could not be found". It's fixed by building each production backend from `main`, as planned for SAN-1939.
 
+**Resolved 2026-10-29.**
+- All release branches were synced and built to production.
+- The IEEMA backend's `admin/applicant-token` returns 401 without a token. Before the deploy it returned 404.
+- Nirmal confirmed that Backdoor Access works on IEEMA production.
+- SAN-2133 is Done.
+
 ## Commit
 
 `03376424` on `sc-saas-admin` `ai_native_setup` (pushed 2026-10-29).
