@@ -234,6 +234,8 @@ Change them in every repo together. They grew out of the sc-saas-3rdparty-webser
 
 **Decided 2026-10-27 (Aman, after Nirmal): only dev deploys automatically.** The `development` Environment holds the dev Jenkins secrets (a Jenkins user that can only build the dev jobs; for a job inside a Jenkins folder, put the folder in `JENKINS_URL`, e.g. `https://<dev-jenkins>/job/sanchi-saas`, and the job name alone in `JENKINS_JOB`). `staging` and `production` get **no Jenkins secrets**: the workflow still tags the release, then says "deploy by hand with Build now" and ends green. Production has many client jobs, so each is built by a person.
 
+**Tag date and release notes (2026-10-29).** The date in a release tag is the date of the **commit** (IST), not of the run, so re-running an old deploy run on another day finds the same tag and release instead of making new ones. If GitHub refuses the generated release notes (over 125000 characters, as in a big promotion), the workflow creates the release with a short note and a warning; before this change the `release` job failed with HTTP 422 and the page was made by hand. Do not re-run old deploy runs to "fix" a red run on an older tag: create or check the release page instead.
+
 The `sanchiconnect` Environment holds the `Demo - Frontend Sanchi Connect` job and needs its own reviewer. Every repo's deploy stays inert until its Environments and secrets exist (SAN-1597).
 
 The rest of this section describes the original pilot:
@@ -309,6 +311,17 @@ npm run migration:deploy   # exit 1: a migration failed, so the app is not resta
 ```
 
 `set -e` is what stops the job: Jenkins marks the build failed and the old version keeps running. Make sure the job's failure notification reaches a person (email or Slack), since that is the only page.
+
+**Dev server 1 (Docker) recipe, added 2026-10-29.** The dev jobs do not run pm2 on the host: they build an image, stop the old container and start a new one. The step therefore runs from the **new image**, after `docker build` and before the old container is stopped, so a failed migration leaves the running container untouched. The image carries the app's own `.env`, and `typeorm` and `dotenv` are runtime dependencies, so nothing else is needed. The `api-builder-payment` job only builds (`npm run build`) and has no `.env`; do not put the step there, a failure would stop `api-thub` from starting.
+
+| Job | Line added after the `docker build` line | Why this path |
+|---|---|---|
+| sc-saas-backend dev: `sanchi-saas/api-thub` (starts after `api-builder-payment`) | `docker run --rm sanchi-saas-dev-api-thub node core/database/deploy-migrate.js \|\| { echo "Migration failed: the running container is left untouched"; exit 1; }` | the job copies `dist/*` flat into `/app`, so the file is `core/database/deploy-migrate.js`; the script has no `set -e`, hence the explicit `\|\| exit 1` |
+| sanchiconnect-saas-tenants dev: `tenants/API` | `docker run --rm sanchi-tenants-dev-api node dist/core/database/deploy-migrate.js` | the image keeps `dist/`; the script starts with `set -e`, which stops the job before `docker stop` |
+
+The first build of each job should print "adopted" or "is up to date". Add an E-mail Notification post-build action to the job, so a red build reaches a person. In the GitHub deploy run the backend shows up as the `api-thub` row of the summary (`JENKINS_WAIT_DOWNSTREAM=true`), tenants as its single row. The migration messages themselves are only in the Jenkins Console Output.
+
+Dev `.env` files are written by the job's shell steps today, in plain text. Move them into a Jenkins Secret file credential (SAN-1562).
 
 What the step does (`src/core/database/deploy-migrate.ts` in each repo):
 
