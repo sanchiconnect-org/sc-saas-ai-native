@@ -4,6 +4,7 @@
 - **Repo:** sc-saas-frontend · **Priority:** High · **Assignee:** Vishali
 - **Classification:** CODE_ERROR (regression from SAN-1959)
 - **Commit:** `9004d88c1` on `ai_native_setup_vishali`
+- **Status:** Done (2026-10-29)
 
 ## Problem
 On a public call-for-applications page, an applicant who saved their application as a draft could not use **Check Application Status**. After the OTP the modal showed "Application not found for program", the email was not remembered, and the draft could not be reopened.
